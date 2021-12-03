@@ -37,6 +37,7 @@ dependencies:
   fluro: ^2.0.3
   provider: ^6.0.1
   get_it: ^7.2.0
+  flutter_svg: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -57,3 +58,6 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - assets/images/charge-spot.png
+    - assets/images/logo.svg
