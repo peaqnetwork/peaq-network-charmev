@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluro/fluro.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/config/navigator.dart';
 import 'package:charmev/config/app.dart';
-import 'package:charmev/screens/onboarding.dart';
+import 'package:charmev/theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const CharmevApp());
 }
 
@@ -31,9 +33,13 @@ class _CharmevAppState extends State<CharmevApp> {
   }
 
   Widget buildMaterialApp(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     return MaterialApp(
       navigatorKey: CEVNavigator.key,
       title: "CharmEv",
+      theme: CEVTheme.theme,
+      themeMode: ThemeMode.dark,
       initialRoute: CEVRoutes.onboarding,
       onGenerateRoute: CEVApp.router.generator,
       debugShowCheckedModeBanner: false,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:charmev/theme.dart';
 
 class CEVTextField extends StatelessWidget {
   const CEVTextField(
@@ -13,7 +14,9 @@ class CEVTextField extends StatelessWidget {
       this.keyboardType = TextInputType.text,
       this.bgColor,
       this.prefix,
+      this.suffix,
       this.errorText,
+      this.style,
       Key? key})
       : super(key: key);
 
@@ -25,10 +28,12 @@ class CEVTextField extends StatelessWidget {
   final String label;
   final Color? bgColor;
   final Widget? prefix;
+  final Widget? suffix;
   final TextInputType? keyboardType;
   final String? errorText;
   final Function onTap;
   final Function onChanged;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +46,18 @@ class CEVTextField extends StatelessWidget {
           autofocus: autofocus,
           obscureText: obscureText,
           readOnly: readOnly,
+          maxLines: obscureText ? 1 : 4,
+          minLines: 1,
+          style: style ?? CEVTheme.formFieldTextStyle,
           decoration: InputDecoration(
             prefix: prefix,
+            suffix: suffix,
             labelText: label,
             filled: filled,
             isDense: false,
+            labelStyle: CEVTheme.formFieldLabelStyle,
+            floatingLabelStyle: CEVTheme.formFieldLabelStyle
+                .copyWith(color: CEVTheme.accentColor),
             fillColor: bgColor ?? Colors.white,
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             errorText: errorText,

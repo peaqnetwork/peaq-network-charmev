@@ -1,7 +1,9 @@
+import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/common/widgets/textfield.dart';
+import 'package:charmev/common/widgets/dialog.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
@@ -22,6 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   final _nodeAddressFieldController =
       TextEditingController(text: "https://testnet.peaq.network");
   final _secretPhraseFieldController = TextEditingController();
+  bool _hideSecret = true;
 
   @override
   void initState() {
@@ -80,7 +83,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       label: "Node Address",
       controller: _nodeAddressFieldController,
       filled: false,
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: TextInputType.url,
+      suffix: InkWell(
+        child: const Padding(
+          padding: EdgeInsets.all(8),
+          child: Icon(
+            Icons.keyboard_arrow_down,
+            color: CEVTheme.greyColor,
+          ),
+        ),
+        onTap: () => _openNodePicker(context),
+      ),
       onChanged: () => {},
       onTap: () => {},
     );
@@ -88,8 +101,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final _secretPhraseField = CEVTextField(
       label: "Secret Phrase",
       filled: false,
-      obscureText: true,
+      obscureText: _hideSecret,
       controller: _secretPhraseFieldController,
+      suffix: InkWell(
+        child: const Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(
+              Icons.visibility,
+              color: CEVTheme.greyColor,
+              key: Key("hello"),
+            )),
+        onTap: () => {
+          setState(() {
+            _hideSecret = !_hideSecret;
+          })
+        },
+      ),
       onChanged: () => {},
       onTap: () => {},
     );
@@ -110,9 +137,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           const SizedBox(
                             height: 24.0,
                           ),
-                          const SizedBox(
-                            height: 8.0,
-                          ),
                           _secretPhraseField,
                           const SizedBox(
                             height: 8.0,
@@ -121,13 +145,29 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           const SizedBox(
                             height: 8.0,
                           ),
-                          const SizedBox(
-                            height: 16.0,
-                          ),
                         ],
                       ),
                       _buildImportButton(),
                     ]))));
+  }
+
+  void _openNodePicker(BuildContext context) async {
+    await showDialog<bool>(
+        context: context,
+        barrierLabel: "hello",
+        barrierColor: Colors.transparent,
+        // backgroundColor: Colors.transparent,
+        // isScrollControlled: true,
+        // elevation: 0,
+
+        builder: (context) {
+          return const Padding(
+              padding: EdgeInsets.only(top: 220),
+              child: CEVDialog(items: [
+                "https://local.testnet.dev",
+                "https://devnet.local"
+              ]));
+        });
   }
 
   Widget _buildLogo(BuildContext context) {
@@ -135,7 +175,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         padding: const EdgeInsets.fromLTRB(0.0, 0.0, 25.0, 10.0),
         height: MediaQuery.of(context).size.height * 0.32,
         child: Align(
-            alignment: Alignment.bottomCenter,
+            alignment: Alignment.center,
             child: FractionallySizedBox(
               widthFactor: 2 / 3,
               child: SizedBox(
@@ -153,9 +193,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _buildImportButton() {
     return CEVRaisedButton(
       text: Env.importString,
-      bgColor: Theme.of(context).colorScheme.secondary,
+      bgColor: Theme.of(context).primaryColor,
       textColor: Colors.white,
-      radius: 5,
+      radius: 10,
       onPressed: () => {},
     );
   }
