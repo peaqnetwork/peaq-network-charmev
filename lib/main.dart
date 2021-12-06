@@ -34,7 +34,9 @@ class _CharmevAppState extends State<CharmevApp> {
 
   Widget buildMaterialApp(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarColor: CEVTheme.appBarBgColor));
     return MaterialApp(
       navigatorKey: CEVNavigator.key,
       title: "CharmEv",
