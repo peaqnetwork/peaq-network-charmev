@@ -112,7 +112,12 @@ class _HomeScreenState extends State<HomeScreen>
                                         controller: qrController,
                                         scanAreaScale: 1,
                                         scanLineColor: CEVTheme.dialogBgColor,
-                                        onCapture: (data) {},
+                                        onCapture: (data) {
+                                          CEVApp.router.navigateTo(
+                                              context, CEVRoutes.providerDetail,
+                                              transition:
+                                                  TransitionType.inFromRight);
+                                        },
                                       ),
                                     ),
                                   ),
