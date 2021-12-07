@@ -1,4 +1,6 @@
+import 'package:charmev/config/app.dart';
 import 'package:charmev/theme.dart';
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:charmev/common/widgets/buttons.dart';
@@ -6,6 +8,8 @@ import 'package:charmev/common/widgets/textfield.dart';
 import 'package:charmev/common/widgets/dialog.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:charmev/config/env.dart';
+import 'package:charmev/config/navigator.dart';
+import 'package:charmev/config/routes.dart';
 import 'package:charmev/assets.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -196,7 +200,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       bgColor: Theme.of(context).primaryColor,
       textColor: Colors.white,
       radius: 10,
-      onPressed: () => {},
+      onPressed: () => CEVApp.router.navigateTo(context, CEVRoutes.home,
+          transition: TransitionType.fadeIn),
     );
   }
 }
