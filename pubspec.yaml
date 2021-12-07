@@ -63,3 +63,4 @@ flutter:
   assets:
     - assets/images/charge-spot.png
     - assets/images/logo.svg
+    - assets/images/ev-pump.svg

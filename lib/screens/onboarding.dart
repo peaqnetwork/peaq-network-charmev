@@ -98,7 +98,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ),
         onTap: () => _openNodePicker(context),
       ),
-      onChanged: () => {},
+      onChanged: (value) => {},
       onTap: () => {},
     );
 
@@ -121,7 +121,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           })
         },
       ),
-      onChanged: () => {},
+      onChanged: (value) => {},
       onTap: () => {},
     );
 
@@ -199,6 +199,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       text: Env.importString,
       bgColor: Theme.of(context).primaryColor,
       textColor: Colors.white,
+      isTextBold: true,
       radius: 10,
       onPressed: () => CEVApp.router.navigateTo(context, CEVRoutes.home,
           transition: TransitionType.fadeIn),

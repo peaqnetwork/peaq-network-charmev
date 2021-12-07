@@ -1,4 +1,7 @@
+import 'package:charmev/config/app.dart';
+import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -109,7 +112,12 @@ class _HomeScreenState extends State<HomeScreen>
                                         controller: qrController,
                                         scanAreaScale: 1,
                                         scanLineColor: CEVTheme.dialogBgColor,
-                                        onCapture: (data) {},
+                                        onCapture: (data) {
+                                          CEVApp.router.navigateTo(
+                                              context, CEVRoutes.providerDetail,
+                                              transition:
+                                                  TransitionType.inFromRight);
+                                        },
                                       ),
                                     ),
                                   ),
