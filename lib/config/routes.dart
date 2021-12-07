@@ -4,6 +4,7 @@ import 'package:charmev/config/route_handlers.dart';
 
 class CEVRoutes {
   static const onboarding = "/on-boarding";
+  static const providerDetail = "/provider-detail";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -11,7 +12,9 @@ class CEVRoutes {
       return;
     });
 
-    // Add onboarding route handler
+    // Add onboarding screen route handler
     router.define(onboarding, handler: onboardingHandler);
+    // Add provider detail screen route handler
+    router.define(providerDetail, handler: providerDetailHandler);
   }
 }

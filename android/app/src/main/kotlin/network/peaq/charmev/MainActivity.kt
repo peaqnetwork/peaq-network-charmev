@@ -1,4 +1,4 @@
-package com.example.charmev
+package network.peaq.charmev
 
 import io.flutter.embedding.android.FlutterActivity
 

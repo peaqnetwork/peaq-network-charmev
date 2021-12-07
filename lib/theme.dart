@@ -7,7 +7,11 @@ class CEVTheme {
   static const Color accentColor = Color(0xffA6A3FF);
   static const Color textColor = Colors.white;
   static const Color greyColor = Colors.grey;
+  static const Color textFadeColor = Colors.grey;
   static const Color dialogBgColor = Color(0xff3A3F42);
+  static const Color bgColor = Color(0xff131416);
+  static const Color appBarBgColor = Color(0xff212427);
+  static const Color successColor = Color(0xff22C679);
 
   static String customFont = "SourceSanPro";
 
