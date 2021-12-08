@@ -1,11 +1,15 @@
+import 'package:charmev/config/app.dart';
+import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:charmev/common/models/detail.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
-import 'package:charmev/common/widgets/dialog.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
+import 'package:charmev/common/widgets/border_box.dart';
 
 class ProviderDetailScreen extends StatefulWidget {
   const ProviderDetailScreen({this.page, Key? key}) : super(key: key);
@@ -52,7 +56,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
     return Stack(children: <Widget>[
       // _backgroundImage,
       Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: CEVTheme.bgColor,
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.qr_code_scanner_rounded),
@@ -91,47 +95,17 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       _buildPump(context),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SizedBox(
-                              width: boxW, // custom wrap size
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                    color: Colors.grey,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                child: Container(
-                                  width: boxW,
-                                  margin: const EdgeInsets.all(1),
-                                  padding: const EdgeInsets.all(32),
-                                  decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: _buildDetailTitleAndValue(),
-                                  ),
-                                ),
-                              ))
-                        ],
-                      ),
+                      _buildDetails(boxW),
                       const SizedBox(
                         height: 50.0,
                       ),
                       SizedBox(
                         child: Column(
                           children: <Widget>[
-                            const Text(
+                            Text(
                               "0.21 PEAQ/KWh",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  height: 1.5,
-                                  color: CEVTheme.accentColor,
-                                  fontWeight: FontWeight.w600),
+                              style: CEVTheme.titleLabelStyle
+                                  .copyWith(color: CEVTheme.accentColor),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 3,
                             ),
@@ -151,9 +125,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
   }
 
   Widget _buildAppBarTitle() {
-    return const Text(
+    return Text(
       "Sohn EV Charge Station",
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      style: CEVTheme.appTitleStyle,
       textAlign: TextAlign.center,
     );
   }
@@ -176,6 +150,26 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             )));
   }
 
+  Widget _buildDetails(double boxWidth) {
+    return SizedBox(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          SizedBox(
+            width: boxWidth, // custom wrap size
+            child: CEVBorderBox(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _buildDetailTitleAndValue(),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   Widget _buildStartButton() {
     return CEVRaisedButton(
       text: Env.startCharging,
@@ -183,7 +177,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
       textColor: Colors.white,
       radius: 10,
       isTextBold: true,
-      onPressed: () => {},
+      onPressed: () => CEVApp.router.navigateTo(
+          context, CEVRoutes.chargingSession,
+          transition: TransitionType.inFromRight),
     );
   }
 
@@ -195,18 +191,13 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
       details.addAll([
         Text(
           item.id,
-          style: const TextStyle(
-              fontSize: 18, height: 1.5, fontWeight: FontWeight.w600),
+          style: CEVTheme.titleLabelStyle,
           overflow: TextOverflow.ellipsis,
           maxLines: 3,
         ),
         Text(
           item.value,
-          style: TextStyle(
-              fontSize: 18,
-              height: 1.5,
-              color: item.color,
-              fontWeight: FontWeight.w400),
+          style: CEVTheme.labelStyle,
           overflow: TextOverflow.ellipsis,
           maxLines: 3,
         ),
@@ -218,12 +209,4 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
     return details;
   }
-}
-
-class Detail {
-  Detail(this.id, this.value, {this.color = CEVTheme.greyColor});
-
-  String id;
-  String value;
-  Color color;
 }

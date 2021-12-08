@@ -1,3 +1,4 @@
+import 'package:charmev/screens/charging_session.dart';
 import 'package:charmev/screens/provider_detail.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -17,4 +18,9 @@ var providerDetailHandler = Handler(
 var homeHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const HomeScreen();
+});
+
+var chargingSessionHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const CharginSessionScreen();
 });

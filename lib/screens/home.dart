@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Stack(children: <Widget>[
       // _backgroundImage,
       Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: CEVTheme.bgColor,
           appBar: AppBar(
             title: _buildAppBarTitle(),
             centerTitle: true,
@@ -143,9 +143,9 @@ class _HomeScreenState extends State<HomeScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            Text(
               Env.scanProviderDID,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: CEVTheme.appTitleStyle,
               textAlign: TextAlign.center,
             ),
             _buildDropdown(),

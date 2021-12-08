@@ -25,9 +25,29 @@ class CEVTheme {
         fontSize: 18.0);
   }
 
+  static TextStyle get appTitleStyle {
+    return const TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+  }
+
   static TextStyle get formFieldLabelStyle {
     return const TextStyle(
         color: greyColor, fontSize: 18, fontWeight: FontWeight.normal);
+  }
+
+  static TextStyle get titleLabelStyle {
+    return const TextStyle(
+        fontSize: 18,
+        height: 1.5,
+        color: Colors.white,
+        fontWeight: FontWeight.w600);
+  }
+
+  static TextStyle get labelStyle {
+    return const TextStyle(
+        fontSize: 16,
+        height: 1.5,
+        color: Colors.grey,
+        fontWeight: FontWeight.w400);
   }
 
   static TextTheme get _textTheme {
