@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/common/widgets/progress_card.dart';
+import 'package:charmev/common/widgets/countdown.dart';
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
@@ -19,11 +20,11 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String qrcode = 'Unknown';
-
   final List<Detail> _details = [
     Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow")
   ];
+
+  String qrcode = 'Unknown';
 
   @override
   void initState() {
@@ -65,52 +66,32 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   Widget _buildScreen(BuildContext context) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
+    int _count = 0;
+    final _totalTimeInSeconds = 30;
+
     return SizedBox(
         height: double.infinity,
         child: SingleChildScrollView(
             child: Container(
                 padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 32.0),
-                // height: MediaQuery.of(context).size.height / 1.18,
+                height: MediaQuery.of(context).size.height / 1.18,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      CEVProgressCard(
-                        child: _buildPump(context),
-                        size: 172,
-                        margin: const EdgeInsets.all(32),
-                      ),
-                      SizedBox(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            SizedBox(
-                                width: boxW, // custom wrap size
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                      color: Colors.grey,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Container(
-                                    width: boxW,
-                                    margin: const EdgeInsets.all(1),
-                                    padding: const EdgeInsets.all(32),
-                                    decoration: const BoxDecoration(
-                                        color: Colors.black,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20))),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: _buildDetailTitleAndValue(),
-                                    ),
-                                  ),
-                                ))
-                          ],
-                        ),
-                      ),
+                      CEVCountdown(displayChild: (counter) {
+                        var percent = counter / _totalTimeInSeconds;
+                        double progress = (percent <= 1) ? percent : 1;
+                        _count += counter;
+                        return CEVProgressCard(
+                          progress: progress,
+                          child: _buildPump(context),
+                          size: 172,
+                          margin: const EdgeInsets.all(32),
+                        );
+                      }),
+                      _buildDetails(boxW),
                       const SizedBox(
                         height: 50.0,
                       ),
@@ -144,6 +125,36 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       "Sohn EV Charge Station",
       style: CEVTheme.appTitleStyle,
       textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildDetails(double boxWidth) {
+    return SizedBox(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          SizedBox(
+              width: boxWidth, // custom wrap size
+              child: Container(
+                decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: Container(
+                  width: boxWidth,
+                  margin: const EdgeInsets.all(1),
+                  padding: const EdgeInsets.all(32),
+                  decoration: const BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildDetailTitleAndValue(),
+                  ),
+                ),
+              ))
+        ],
+      ),
     );
   }
 

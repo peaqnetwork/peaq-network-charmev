@@ -91,34 +91,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       _buildPump(context),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SizedBox(
-                              width: boxW, // custom wrap size
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                    color: Colors.grey,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                child: Container(
-                                  width: boxW,
-                                  margin: const EdgeInsets.all(1),
-                                  padding: const EdgeInsets.all(32),
-                                  decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: _buildDetailTitleAndValue(),
-                                  ),
-                                ),
-                              ))
-                        ],
-                      ),
+                      _buildDetails(boxW),
                       const SizedBox(
                         height: 50.0,
                       ),
@@ -171,6 +144,36 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                 ),
               ),
             )));
+  }
+
+  Widget _buildDetails(double boxWidth) {
+    return SizedBox(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          SizedBox(
+              width: boxWidth, // custom wrap size
+              child: Container(
+                decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: Container(
+                  width: boxWidth,
+                  margin: const EdgeInsets.all(1),
+                  padding: const EdgeInsets.all(32),
+                  decoration: const BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildDetailTitleAndValue(),
+                  ),
+                ),
+              ))
+        ],
+      ),
+    );
   }
 
   Widget _buildStartButton() {

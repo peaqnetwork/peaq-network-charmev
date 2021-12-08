@@ -29,6 +29,9 @@ class CEVProgressCard extends StatelessWidget {
             ColorScheme.fromSwatch().copyWith(primary: CEVTheme.successColor));
     Color _fadeColor = Theme.of(context).colorScheme.secondary.withOpacity(.2);
 
+    var progressText = (progress * 100).round();
+    var chargedAmount = (progressText * 5.3).roundToDouble();
+
     return Container(
       margin: margin,
       child: Column(
@@ -50,13 +53,13 @@ class CEVProgressCard extends StatelessWidget {
             height: 16,
           ),
           Text(
-            "$progress% Charged",
+            "$progressText% Charged",
             style: CEVTheme.titleLabelStyle,
             overflow: TextOverflow.ellipsis,
             maxLines: 3,
           ),
           Text(
-            "275 kWh",
+            "$chargedAmount kWh",
             style: CEVTheme.labelStyle.copyWith(fontSize: 16),
             overflow: TextOverflow.ellipsis,
             maxLines: 3,
