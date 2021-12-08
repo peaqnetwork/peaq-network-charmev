@@ -125,13 +125,10 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                       SizedBox(
                         child: Column(
                           children: <Widget>[
-                            const Text(
+                            Text(
                               "0.21 PEAQ/KWh",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  height: 1.5,
-                                  color: CEVTheme.accentColor,
-                                  fontWeight: FontWeight.w600),
+                              style: CEVTheme.titleLabelStyle
+                                  .copyWith(color: CEVTheme.accentColor),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 3,
                             ),
@@ -151,9 +148,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
   }
 
   Widget _buildAppBarTitle() {
-    return const Text(
+    return Text(
       "Sohn EV Charge Station",
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      style: CEVTheme.appTitleStyle,
       textAlign: TextAlign.center,
     );
   }
@@ -195,18 +192,13 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
       details.addAll([
         Text(
           item.id,
-          style: const TextStyle(
-              fontSize: 18, height: 1.5, fontWeight: FontWeight.w600),
+          style: CEVTheme.titleLabelStyle,
           overflow: TextOverflow.ellipsis,
           maxLines: 3,
         ),
         Text(
           item.value,
-          style: TextStyle(
-              fontSize: 18,
-              height: 1.5,
-              color: item.color,
-              fontWeight: FontWeight.w400),
+          style: CEVTheme.labelStyle,
           overflow: TextOverflow.ellipsis,
           maxLines: 3,
         ),
