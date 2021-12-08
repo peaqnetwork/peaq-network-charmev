@@ -56,7 +56,6 @@ class CEVProgressCard extends StatelessWidget {
             "$progressText% Charged",
             style: CEVTheme.titleLabelStyle,
             overflow: TextOverflow.ellipsis,
-            maxLines: 3,
           ),
           Text(
             "$chargedAmount kWh",

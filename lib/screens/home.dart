@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Stack(children: <Widget>[
       // _backgroundImage,
       Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: CEVTheme.bgColor,
           appBar: AppBar(
             title: _buildAppBarTitle(),
             centerTitle: true,

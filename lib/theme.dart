@@ -44,7 +44,7 @@ class CEVTheme {
 
   static TextStyle get labelStyle {
     return const TextStyle(
-        fontSize: 18,
+        fontSize: 16,
         height: 1.5,
         color: Colors.grey,
         fontWeight: FontWeight.w400);

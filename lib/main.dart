@@ -42,7 +42,7 @@ class _CharmevAppState extends State<CharmevApp> {
       title: "CharmEv",
       theme: CEVTheme.theme,
       themeMode: ThemeMode.dark,
-      initialRoute: CEVRoutes.chargingSession,
+      initialRoute: CEVRoutes.onboarding,
       onGenerateRoute: CEVApp.router.generator,
       debugShowCheckedModeBanner: false,
     );

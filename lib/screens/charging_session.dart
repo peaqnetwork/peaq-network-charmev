@@ -1,9 +1,13 @@
+import 'package:charmev/keys.dart';
 import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/common/widgets/progress_card.dart';
+import 'package:charmev/common/widgets/border_box.dart';
+import 'package:charmev/common/widgets/bottom_sheet.dart';
+import 'package:charmev/common/widgets/keyboard_padding.dart';
 import 'package:charmev/common/widgets/countdown.dart';
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/config/env.dart';
@@ -22,6 +26,12 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   final List<Detail> _details = [
     Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow")
+  ];
+
+  final List<Detail> _transactions = [
+    Detail("Pay Station", "7.0 PEAQ"),
+    Detail("Refund", "3.0 PEAQ"),
+    Detail("Total", "10.0 PEAQ"),
   ];
 
   String qrcode = 'Unknown';
@@ -49,7 +59,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     return Stack(children: <Widget>[
       // _backgroundImage,
       Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: CEVTheme.bgColor,
           appBar: AppBar(
             title: _buildAppBarTitle(),
             centerTitle: true,
@@ -66,8 +76,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   Widget _buildScreen(BuildContext context) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
-    int _count = 0;
-    final _totalTimeInSeconds = 30;
+    final _totalTimeInSeconds = 10;
 
     return SizedBox(
         height: double.infinity,
@@ -80,17 +89,21 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      CEVCountdown(displayChild: (counter) {
-                        var percent = counter / _totalTimeInSeconds;
-                        double progress = (percent <= 1) ? percent : 1;
-                        _count += counter;
-                        return CEVProgressCard(
-                          progress: progress,
-                          child: _buildPump(context),
-                          size: 172,
-                          margin: const EdgeInsets.all(32),
-                        );
-                      }),
+                      CEVCountdown(
+                          maxCount: _totalTimeInSeconds,
+                          onTimeout: () =>
+                              _openAuthorizePaymentBottomSheet(context),
+                          displayChild: (counter) {
+                            var percent = counter / _totalTimeInSeconds;
+                            double progress = (percent <= 1) ? percent : 1;
+
+                            return CEVProgressCard(
+                              progress: progress,
+                              child: _buildPump(context),
+                              size: 172,
+                              margin: const EdgeInsets.all(32),
+                            );
+                          }),
                       _buildDetails(boxW),
                       const SizedBox(
                         height: 50.0,
@@ -111,7 +124,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                             const SizedBox(
                               height: 8.0,
                             ),
-                            _buildStartButton(),
+                            _buildStopButton(context),
                           ],
                         ),
                       ),
@@ -135,24 +148,15 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
         mainAxisSize: MainAxisSize.max,
         children: [
           SizedBox(
-              width: boxWidth, // custom wrap size
-              child: Container(
-                decoration: const BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Container(
-                  width: boxWidth,
-                  margin: const EdgeInsets.all(1),
-                  padding: const EdgeInsets.all(32),
-                  decoration: const BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _buildDetailTitleAndValue(),
-                  ),
-                ),
-              ))
+            width: boxWidth, // custom wrap size
+            child: CEVBorderBox(
+              width: boxWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _buildDetailTitleAndValue(),
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -176,14 +180,14 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
             )));
   }
 
-  Widget _buildStartButton() {
+  Widget _buildStopButton(BuildContext ctx) {
     return CEVRaisedButton(
       text: Env.stopCharging,
-      bgColor: Theme.of(context).primaryColor,
+      bgColor: Theme.of(ctx).primaryColor,
       textColor: Colors.white,
       radius: 10,
       isTextBold: true,
-      onPressed: () => {},
+      onPressed: () => _openAuthorizePaymentBottomSheet(ctx),
     );
   }
 
@@ -217,5 +221,89 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     }
 
     return details;
+  }
+
+  void _openAuthorizePaymentBottomSheet(BuildContext context) async {
+    await showModalBottomSheet<bool>(
+        context: context,
+        barrierColor: CEVTheme.dialogBgColor.withOpacity(.5),
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) {
+          final _header = Container(
+              height: 10,
+              width: 40,
+              margin: const EdgeInsets.only(bottom: 16),
+              // constraints: const BoxConstraints(maxWidth: 30),
+              decoration: const BoxDecoration(
+                  color: CEVTheme.greyColor,
+                  borderRadius: BorderRadius.all(Radius.circular(20))));
+
+          return MTDKeyboardPadding(
+              child: CEVBottomSheet(
+                  key: CEVKeys.authorizeBottomSheet,
+                  childrenFlexSize: 11,
+                  childrenPaddingTop: 1,
+                  height: MediaQuery.of(context).size.height / 1.7,
+                  header: _header,
+                  boxPadding: 0,
+                  children: _buildPayments(context)));
+        });
+  }
+
+  List<Widget> _buildPayments(BuildContext context) {
+    var children = <Widget>[];
+
+    var _successIcon = const Padding(
+      padding: EdgeInsets.only(bottom: 16),
+      child: Icon(
+        Icons.check_circle_outline_outlined,
+        color: CEVTheme.successColor,
+        size: 50,
+      ),
+    );
+
+    var _submitButton = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        child: CEVRaisedButton(
+          text: Env.authorizePayment,
+          bgColor: Theme.of(context).primaryColor,
+          textColor: Colors.white,
+          radius: 10,
+          isTextBold: true,
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+        ));
+
+    children.add(_successIcon);
+
+    for (var e in _transactions) {
+      var title = Text(
+        e.value,
+        style: CEVTheme.titleLabelStyle
+            .copyWith(color: CEVTheme.accentColor, fontWeight: FontWeight.w500),
+        overflow: TextOverflow.ellipsis,
+      );
+
+      var suffix = Text(
+        e.id,
+        style: CEVTheme.labelStyle,
+        overflow: TextOverflow.ellipsis,
+      );
+
+      final _field = CEVBorderBox(
+          boxMargin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: 0,
+          radius: 10,
+          child: ListTile(title: title, trailing: suffix));
+
+      children.add(_field);
+    }
+
+    children.add(_submitButton);
+
+    return children;
   }
 }

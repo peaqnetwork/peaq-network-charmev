@@ -6,4 +6,5 @@ class Env {
   static const String stopCharging = 'Stop Charging Session';
   static const String scanProviderDID = "Scan Provider DID";
   static const String scanQRCode = "Scan QR Code";
+  static const String authorizePayment = "Authorize Payment";
 }

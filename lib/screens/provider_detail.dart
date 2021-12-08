@@ -1,4 +1,7 @@
+import 'package:charmev/config/app.dart';
+import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
+import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:charmev/common/models/detail.dart';
@@ -6,6 +9,7 @@ import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
+import 'package:charmev/common/widgets/border_box.dart';
 
 class ProviderDetailScreen extends StatefulWidget {
   const ProviderDetailScreen({this.page, Key? key}) : super(key: key);
@@ -52,7 +56,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
     return Stack(children: <Widget>[
       // _backgroundImage,
       Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: CEVTheme.bgColor,
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.qr_code_scanner_rounded),
@@ -153,24 +157,14 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         mainAxisSize: MainAxisSize.max,
         children: [
           SizedBox(
-              width: boxWidth, // custom wrap size
-              child: Container(
-                decoration: const BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Container(
-                  width: boxWidth,
-                  margin: const EdgeInsets.all(1),
-                  padding: const EdgeInsets.all(32),
-                  decoration: const BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _buildDetailTitleAndValue(),
-                  ),
-                ),
-              ))
+            width: boxWidth, // custom wrap size
+            child: CEVBorderBox(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _buildDetailTitleAndValue(),
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -183,7 +177,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
       textColor: Colors.white,
       radius: 10,
       isTextBold: true,
-      onPressed: () => {},
+      onPressed: () => CEVApp.router.navigateTo(
+          context, CEVRoutes.chargingSession,
+          transition: TransitionType.inFromRight),
     );
   }
 
