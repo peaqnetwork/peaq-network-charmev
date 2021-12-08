@@ -1,32 +1,27 @@
 import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:charmev/common/models/detail.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
+import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 
-class ProviderDetailScreen extends StatefulWidget {
-  const ProviderDetailScreen({this.page, Key? key}) : super(key: key);
-
-  final int? page;
+class CharginSessionScreen extends StatefulWidget {
+  const CharginSessionScreen({Key? key}) : super(key: key);
 
   @override
-  _ProviderDetailScreenState createState() => _ProviderDetailScreenState();
+  _CharginSessionScreenState createState() => _CharginSessionScreenState();
 }
 
-class _ProviderDetailScreenState extends State<ProviderDetailScreen>
+class _CharginSessionScreenState extends State<CharginSessionScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   String qrcode = 'Unknown';
 
   final List<Detail> _details = [
-    Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow"),
-    Detail("Plug Type", "EV2021"),
-    Detail("Status", "Available", color: CEVTheme.successColor),
-    Detail("Power", "(22kW) 2,50 DKK / kwh"),
+    Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow")
   ];
 
   @override
@@ -178,7 +173,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   Widget _buildStartButton() {
     return CEVRaisedButton(
-      text: Env.startCharging,
+      text: Env.stopCharging,
       bgColor: Theme.of(context).primaryColor,
       textColor: Colors.white,
       radius: 10,
