@@ -7,6 +7,7 @@ class CEVRoutes {
   static const providerDetail = "/provider-detail";
   static const chargingSession = "/charging-session";
   static const home = "/home";
+  static const account = "/account";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -22,5 +23,7 @@ class CEVRoutes {
     router.define(home, handler: homeHandler);
     // Add charging session screen route handler
     router.define(chargingSession, handler: chargingSessionHandler);
+    // Add account screen route handler
+    router.define(account, handler: accountHandler);
   }
 }

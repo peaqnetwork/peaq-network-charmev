@@ -7,4 +7,5 @@ class Env {
   static const String scanProviderDID = "Scan Provider DID";
   static const String scanQRCode = "Scan QR Code";
   static const String authorizePayment = "Authorize Payment";
+  static const String logout = "Logout";
 }

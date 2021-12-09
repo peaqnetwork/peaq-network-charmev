@@ -1,3 +1,4 @@
+import 'package:charmev/screens/account.dart';
 import 'package:charmev/screens/charging_session.dart';
 import 'package:charmev/screens/provider_detail.dart';
 import 'package:fluro/fluro.dart';
@@ -23,4 +24,9 @@ var homeHandler = Handler(
 var chargingSessionHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const CharginSessionScreen();
+});
+
+var accountHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AccountScreen();
 });
