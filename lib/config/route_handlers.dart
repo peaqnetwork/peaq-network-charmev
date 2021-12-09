@@ -1,3 +1,4 @@
+import 'package:charmev/screens/account.dart';
 import 'package:charmev/screens/charging_session.dart';
 import 'package:charmev/screens/provider_detail.dart';
 import 'package:fluro/fluro.dart';
@@ -7,7 +8,8 @@ import 'package:charmev/screens/home.dart';
 
 var onboardingHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return const OnboardingScreen();
+  int page = int.tryParse(params["page"]![0]) ?? 1;
+  return OnboardingScreen(page: page);
 });
 
 var providerDetailHandler = Handler(
@@ -23,4 +25,9 @@ var homeHandler = Handler(
 var chargingSessionHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const CharginSessionScreen();
+});
+
+var accountHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AccountScreen();
 });

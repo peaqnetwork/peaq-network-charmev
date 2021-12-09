@@ -1,4 +1,7 @@
+import 'package:charmev/screens/onboarding.dart';
+import 'package:flutter/material.dart';
 import 'package:charmev/config/app.dart';
+import 'package:charmev/config/navigator.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
@@ -11,26 +14,22 @@ import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 import 'package:charmev/common/widgets/border_box.dart';
 
-class ProviderDetailScreen extends StatefulWidget {
-  const ProviderDetailScreen({this.page, Key? key}) : super(key: key);
+class AccountScreen extends StatefulWidget {
+  const AccountScreen({this.page, Key? key}) : super(key: key);
 
   final int? page;
 
   @override
-  _ProviderDetailScreenState createState() => _ProviderDetailScreenState();
+  _AccountScreenState createState() => _AccountScreenState();
 }
 
-class _ProviderDetailScreenState extends State<ProviderDetailScreen>
+class _AccountScreenState extends State<AccountScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String qrcode = 'Unknown';
-
   final List<Detail> _details = [
-    Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow"),
-    Detail("Plug Type", "EV2021"),
-    Detail("Status", "Available", color: CEVTheme.successColor),
-    Detail("Power", "(22kW) 2,50 DKK / kwh"),
+    Detail("Identity", "did:pq:24203qr8s0fwert343ßt23qfiwßfj43645enjitufOs4j"),
+    Detail("Balance", "103.90 PEAQ", color: CEVTheme.accentColor),
   ];
 
   @override
@@ -54,7 +53,6 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   Widget _buildMain(BuildContext context) {
     return Stack(children: <Widget>[
-      // _backgroundImage,
       Scaffold(
           backgroundColor: CEVTheme.bgColor,
           appBar: AppBar(
@@ -69,10 +67,11 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
             actions: [
               IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () => CEVApp.router.navigateTo(
-                    context, CEVRoutes.account,
-                    transition: TransitionType.inFromRight),
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  CEVApp.router.navigateTo(context, "/on-boarding/2",
+                      transition: TransitionType.inFromRight);
+                },
               )
             ],
           ),
@@ -90,36 +89,20 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         child: SingleChildScrollView(
             child: Container(
                 padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 32.0),
-                // height: MediaQuery.of(context).size.height / 1.18,
+                height: MediaQuery.of(context).size.height / 1.18,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      _buildPump(context),
+                      _buildAvatar(context),
                       _buildDetails(boxW),
                       const SizedBox(
                         height: 50.0,
                       ),
-                      SizedBox(
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                              "0.21 PEAQ/KWh",
-                              style: CEVTheme.titleLabelStyle
-                                  .copyWith(color: CEVTheme.accentColor),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 3,
-                            ),
-                            const SizedBox(
-                              height: 8.0,
-                            ),
-                            _buildStartButton(),
-                            const SizedBox(
-                              height: 40.0,
-                            ),
-                          ],
-                        ),
+                      _buildLogoutButton(),
+                      const SizedBox(
+                        height: 40.0,
                       ),
 
                       // _buildImportButton(),
@@ -128,13 +111,13 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   Widget _buildAppBarTitle() {
     return Text(
-      "Sohn EV Charge Station",
+      Env.account,
       style: CEVTheme.appTitleStyle,
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildPump(BuildContext context) {
+  Widget _buildAvatar(BuildContext context) {
     return Container(
         padding: const EdgeInsets.fromLTRB(0, 32, 0.0, 32.0),
         height: 150,
@@ -143,10 +126,10 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
               child: SizedBox(
-                height: 70,
-                width: 70,
+                height: 100,
+                width: 100,
                 child: SvgPicture.asset(
-                  CEVImageAssets.pump,
+                  CEVImageAssets.avatar,
                 ),
               ),
             )));
@@ -160,11 +143,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         children: [
           SizedBox(
             width: boxWidth, // custom wrap size
-            child: CEVBorderBox(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _buildDetailTitleAndValue(),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: _buildDetailTitleAndValue(boxWidth),
             ),
           )
         ],
@@ -172,37 +153,40 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
     );
   }
 
-  Widget _buildStartButton() {
+  Widget _buildLogoutButton() {
     return CEVRaisedButton(
-      text: Env.startCharging,
+      text: Env.logout,
       bgColor: Theme.of(context).primaryColor,
       textColor: Colors.white,
       radius: 10,
       isTextBold: true,
-      onPressed: () => CEVApp.router.navigateTo(
-          context, CEVRoutes.chargingSession,
-          transition: TransitionType.inFromRight),
+      onPressed: () => CEVNavigator.pushReplacement(const OnboardingScreen()),
     );
   }
 
-  List<Widget> _buildDetailTitleAndValue() {
+  List<Widget> _buildDetailTitleAndValue(double width) {
     var details = <Widget>[];
 
     for (var e in _details) {
       var item = e;
       details.addAll([
-        Text(
-          item.id,
-          style: CEVTheme.titleLabelStyle,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 3,
-        ),
-        Text(
-          item.value,
-          style: CEVTheme.labelStyle.copyWith(color: item.color),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 3,
-        ),
+        CEVBorderBox(
+            width: width,
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                item.id,
+                style: CEVTheme.titleLabelStyle,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 3,
+              ),
+              Text(
+                item.value,
+                style: CEVTheme.labelStyle.copyWith(color: e.color),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 3,
+              ),
+            ])),
         const SizedBox(
           height: 16,
         )

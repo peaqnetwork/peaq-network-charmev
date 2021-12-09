@@ -61,9 +61,12 @@ class _HomeScreenState extends State<HomeScreen>
             iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
             actions: [
               IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () {},
-              )
+                  icon: const Icon(Icons.person),
+                  onPressed: () {
+                    // qrController.pause();
+                    CEVApp.router.navigateTo(context, CEVRoutes.account,
+                        transition: TransitionType.inFromRight);
+                  })
             ],
           ),
           body: GestureDetector(
