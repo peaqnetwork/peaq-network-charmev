@@ -70,7 +70,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             actions: [
               IconButton(
                 icon: const Icon(Icons.person),
-                onPressed: () {},
+                onPressed: () => CEVApp.router.navigateTo(
+                    context, CEVRoutes.account,
+                    transition: TransitionType.inFromRight),
               )
             ],
           ),
@@ -197,7 +199,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         ),
         Text(
           item.value,
-          style: CEVTheme.labelStyle,
+          style: CEVTheme.labelStyle.copyWith(color: item.color),
           overflow: TextOverflow.ellipsis,
           maxLines: 3,
         ),

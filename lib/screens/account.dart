@@ -29,7 +29,7 @@ class _AccountScreenState extends State<AccountScreen>
 
   final List<Detail> _details = [
     Detail("Identity", "did:pq:24203qr8s0fwert343ßt23qfiwßfj43645enjitufOs4j"),
-    Detail("Balance", "103.90 PEAQ"),
+    Detail("Balance", "103.90 PEAQ", color: CEVTheme.accentColor),
   ];
 
   @override
@@ -68,7 +68,10 @@ class _AccountScreenState extends State<AccountScreen>
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () {},
+                onPressed: () {
+                  CEVApp.router.navigateTo(context, "/on-boarding/2",
+                      transition: TransitionType.inFromRight);
+                },
               )
             ],
           ),
@@ -108,7 +111,7 @@ class _AccountScreenState extends State<AccountScreen>
 
   Widget _buildAppBarTitle() {
     return Text(
-      "Account",
+      Env.account,
       style: CEVTheme.appTitleStyle,
       textAlign: TextAlign.center,
     );
@@ -179,7 +182,7 @@ class _AccountScreenState extends State<AccountScreen>
               ),
               Text(
                 item.value,
-                style: CEVTheme.labelStyle,
+                style: CEVTheme.labelStyle.copyWith(color: e.color),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 3,
               ),

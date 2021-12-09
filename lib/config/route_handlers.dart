@@ -8,7 +8,8 @@ import 'package:charmev/screens/home.dart';
 
 var onboardingHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return const OnboardingScreen();
+  int page = int.tryParse(params["page"]![0]) ?? 1;
+  return OnboardingScreen(page: page);
 });
 
 var providerDetailHandler = Handler(

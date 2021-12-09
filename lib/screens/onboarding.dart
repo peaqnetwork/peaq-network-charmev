@@ -1,4 +1,5 @@
 import 'package:charmev/config/app.dart';
+import 'package:charmev/screens/home.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,9 @@ import 'package:charmev/config/routes.dart';
 import 'package:charmev/assets.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({this.page, Key? key}) : super(key: key);
-
+  const OnboardingScreen({this.page = 1, Key? key}) : super(key: key);
+// page = 1 - default screen page
+// page = 2 - Account edit screen page
   final int? page;
 
   @override
@@ -67,14 +69,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
 
     return Stack(children: <Widget>[
-      _backgroundImage,
+      // page 2 is routed from account edit screen
+      // Changes was made to suite the edir account page
+      // instead of creating a new screen
+      (widget.page != 2) ? _backgroundImage : const SizedBox(),
       Scaffold(
-          backgroundColor: Colors.transparent,
-          // appBar: AppBar(
-          //   automaticallyImplyLeading: false,
-          //   backgroundColor: Colors.transparent,
-          //   iconTheme: const IconThemeData(color: Colors.white),
-          // ),
+          backgroundColor:
+              (widget.page != 2) ? Colors.transparent : CEVTheme.bgColor,
+          appBar: (widget.page == 2)
+              ? AppBar(
+                  title: _buildAppBarTitle(),
+                  centerTitle: true,
+                  automaticallyImplyLeading: true,
+                  backgroundColor: CEVTheme.appBarBgColor,
+                  iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+                )
+              : null,
           body: GestureDetector(
             onTap: () => {},
             child: _buildScreen(context),
@@ -130,17 +140,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 25.0),
         child: SingleChildScrollView(
             child: SizedBox(
-                height: MediaQuery.of(context).size.height / 1.18,
+                height: MediaQuery.of(context).size.height / 1.3,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       Column(
                         children: [
-                          _buildLogo(context),
-                          const SizedBox(
-                            height: 24.0,
-                          ),
+                          (widget.page != 2)
+                              ? _buildLogo(context)
+                              : const SizedBox(),
+                          (widget.page != 2)
+                              ? const SizedBox(
+                                  height: 24.0,
+                                )
+                              : const SizedBox(
+                                  height: 150,
+                                ),
                           _secretPhraseField,
                           const SizedBox(
                             height: 8.0,
@@ -194,15 +210,27 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             )));
   }
 
+  Widget _buildAppBarTitle() {
+    return Text(
+      Env.editAccount,
+      style: CEVTheme.appTitleStyle,
+      textAlign: TextAlign.center,
+    );
+  }
+
   Widget _buildImportButton() {
     return CEVRaisedButton(
-      text: Env.importString,
-      bgColor: Theme.of(context).primaryColor,
-      textColor: Colors.white,
-      isTextBold: true,
-      radius: 10,
-      onPressed: () => CEVApp.router.navigateTo(context, CEVRoutes.home,
-          transition: TransitionType.fadeIn),
-    );
+        text: Env.importString,
+        bgColor: Theme.of(context).primaryColor,
+        textColor: Colors.white,
+        isTextBold: true,
+        radius: 10,
+        onPressed: () {
+          if (widget.page == 2) {
+            Navigator.of(context).pop();
+            return;
+          }
+          CEVNavigator.pushReplacement(const HomeScreen());
+        });
   }
 }

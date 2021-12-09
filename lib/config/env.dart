@@ -8,4 +8,6 @@ class Env {
   static const String scanQRCode = "Scan QR Code";
   static const String authorizePayment = "Authorize Payment";
   static const String logout = "Logout";
+  static const String account = "Account";
+  static const String editAccount = "Edit Account";
 }
