@@ -239,7 +239,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                   color: CEVTheme.greyColor,
                   borderRadius: BorderRadius.all(Radius.circular(20))));
 
-          return MTDKeyboardPadding(
+          return CEVKeyboardPadding(
               child: CEVBottomSheet(
                   key: CEVKeys.authorizeBottomSheet,
                   childrenFlexSize: 11,

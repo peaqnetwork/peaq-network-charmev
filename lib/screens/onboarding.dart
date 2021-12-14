@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/config/navigator.dart';
 import 'package:charmev/config/routes.dart';
+import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/assets.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         onWillPop: () async {
           return true;
         },
-        child: Material(color: Colors.white, child: _buildMain(context)));
+        child: _buildMain(context));
   }
 
   Widget _buildMain(BuildContext context) {
@@ -93,6 +94,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Widget _buildScreen(BuildContext context) {
+    var accountProvider = CEVAccountProvider.of(context);
+
     final _nodeAddressField = CEVTextField(
       label: "Node Address",
       controller: _nodeAddressFieldController,
@@ -167,7 +170,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ),
                         ],
                       ),
-                      _buildImportButton(),
+                      _buildImportButton(accountProvider),
                     ]))));
   }
 
@@ -218,19 +221,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 
-  Widget _buildImportButton() {
+  Widget _buildImportButton(CEVAccountProvider accountProvider) {
     return CEVRaisedButton(
         text: Env.importString,
         bgColor: Theme.of(context).primaryColor,
         textColor: Colors.white,
         isTextBold: true,
         radius: 10,
-        onPressed: () {
-          if (widget.page == 2) {
-            Navigator.of(context).pop();
-            return;
+        onPressed: () async {
+          // if (widget.page == 2) {
+          //   Navigator.of(context).pop();
+          //   return;
+          // }
+          await accountProvider
+              .generateConsumerKeys(_secretPhraseFieldController.text);
+          if (accountProvider.isLoggedIn) {
+            CEVNavigator.pushReplacement(const HomeScreen());
           }
-          CEVNavigator.pushReplacement(const HomeScreen());
         });
   }
 }

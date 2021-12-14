@@ -1,3 +1,4 @@
+import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/screens/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:charmev/config/app.dart';
@@ -13,6 +14,7 @@ import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 import 'package:charmev/common/widgets/border_box.dart';
+import 'package:provider/provider.dart' as provider;
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({this.page, Key? key}) : super(key: key);
@@ -26,11 +28,6 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  final List<Detail> _details = [
-    Detail("Identity", "did:pq:24203qr8s0fwert343ßt23qfiwßfj43645enjitufOs4j"),
-    Detail("Balance", "103.90 PEAQ", color: CEVTheme.accentColor),
-  ];
 
   @override
   void initState() {
@@ -52,37 +49,40 @@ class _AccountScreenState extends State<AccountScreen>
   }
 
   Widget _buildMain(BuildContext context) {
-    return Stack(children: <Widget>[
-      Scaffold(
-          backgroundColor: CEVTheme.bgColor,
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.qr_code_scanner_rounded),
-              onPressed: () => Navigator.of(context).pop(),
+    return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
+      return Stack(children: <Widget>[
+        Scaffold(
+            backgroundColor: CEVTheme.bgColor,
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: _buildAppBarTitle(),
+              centerTitle: true,
+              automaticallyImplyLeading: false,
+              backgroundColor: CEVTheme.appBarBgColor,
+              iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    CEVApp.router.navigateTo(context, "/on-boarding/2",
+                        transition: TransitionType.inFromRight);
+                  },
+                )
+              ],
             ),
-            title: _buildAppBarTitle(),
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            backgroundColor: CEVTheme.appBarBgColor,
-            iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {
-                  CEVApp.router.navigateTo(context, "/on-boarding/2",
-                      transition: TransitionType.inFromRight);
-                },
-              )
-            ],
-          ),
-          body: GestureDetector(
-            onTap: () => {},
-            child: _buildScreen(context),
-          )),
-    ]);
+            body: GestureDetector(
+              onTap: () => {},
+              child: _buildScreen(context, model),
+            )),
+      ]);
+    });
   }
 
-  Widget _buildScreen(BuildContext context) {
+  Widget _buildScreen(
+      BuildContext context, CEVAccountProvider accountProvider) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
     return SizedBox(
         height: double.infinity,
@@ -96,7 +96,7 @@ class _AccountScreenState extends State<AccountScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       _buildAvatar(context),
-                      _buildDetails(boxW),
+                      _buildDetails(boxW, accountProvider),
                       const SizedBox(
                         height: 50.0,
                       ),
@@ -104,8 +104,6 @@ class _AccountScreenState extends State<AccountScreen>
                       const SizedBox(
                         height: 40.0,
                       ),
-
-                      // _buildImportButton(),
                     ]))));
   }
 
@@ -135,7 +133,7 @@ class _AccountScreenState extends State<AccountScreen>
             )));
   }
 
-  Widget _buildDetails(double boxWidth) {
+  Widget _buildDetails(double boxWidth, CEVAccountProvider accountProvider) {
     return SizedBox(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +143,7 @@ class _AccountScreenState extends State<AccountScreen>
             width: boxWidth, // custom wrap size
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: _buildDetailTitleAndValue(boxWidth),
+              children: _buildDetailTitleAndValue(boxWidth, accountProvider),
             ),
           )
         ],
@@ -164,8 +162,11 @@ class _AccountScreenState extends State<AccountScreen>
     );
   }
 
-  List<Widget> _buildDetailTitleAndValue(double width) {
+  List<Widget> _buildDetailTitleAndValue(
+      double width, CEVAccountProvider accountProvider) {
     var details = <Widget>[];
+
+    var _details = accountProvider.details;
 
     for (var e in _details) {
       var item = e;
