@@ -10,4 +10,10 @@ class Env {
   static const String logout = "Logout";
   static const String account = "Account";
   static const String editAccount = "Edit Account";
+  static const String pk = "pk";
+  static const String sk = "sk";
+  static const String address = "address";
+  static const String did = "did";
+  static const String accountPrefKey = "_account_";
+  static const String appName = "CharmEv";
 }
