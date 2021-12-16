@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:charmev/theme.dart';
 
 class CEVDialog extends StatelessWidget {
-  final double cornerRadius;
-  final List<String> items;
+  const CEVDialog(
+      {Key? key, this.cornerRadius = 8.0, required this.items, this.onTap})
+      : super(key: key);
 
-  const CEVDialog({
-    Key? key,
-    this.cornerRadius = 8.0,
-    required this.items,
-  }) : super(key: key);
+  final double cornerRadius;
+  final Function(String)? onTap;
+  final List<String> items;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class CEVDialog extends StatelessWidget {
                 return ListTile(
                   title: Text(items[i]),
                   tileColor: CEVTheme.dialogBgColor,
-                  onTap: () => Navigator.of(context).pop(),
+                  onTap: () => onTap!(items[i]),
                 );
               })),
     );

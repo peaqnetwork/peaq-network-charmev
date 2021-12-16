@@ -1,3 +1,4 @@
+import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
@@ -12,6 +13,7 @@ import 'package:charmev/common/widgets/dialog.dart';
 import 'package:charmev/common/widgets/custom_shapes.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
+import 'package:provider/provider.dart' as provider;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({this.page, Key? key}) : super(key: key);
@@ -49,31 +51,40 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildMain(BuildContext context) {
-    return Stack(children: <Widget>[
-      // _backgroundImage,
-      Scaffold(
-          backgroundColor: CEVTheme.bgColor,
-          appBar: AppBar(
-            title: _buildAppBarTitle(),
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            backgroundColor: CEVTheme.appBarBgColor,
-            iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-            actions: [
-              IconButton(
-                  icon: const Icon(Icons.person),
+    return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
+      return Stack(children: <Widget>[
+        // _backgroundImage,
+        Scaffold(
+            backgroundColor: CEVTheme.bgColor,
+            appBar: AppBar(
+              title: _buildAppBarTitle(context, model),
+              centerTitle: true,
+              automaticallyImplyLeading: false,
+              backgroundColor: CEVTheme.appBarBgColor,
+              leading: IconButton(
+                  icon: const Icon(Icons.explore),
                   onPressed: () {
                     // qrController.pause();
-                    CEVApp.router.navigateTo(context, CEVRoutes.account,
+                    CEVApp.router.navigateTo(context, CEVRoutes.eventExplorer,
                         transition: TransitionType.inFromRight);
-                  })
-            ],
-          ),
-          body: GestureDetector(
-            onTap: () => {},
-            child: _buildScreen(context),
-          )),
-    ]);
+                  }),
+              iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+              actions: [
+                IconButton(
+                    icon: const Icon(Icons.person),
+                    onPressed: () {
+                      // qrController.pause();
+                      CEVApp.router.navigateTo(context, CEVRoutes.account,
+                          transition: TransitionType.inFromRight);
+                    })
+              ],
+            ),
+            body: GestureDetector(
+              onTap: () => {},
+              child: _buildScreen(context),
+            )),
+      ]);
+    });
   }
 
   Widget _buildScreen(BuildContext context) {
@@ -138,7 +149,8 @@ class _HomeScreenState extends State<HomeScreen>
                     ]))));
   }
 
-  Widget _buildAppBarTitle() {
+  Widget _buildAppBarTitle(
+      BuildContext context, CEVAccountProvider accountProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -151,16 +163,17 @@ class _HomeScreenState extends State<HomeScreen>
               style: CEVTheme.appTitleStyle,
               textAlign: TextAlign.center,
             ),
-            _buildDropdown(),
+            _buildDropdown(context, accountProvider),
           ],
         )
       ],
     );
   }
 
-  Widget _buildDropdown() {
+  Widget _buildDropdown(
+      BuildContext context, CEVAccountProvider accountProvider) {
     return DropdownButton<String>(
-        value: "https://testnet.peaq.network",
+        value: accountProvider.selectedNode,
         isDense: true,
         isExpanded: false,
         style: Theme.of(context).textTheme.headline6?.copyWith(
@@ -174,13 +187,14 @@ class _HomeScreenState extends State<HomeScreen>
           Icons.keyboard_arrow_down,
           color: CEVTheme.textFadeColor,
         ),
-        items: [
-          "https://testnet.peaq.network",
-          "https://local.testnet.dev",
-          "https://devnet.local"
-        ].map<DropdownMenuItem<String>>((String value) {
+        items:
+            accountProvider.nodes.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
               value: value,
+              onTap: () {
+                accountProvider.selectedNode = value;
+                accountProvider.connectNode();
+              },
               child: Text(
                 value,
                 style: const TextStyle(
