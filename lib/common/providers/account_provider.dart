@@ -80,6 +80,11 @@ class CEVAccountProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  _deleteNodes() async {
+    await cevSharedPref!.init();
+    cevSharedPref!.prefs!.remove(Env.nodePrefKey);
+  }
+
   _fetchNode() async {
     await cevSharedPref!.init();
     List<String>? _savedNodes =
@@ -156,7 +161,8 @@ class CEVAccountProvider with ChangeNotifier {
     _socket!.stream.listen(
         (event) {
           print("EVENT:: $event");
-          _events.add(event);
+          _events.insert(0, event);
+          // _events.add(event);
           notifyListeners();
         },
         onError: _onError,
@@ -181,6 +187,12 @@ class CEVAccountProvider with ChangeNotifier {
     }
   }
 
+  /// Delete account saved in the shared pref
+  Future<void> _deleteAccount() async {
+    await cevSharedPref!.init();
+    cevSharedPref!.prefs!.remove(Env.accountPrefKey);
+  }
+
   /// Initializes the authenticated [CEVAccount].
   Future<bool> initBeforeOnboardingPage() async {
     await Future.wait([
@@ -194,5 +206,13 @@ class CEVAccountProvider with ChangeNotifier {
     }
 
     return true;
+  }
+
+  /// Remove credentials before logout.
+  initBeforeLogout() async {
+    await _deleteAccount();
+    _deleteNodes();
+    // Close the websocket connection
+    _socket!.sink.close();
   }
 }

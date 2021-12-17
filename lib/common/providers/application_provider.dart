@@ -1,4 +1,5 @@
 import 'package:charmev/common/providers/account_provider.dart';
+import 'package:charmev/common/widgets/route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/utils/logger.dart';
@@ -73,9 +74,15 @@ class CEVApplicationProvider extends ChangeNotifier {
     if (authenticated) {
       _log.fine("navigating to home screen");
       accountProvider!.connectNode();
-      CEVNavigator.pushReplacement(const HomeScreen());
+      CEVNavigator.pushReplacementRoute(CEVFadeRoute(
+        builder: (context) => const HomeScreen(),
+        duration: const Duration(milliseconds: 600),
+      ));
     } else {
-      CEVNavigator.pushReplacement(const OnboardingScreen());
+      CEVNavigator.pushReplacementRoute(CEVFadeRoute(
+        builder: (context) => const OnboardingScreen(),
+        duration: const Duration(milliseconds: 600),
+      ));
     }
   }
 
