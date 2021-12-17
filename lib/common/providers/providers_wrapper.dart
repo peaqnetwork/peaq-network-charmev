@@ -1,3 +1,4 @@
+import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/common/providers/service_provider.dart';
@@ -17,6 +18,7 @@ class CEVProvidersWrapper extends StatefulWidget {
 class CEVProvidersWrapperState extends State<CEVProvidersWrapper> {
   CEVApplicationProvider? applicationProvider;
   CEVAccountProvider? accountProvider;
+  CEVChargeProvider? chargeProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +28,14 @@ class CEVProvidersWrapperState extends State<CEVProvidersWrapper> {
       cevSharedPref: serviceProvider!.data!.cevSharedPref,
     );
 
+    chargeProvider ??= CEVChargeProvider(
+      cevSharedPref: serviceProvider!.data!.cevSharedPref,
+    );
+
     applicationProvider ??= CEVApplicationProvider(context,
         cevSharedPrefs: serviceProvider!.data!.cevSharedPref,
-        accountProvider: accountProvider);
+        accountProvider: accountProvider,
+        chargeProvider: chargeProvider);
 
     return provider.MultiProvider(
       providers: [
@@ -38,6 +45,9 @@ class CEVProvidersWrapperState extends State<CEVProvidersWrapper> {
         provider.ChangeNotifierProvider<CEVAccountProvider?>(
           create: (_) => accountProvider,
         ),
+        provider.ChangeNotifierProvider<CEVChargeProvider?>(
+          create: (_) => chargeProvider,
+        )
       ],
       child: widget.child,
     );
