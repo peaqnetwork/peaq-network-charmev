@@ -9,6 +9,7 @@ class CEVRoutes {
   static const home = "/home";
   static const account = "/account";
   static const eventExplorer = "/event-explorer";
+  static const entry = "/";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -28,5 +29,6 @@ class CEVRoutes {
     router.define(account, handler: accountHandler);
     // Add event explorer screen route handler
     router.define(eventExplorer, handler: eventExplorerHandler);
+    router.define(entry, handler: entryHandler);
   }
 }

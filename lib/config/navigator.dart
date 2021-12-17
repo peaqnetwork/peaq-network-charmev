@@ -36,6 +36,6 @@ class CEVNavigator {
   static void popAllAndPushNamed(String route) async {
     key.currentState?.popUntil(ModalRoute.withName('/'));
     await Future.delayed(const Duration(seconds: 1));
-    popAndPushNamed(route);
+    key.currentState?.pushNamed(route);
   }
 }
