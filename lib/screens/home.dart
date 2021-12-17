@@ -1,4 +1,5 @@
 import 'package:charmev/common/providers/account_provider.dart';
+import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
@@ -28,12 +29,16 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  ScanController qrController = ScanController();
   String qrcode = 'Unknown';
+
+  CEVChargeProvider? _dumbChargeProvider;
 
   @override
   void initState() {
     super.initState();
+    _dumbChargeProvider =
+        provider.Provider.of<CEVChargeProvider>(context, listen: false);
+    _dumbChargeProvider!.qrController.resume();
   }
 
   @override
@@ -64,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen>
               leading: IconButton(
                   icon: const Icon(Icons.explore),
                   onPressed: () {
-                    // qrController.pause();
+                    _dumbChargeProvider!.qrController.pause();
                     CEVApp.router.navigateTo(context, CEVRoutes.eventExplorer,
                         transition: TransitionType.inFromRight);
                   }),
@@ -88,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildScreen(BuildContext context) {
+    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
     final qrcodeSize = MediaQuery.of(context).size.width - 32;
     return SizedBox(
         height: double.infinity,
@@ -123,10 +129,16 @@ class _HomeScreenState extends State<HomeScreen>
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(20))),
                                       child: ScanView(
-                                        controller: qrController,
+                                        controller:
+                                            _dumbChargeProvider!.qrController,
                                         scanAreaScale: 1,
                                         scanLineColor: CEVTheme.dialogBgColor,
                                         onCapture: (data) {
+                                          print("Sacnned:: $data");
+                                          _dumbChargeProvider!.qrController
+                                              .pause();
+                                          _chargeProvider.providerDid = data;
+                                          _chargeProvider.generateDetails();
                                           CEVApp.router.navigateTo(
                                               context, CEVRoutes.providerDetail,
                                               transition:

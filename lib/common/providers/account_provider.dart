@@ -103,9 +103,6 @@ class CEVAccountProvider with ChangeNotifier {
   generateDetails({bool notify = false}) {
     List<Detail> _newDetails = [];
 
-    print("_account:: $_account");
-    print("_account::did  ${_account!.did}");
-
     if (_account != null) {
       _newDetails.add(Detail("Identity", _account!.did ?? ""));
     }
@@ -115,7 +112,6 @@ class CEVAccountProvider with ChangeNotifier {
     );
     _details = _newDetails;
     if (notify) {
-      print("_account:: notified");
       notifyListeners();
     }
   }

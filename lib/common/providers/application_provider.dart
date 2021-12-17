@@ -10,16 +10,21 @@ import 'package:provider/provider.dart' as provider;
 import 'package:charmev/config/navigator.dart';
 import 'package:charmev/screens/onboarding.dart';
 
+import 'package:charmev/common/providers/charge_provider.dart';
+
 // / The [CEVApplicationProvider] handles initialization in the [EntryScreen] when
 /// starting the app.
 class CEVApplicationProvider extends ChangeNotifier {
   CEVApplicationProvider(BuildContext context,
-      {required this.cevSharedPrefs, required this.accountProvider}) {
+      {required this.cevSharedPrefs,
+      required this.accountProvider,
+      required this.chargeProvider}) {
     _initialize(context);
   }
 
   final CEVSharedPref? cevSharedPrefs;
   final CEVAccountProvider? accountProvider;
+  final CEVChargeProvider? chargeProvider;
 
   static CEVApplicationProvider of(BuildContext context) {
     return provider.Provider.of<CEVApplicationProvider>(context);
@@ -48,6 +53,7 @@ class CEVApplicationProvider extends ChangeNotifier {
     // set application model references
     cevSharedPrefs?.appProvider = this;
     accountProvider?.appProvider = this;
+    chargeProvider?.appProvider = this;
 
     await Future.wait([
       // charmev shared preferences

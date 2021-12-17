@@ -1,3 +1,4 @@
+import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
@@ -25,13 +26,6 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   String qrcode = 'Unknown';
-
-  final List<Detail> _details = [
-    Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow"),
-    Detail("Plug Type", "EV2021"),
-    Detail("Status", "Available", color: CEVTheme.successColor),
-    Detail("Power", "(22kW) 2,50 DKK / kwh"),
-  ];
 
   @override
   void initState() {
@@ -186,9 +180,10 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
   }
 
   List<Widget> _buildDetailTitleAndValue() {
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
     var details = <Widget>[];
 
-    for (var e in _details) {
+    for (var e in chargeProvider.details) {
       var item = e;
       details.addAll([
         Text(
