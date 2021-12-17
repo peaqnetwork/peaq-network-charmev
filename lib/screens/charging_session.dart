@@ -1,3 +1,4 @@
+import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/keys.dart';
 import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:charmev/common/widgets/countdown.dart';
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
+import 'package:provider/provider.dart' as provider;
 
 class CharginSessionScreen extends StatefulWidget {
   const CharginSessionScreen({Key? key}) : super(key: key);
@@ -23,10 +25,6 @@ class CharginSessionScreen extends StatefulWidget {
 class _CharginSessionScreenState extends State<CharginSessionScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  final List<Detail> _details = [
-    Detail("Identity", "did:pq:35203qr8s0fsfqßr23ßt23qfiwßfj43645z3sdivgsow")
-  ];
 
   final List<Detail> _transactions = [
     Detail("Pay Station", "7.0 PEAQ"),
@@ -56,25 +54,26 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
   }
 
   Widget _buildMain(BuildContext context) {
-    return Stack(children: <Widget>[
-      // _backgroundImage,
-      Scaffold(
-          backgroundColor: CEVTheme.bgColor,
-          appBar: AppBar(
-            title: _buildAppBarTitle(),
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            backgroundColor: CEVTheme.appBarBgColor,
-            iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-          ),
-          body: GestureDetector(
-            onTap: () => {},
-            child: _buildScreen(context),
-          )),
-    ]);
+    return provider.Consumer<CEVChargeProvider>(builder: (context, model, _) {
+      return Stack(children: <Widget>[
+        Scaffold(
+            backgroundColor: CEVTheme.bgColor,
+            appBar: AppBar(
+              title: _buildAppBarTitle(),
+              centerTitle: true,
+              automaticallyImplyLeading: false,
+              backgroundColor: CEVTheme.appBarBgColor,
+              iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+            ),
+            body: GestureDetector(
+              onTap: () => {},
+              child: _buildScreen(context, model),
+            )),
+      ]);
+    });
   }
 
-  Widget _buildScreen(BuildContext context) {
+  Widget _buildScreen(BuildContext context, CEVChargeProvider chargeProvider) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
     final _totalTimeInSeconds = 10;
 
@@ -83,7 +82,6 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
         child: SingleChildScrollView(
             child: Container(
                 padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 32.0),
-                height: MediaQuery.of(context).size.height / 1.18,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
@@ -104,7 +102,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                               margin: const EdgeInsets.all(32),
                             );
                           }),
-                      _buildDetails(boxW),
+                      _buildDetails(boxW, chargeProvider),
                       const SizedBox(
                         height: 50.0,
                       ),
@@ -125,6 +123,9 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                               height: 8.0,
                             ),
                             _buildStopButton(context),
+                            const SizedBox(
+                              height: 100.0,
+                            ),
                           ],
                         ),
                       ),
@@ -141,7 +142,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     );
   }
 
-  Widget _buildDetails(double boxWidth) {
+  Widget _buildDetails(double boxWidth, CEVChargeProvider chargeProvider) {
     return SizedBox(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -153,7 +154,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
               width: boxWidth,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: _buildDetailTitleAndValue(),
+                children: _buildDetailTitleAndValue(chargeProvider),
               ),
             ),
           )
@@ -191,34 +192,33 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     );
   }
 
-  List<Widget> _buildDetailTitleAndValue() {
+  List<Widget> _buildDetailTitleAndValue(CEVChargeProvider chargeProvider) {
     var details = <Widget>[];
 
-    for (var e in _details) {
-      var item = e;
-      details.addAll([
-        Text(
-          item.id,
-          style: const TextStyle(
-              fontSize: 18, height: 1.5, fontWeight: FontWeight.w600),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 3,
-        ),
-        Text(
-          item.value,
-          style: TextStyle(
-              fontSize: 18,
-              height: 1.5,
-              color: item.color,
-              fontWeight: FontWeight.w400),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 3,
-        ),
-        const SizedBox(
-          height: 16,
-        )
-      ]);
-    }
+    var item = chargeProvider.details[0];
+
+    details.addAll([
+      Text(
+        item.id,
+        style: const TextStyle(
+            fontSize: 18, height: 1.5, fontWeight: FontWeight.w600),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      Text(
+        item.value,
+        style: TextStyle(
+            fontSize: 18,
+            height: 1.5,
+            color: item.color,
+            fontWeight: FontWeight.w400),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 3,
+      ),
+      const SizedBox(
+        height: 16,
+      )
+    ]);
 
     return details;
   }

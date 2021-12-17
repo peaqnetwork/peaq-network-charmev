@@ -11,6 +11,7 @@ import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 import 'package:charmev/common/widgets/border_box.dart';
+import 'package:provider/provider.dart' as provider;
 
 class ProviderDetailScreen extends StatefulWidget {
   const ProviderDetailScreen({this.page, Key? key}) : super(key: key);
@@ -47,37 +48,39 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
   }
 
   Widget _buildMain(BuildContext context) {
-    return Stack(children: <Widget>[
-      // _backgroundImage,
-      Scaffold(
-          backgroundColor: CEVTheme.bgColor,
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.qr_code_scanner_rounded),
-              onPressed: () => Navigator.of(context).pop(),
+    return provider.Consumer<CEVChargeProvider>(builder: (context, model, _) {
+      return Stack(children: <Widget>[
+        // _backgroundImage,
+        Scaffold(
+            backgroundColor: CEVTheme.bgColor,
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: _buildAppBarTitle(),
+              centerTitle: true,
+              automaticallyImplyLeading: false,
+              backgroundColor: CEVTheme.appBarBgColor,
+              iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () => CEVApp.router.navigateTo(
+                      context, CEVRoutes.account,
+                      transition: TransitionType.inFromRight),
+                )
+              ],
             ),
-            title: _buildAppBarTitle(),
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            backgroundColor: CEVTheme.appBarBgColor,
-            iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () => CEVApp.router.navigateTo(
-                    context, CEVRoutes.account,
-                    transition: TransitionType.inFromRight),
-              )
-            ],
-          ),
-          body: GestureDetector(
-            onTap: () => {},
-            child: _buildScreen(context),
-          )),
-    ]);
+            body: GestureDetector(
+              onTap: () => {},
+              child: _buildScreen(context, model),
+            )),
+      ]);
+    });
   }
 
-  Widget _buildScreen(BuildContext context) {
+  Widget _buildScreen(BuildContext context, CEVChargeProvider chargeProvider) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
     return SizedBox(
         height: double.infinity,
@@ -91,7 +94,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       _buildPump(context),
-                      _buildDetails(boxW),
+                      _buildDetails(boxW, chargeProvider),
                       const SizedBox(
                         height: 50.0,
                       ),
@@ -110,7 +113,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                             ),
                             _buildStartButton(),
                             const SizedBox(
-                              height: 40.0,
+                              height: 100.0,
                             ),
                           ],
                         ),
@@ -146,7 +149,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             )));
   }
 
-  Widget _buildDetails(double boxWidth) {
+  Widget _buildDetails(double boxWidth, CEVChargeProvider chargeProvider) {
     return SizedBox(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -157,7 +160,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             child: CEVBorderBox(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: _buildDetailTitleAndValue(),
+                children: _buildDetailTitleAndValue(chargeProvider),
               ),
             ),
           )
@@ -179,8 +182,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
     );
   }
 
-  List<Widget> _buildDetailTitleAndValue() {
-    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
+  List<Widget> _buildDetailTitleAndValue(CEVChargeProvider chargeProvider) {
     var details = <Widget>[];
 
     for (var e in chargeProvider.details) {

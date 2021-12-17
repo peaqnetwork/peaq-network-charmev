@@ -61,6 +61,7 @@ class CEVApplicationProvider extends ChangeNotifier {
       cevSharedPrefs!.init(),
       accountProvider!.initBeforeOnboardingPage(),
     ]);
+    chargeProvider!.generateDetails(notify: true);
 
     if (accountProvider!.isLoggedIn) {
       _authenticated = true;
