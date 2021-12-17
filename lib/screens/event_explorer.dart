@@ -75,17 +75,8 @@ class _EventExplorerScreenState extends State<EventExplorerScreen>
   }
 
   Widget _buildScreen(BuildContext context) {
-    final qrcodeSize = MediaQuery.of(context).size.width - 32;
     return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
-      return SizedBox(
-          height: double.infinity,
-          // padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 25.0),
-          child: SingleChildScrollView(
-              child: SizedBox(
-            child: _buildEventList(model),
-
-            // _buildImportButton(),
-          )));
+      return _buildEventList(model);
     });
   }
 
@@ -113,11 +104,9 @@ class _EventExplorerScreenState extends State<EventExplorerScreen>
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemCount: accountProvider.events.length,
-        reverse: true,
+        // reverse: true,
         itemBuilder: (context, i) {
           return Wrap(
-            // mainAxisAlignment: MainAxisAlignment.start,
-            // mainAxisSize: MainAxisSize.max,
             children: [
               Padding(
                   padding: const EdgeInsets.symmetric(

@@ -1,3 +1,4 @@
+import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/screens/event_explorer.dart';
 import 'package:charmev/screens/home.dart';
@@ -243,9 +244,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           var secretPhrase = _secretPhraseFieldController.text;
           if (node.isNotEmpty && secretPhrase.isNotEmpty) {
             await accountProvider.generateConsumerKeys(secretPhrase);
-            // if (accountProvider.isLoggedIn) {
-            CEVNavigator.pushReplacement(const HomeScreen());
-            // }
+            if (accountProvider.isLoggedIn) {
+              CEVNavigator.pushReplacementRoute(CEVFadeRoute(
+                builder: (context) => const HomeScreen(),
+                duration: const Duration(milliseconds: 600),
+              ));
+            }
             accountProvider.selectedNode = node;
             accountProvider.addNode(node);
             accountProvider.connectNode();

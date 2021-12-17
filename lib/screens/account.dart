@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:charmev/common/models/detail.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
+import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 import 'package:charmev/common/widgets/border_box.dart';
@@ -100,7 +101,7 @@ class _AccountScreenState extends State<AccountScreen>
                       const SizedBox(
                         height: 50.0,
                       ),
-                      _buildLogoutButton(),
+                      _buildLogoutButton(accountProvider),
                       const SizedBox(
                         height: 40.0,
                       ),
@@ -151,14 +152,22 @@ class _AccountScreenState extends State<AccountScreen>
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(CEVAccountProvider accountProvider) {
     return CEVRaisedButton(
       text: Env.logout,
       bgColor: Theme.of(context).primaryColor,
       textColor: Colors.white,
       radius: 10,
       isTextBold: true,
-      onPressed: () => CEVNavigator.pushReplacement(const OnboardingScreen()),
+      onPressed: () {
+        accountProvider.initBeforeLogout();
+
+        CEVNavigator.popAllAndPushNamed("/on-boarding/0");
+        // CEVNavigator.pushReplacementRoute(CEVFadeRoute(
+        //   builder: (context) => const OnboardingScreen(),
+        //   duration: const Duration(milliseconds: 600),
+        // ));
+      },
     );
   }
 

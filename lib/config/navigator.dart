@@ -25,4 +25,17 @@ class CEVNavigator {
   static void pushReplacementRoute(Route route) {
     key.currentState?.pushReplacement(route);
   }
+
+  static void popAndPushNamed(String route) {
+    key.currentState?.popAndPushNamed(route);
+  }
+
+  /// A convenience method to pop all routes
+  /// and push a new replacement named [route] to the [Navigator].
+  /// useful during logout
+  static void popAllAndPushNamed(String route) async {
+    key.currentState?.popUntil(ModalRoute.withName('/'));
+    await Future.delayed(const Duration(seconds: 1));
+    popAndPushNamed(route);
+  }
 }
