@@ -161,7 +161,6 @@ class _AccountScreenState extends State<AccountScreen>
       isTextBold: true,
       onPressed: () {
         accountProvider.initBeforeLogout();
-
         CEVNavigator.popAllAndPushNamed("/on-boarding/0");
         // CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         //   builder: (context) => const OnboardingScreen(),

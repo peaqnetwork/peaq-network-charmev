@@ -51,7 +51,7 @@ class _CharmevAppState extends State<CharmevApp> {
         title: Env.appName,
         theme: CEVTheme.theme,
         themeMode: ThemeMode.dark,
-        home: CEVEntryScreen(),
+        initialRoute: CEVRoutes.entry,
         onGenerateRoute: CEVApp.router.generator,
         debugShowCheckedModeBanner: false,
       );
