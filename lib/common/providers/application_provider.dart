@@ -52,7 +52,6 @@ class CEVApplicationProvider extends ChangeNotifier {
       // charmev shared preferences
       // Initialize the shared preference
       cevSharedPrefs!.init(),
-      accountProvider!.initSDK(),
       accountProvider!.initBeforeOnboardingPage(),
     ]);
 
@@ -73,6 +72,7 @@ class CEVApplicationProvider extends ChangeNotifier {
 
     if (authenticated) {
       _log.fine("navigating to home screen");
+      accountProvider!.connectNode();
       CEVNavigator.pushReplacement(const HomeScreen());
     } else {
       CEVNavigator.pushReplacement(const OnboardingScreen());

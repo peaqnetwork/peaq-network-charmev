@@ -15,5 +15,8 @@ class Env {
   static const String address = "address";
   static const String did = "did";
   static const String accountPrefKey = "_account_";
+  static const String nodePrefKey = "_nodes_";
   static const String appName = "CharmEv";
+  static const String eventExplorer = "Event Explorer";
+  static const String peaqTestnet = "wss://fn1.test.peaq.network";
 }

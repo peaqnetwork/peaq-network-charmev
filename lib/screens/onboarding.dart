@@ -1,4 +1,5 @@
 import 'package:charmev/config/app.dart';
+import 'package:charmev/screens/event_explorer.dart';
 import 'package:charmev/screens/home.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
@@ -13,6 +14,7 @@ import 'package:charmev/config/navigator.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/assets.dart';
+import 'package:provider/provider.dart' as provider;
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({this.page = 1, Key? key}) : super(key: key);
@@ -29,7 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final _nodeAddressFieldController =
-      TextEditingController(text: "https://testnet.peaq.network");
+      TextEditingController(text: Env.peaqTestnet);
   final _secretPhraseFieldController = TextEditingController();
   bool _hideSecret = true;
 
@@ -69,28 +71,31 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           foregroundDecoration: const BoxDecoration(color: Colors.transparent)),
     );
 
-    return Stack(children: <Widget>[
-      // page 2 is routed from account edit screen
-      // Changes was made to suite the edir account page
-      // instead of creating a new screen
-      (widget.page != 2) ? _backgroundImage : const SizedBox(),
-      Scaffold(
-          backgroundColor:
-              (widget.page != 2) ? Colors.transparent : CEVTheme.bgColor,
-          appBar: (widget.page == 2)
-              ? AppBar(
-                  title: _buildAppBarTitle(),
-                  centerTitle: true,
-                  automaticallyImplyLeading: true,
-                  backgroundColor: CEVTheme.appBarBgColor,
-                  iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-                )
-              : null,
-          body: GestureDetector(
-            onTap: () => {},
-            child: _buildScreen(context),
-          )),
-    ]);
+    return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
+      return Stack(children: <Widget>[
+        // page 2 is routed from account edit screen
+        // Changes was made to suite the edir account page
+        // instead of creating a new screen
+        (widget.page != 2) ? _backgroundImage : const SizedBox(),
+        Scaffold(
+            backgroundColor:
+                (widget.page != 2) ? Colors.transparent : CEVTheme.bgColor,
+            appBar: (widget.page == 2)
+                ? AppBar(
+                    title: _buildAppBarTitle(),
+                    centerTitle: true,
+                    automaticallyImplyLeading: true,
+                    backgroundColor: CEVTheme.appBarBgColor,
+                    iconTheme:
+                        const IconThemeData(color: CEVTheme.textFadeColor),
+                  )
+                : null,
+            body: GestureDetector(
+              onTap: () => {},
+              child: _buildScreen(context),
+            )),
+      ]);
+    });
   }
 
   Widget _buildScreen(BuildContext context) {
@@ -109,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             color: CEVTheme.greyColor,
           ),
         ),
-        onTap: () => _openNodePicker(context),
+        onTap: () => _openNodePicker(context, accountProvider),
       ),
       onChanged: (value) => {},
       onTap: () => {},
@@ -143,7 +148,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 25.0),
         child: SingleChildScrollView(
             child: SizedBox(
-                height: MediaQuery.of(context).size.height / 1.3,
+                height: MediaQuery.of(context).size.height / 1.18,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
@@ -174,22 +179,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ]))));
   }
 
-  void _openNodePicker(BuildContext context) async {
+  void _openNodePicker(
+      BuildContext context, CEVAccountProvider accountProvider) async {
     await showDialog<bool>(
         context: context,
         barrierLabel: "hello",
         barrierColor: Colors.transparent,
-        // backgroundColor: Colors.transparent,
-        // isScrollControlled: true,
-        // elevation: 0,
-
         builder: (context) {
-          return const Padding(
-              padding: EdgeInsets.only(top: 220),
-              child: CEVDialog(items: [
-                "https://local.testnet.dev",
-                "https://devnet.local"
-              ]));
+          return Padding(
+              padding: const EdgeInsets.only(top: 220),
+              child: CEVDialog(
+                items: accountProvider.nodes,
+                onTap: (item) {
+                  accountProvider.selectedNode = item;
+                  Navigator.of(context).pop();
+                },
+              ));
         });
   }
 
@@ -229,14 +234,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         isTextBold: true,
         radius: 10,
         onPressed: () async {
-          // if (widget.page == 2) {
-          //   Navigator.of(context).pop();
-          //   return;
-          // }
-          await accountProvider
-              .generateConsumerKeys(_secretPhraseFieldController.text);
-          if (accountProvider.isLoggedIn) {
+          if (widget.page == 2) {
+            Navigator.of(context).pop();
+            return;
+          }
+
+          var node = _nodeAddressFieldController.text;
+          var secretPhrase = _secretPhraseFieldController.text;
+          if (node.isNotEmpty && secretPhrase.isNotEmpty) {
+            await accountProvider.generateConsumerKeys(secretPhrase);
+            // if (accountProvider.isLoggedIn) {
             CEVNavigator.pushReplacement(const HomeScreen());
+            // }
+            accountProvider.selectedNode = node;
+            accountProvider.addNode(node);
+            accountProvider.connectNode();
           }
         });
   }
