@@ -1,3 +1,4 @@
+import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
@@ -39,11 +40,13 @@ class _EventExplorerScreenState extends State<EventExplorerScreen>
 
   @override
   Widget build(BuildContext context) {
+    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
+          _chargeProvider.qrController.resume();
           return true;
         },
-        child: Material(color: Colors.white, child: _buildMain(context)));
+        child: _buildMain(context));
   }
 
   Widget _buildMain(BuildContext context) {
