@@ -40,11 +40,14 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
+
     return WillPopScope(
         onWillPop: () async {
+          _chargeProvider.qrController.resume();
           return true;
         },
-        child: Material(color: Colors.white, child: _buildMain(context)));
+        child: _buildMain(context));
   }
 
   Widget _buildMain(BuildContext context) {
@@ -56,7 +59,10 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             appBar: AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.qr_code_scanner_rounded),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  model.qrController.resume();
+                  Navigator.of(context).pop();
+                },
               ),
               title: _buildAppBarTitle(),
               centerTitle: true,

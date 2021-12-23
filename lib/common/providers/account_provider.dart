@@ -7,17 +7,11 @@ import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/models/account.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
-
-import 'package:nanodart/nanodart.dart';
-
+import 'package:dio/dio.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/status.dart' as socketStatus;
 
 import 'package:substrate_sign_flutter/substrate_sign_flutter.dart' as subsign;
-import "package:hex/hex.dart";
-import 'package:bip39/bip39.dart' as bip39;
 import 'dart:async';
 import 'dart:convert';
 
@@ -50,6 +44,7 @@ class CEVAccountProvider with ChangeNotifier {
 
   rpc.Client? _rpcClient;
   WebSocketChannel? _socket;
+  final Dio _dio = Dio()..options = BaseOptions(baseUrl: Env.scaleCodecBaseURL);
 
   List<String> _events = [];
   List<String> _nodes = [Env.peaqTestnet];
@@ -149,27 +144,34 @@ class CEVAccountProvider with ChangeNotifier {
     final params = {
       "id": 1,
       "jsonrpc": "2.0",
-      "method": "chain_subscribeNewHeads"
+      "method": "chain_subscribeFinalisedHeads"
     };
 
     _socket!.sink.add(json.encode(params));
 
-    _socket!.stream.listen(
-        (event) {
-          print("EVENT:: $event");
-          _events.insert(0, event);
-          // _events.add(event);
-          notifyListeners();
-        },
-        onError: _onError,
-        onDone: () {
-          // _socket.sink.
-          // print("DONE");
-        });
+    _socket!.stream.listen((event) async {
+      print("EVENT:: $event");
+      var devent = json.decode(event);
+      var hsh = devent["params"]["result"]["parentHash"];
+      print(hsh);
+      url = "${Env.eventURL}/$hsh";
+
+      var ev = await _dio.get(url);
+      var evString = json.encode(ev.data);
+      var msg = ev.data["message"];
+      print(msg);
+      if (msg == "EVENT FOUND") {
+        if (_events.length > 100) {
+          _events = [];
+        }
+        _events.insert(0, evString);
+        notifyListeners();
+      }
+    }, onError: _onError, onDone: () {});
   }
 
   void _onError(error) {
-    print("ERROR:: $error");
+    print("Websocket ERROR:: $error");
   }
 
   /// Fetch account saved in the shared pref
@@ -191,9 +193,7 @@ class CEVAccountProvider with ChangeNotifier {
 
   /// Initializes the authenticated [CEVAccount].
   Future<bool> initBeforeOnboardingPage() async {
-    await Future.wait([
-      getAccount(),
-    ]);
+    await Future.wait([getAccount()]);
 
     if (_account != null) {
       _isLoggedIn = true;
@@ -209,6 +209,10 @@ class CEVAccountProvider with ChangeNotifier {
     await _deleteAccount();
     _deleteNodes();
     // Close the websocket connection
+    closeNodeConnection();
+  }
+
+  closeNodeConnection() {
     _socket!.sink.close();
   }
 }

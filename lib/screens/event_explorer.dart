@@ -1,10 +1,10 @@
+import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scan/scan.dart';
 
 import 'package:charmev/config/env.dart';
@@ -39,11 +39,13 @@ class _EventExplorerScreenState extends State<EventExplorerScreen>
 
   @override
   Widget build(BuildContext context) {
+    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
+          _chargeProvider.qrController.resume();
           return true;
         },
-        child: Material(color: Colors.white, child: _buildMain(context)));
+        child: _buildMain(context));
   }
 
   Widget _buildMain(BuildContext context) {
@@ -115,9 +117,10 @@ class _EventExplorerScreenState extends State<EventExplorerScreen>
                   ),
                   child: Text(
                     accountProvider.events[i],
-                    style: CEVTheme.labelStyle.copyWith(color: Colors.blue),
+                    style: CEVTheme.labelStyle
+                        .copyWith(color: Colors.blue, fontSize: 13),
                     overflow: TextOverflow.ellipsis,
-                    maxLines: 5,
+                    maxLines: 10,
                   ))
             ],
           );

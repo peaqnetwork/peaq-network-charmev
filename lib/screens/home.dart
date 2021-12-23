@@ -6,7 +6,6 @@ import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scan/scan.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
@@ -48,8 +47,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    CEVAccountProvider _accountProvider = CEVAccountProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
+          _accountProvider.closeNodeConnection();
           return true;
         },
         child: Material(color: Colors.white, child: _buildMain(context)));

@@ -38,17 +38,13 @@ dependencies:
   provider: ^6.0.1
   get_it: ^7.2.0
   flutter_svg: ^1.0.0
-  qr_flutter: ^4.0.0
   scan: ^1.5.0
   logging: ^1.0.1 
   shared_preferences: ^2.0.11
   intl: ^0.17.0
   json_rpc_2: ^3.0.1
-  hex: ^0.2.0
-  blake2b: ^0.2.2
   web_socket_channel: ^2.1.0
-  nanodart: ^2.0.0
-  bip39: ^1.0.6
+  dio: ^4.0.4
   substrate_sign_flutter:
     git:
       url: https://github.com/irediaes/substrate_sign_flutter.git
