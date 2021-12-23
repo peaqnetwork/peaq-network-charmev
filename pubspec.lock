@@ -36,20 +36,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.8.1"
-  bip39:
-    dependency: "direct main"
-    description:
-      name: bip39
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.6"
-  blake2b:
-    dependency: "direct main"
-    description:
-      name: blake2b
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -190,6 +176,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
+  dio:
+    dependency: "direct main"
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.4"
   fake_async:
     dependency: transitive
     description:
@@ -215,13 +208,6 @@ packages:
     dependency: transitive
     description:
       name: fixnum
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
-  fixnum_nanodart:
-    dependency: transitive
-    description:
-      name: fixnum_nanodart
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
@@ -296,13 +282,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
-  hex:
-    dependency: "direct main"
-    description:
-      name: hex
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -401,13 +380,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
-  nanodart:
-    dependency: "direct main"
-    description:
-      name: nanodart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
   nested:
     dependency: transitive
     description:
@@ -485,13 +457,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
-  pointycastle:
-    dependency: transitive
-    description:
-      name: pointycastle
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.4.0"
   pool:
     dependency: transitive
     description:
@@ -527,20 +492,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0"
-  qr:
-    dependency: transitive
-    description:
-      name: qr
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.0"
-  qr_flutter:
-    dependency: "direct main"
-    description:
-      name: qr_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.0"
   scan:
     dependency: "direct main"
     description:

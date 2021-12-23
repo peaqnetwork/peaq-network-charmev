@@ -19,4 +19,7 @@ class Env {
   static const String appName = "CharmEv";
   static const String eventExplorer = "Event Explorer";
   static const String peaqTestnet = "wss://fn1.test.peaq.network";
+  // static const String peaqTestnet = "wss://5556-41-58-235-119.ngrok.io";
+  static const String scaleCodecBaseURL = "https://codec.test.peaq.network";
+  static const String eventURL = "/events";
 }

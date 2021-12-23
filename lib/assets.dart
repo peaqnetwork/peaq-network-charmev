@@ -4,3 +4,5 @@ class CEVImageAssets {
   static const String avatar = 'assets/images/avatar.svg';
   static const String pump = 'assets/images/ev-pump.svg';
 }
+
+class CEVJsAssets {}
