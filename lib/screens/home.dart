@@ -1,5 +1,8 @@
+import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/widgets/loading_view.dart';
+import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
@@ -57,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildMain(BuildContext context) {
+    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
     return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
       return Stack(children: <Widget>[
         // _backgroundImage,
@@ -89,6 +93,25 @@ class _HomeScreenState extends State<HomeScreen>
               onTap: () => {},
               child: _buildScreen(context),
             )),
+        (_chargeProvider.status != LoadingStatus.idle &&
+                _chargeProvider.status != LoadingStatus.success)
+            ? CEVLoadingView(
+                status: _chargeProvider.status,
+                loadingContent: CEVStatusCard(
+                    text:
+                        "${_chargeProvider.providerDid} \n\n ${Env.fetchingData}",
+                    status: LoadingStatus.loading),
+                errorContent: CEVStatusCard(
+                    text:
+                        "${_chargeProvider.providerDid} ${_chargeProvider.providerDid != '' ? '\n\n' : ''} ${_chargeProvider.statusMessage}",
+                    status: LoadingStatus.error,
+                    onTap: () {
+                      _chargeProvider.reset();
+                      _dumbChargeProvider!.qrController.resume();
+                    }),
+                successContent: const SizedBox(),
+              )
+            : const SizedBox(),
       ]);
     });
   }
@@ -134,12 +157,22 @@ class _HomeScreenState extends State<HomeScreen>
                                             _dumbChargeProvider!.qrController,
                                         scanAreaScale: 1,
                                         scanLineColor: CEVTheme.dialogBgColor,
-                                        onCapture: (data) {
+                                        onCapture: (data) async {
                                           print("Sacnned:: $data");
+                                          print("Sacnned len:: ${data.length}");
+                                          if (data.length > 64) {
+                                            _chargeProvider.setStatus(
+                                                LoadingStatus.error,
+                                                message:
+                                                    Env.invalidProviderDid);
+
+                                            return;
+                                          }
                                           _dumbChargeProvider!.qrController
                                               .pause();
                                           _chargeProvider.providerDid = data;
-                                          _chargeProvider.generateDetails();
+                                          await _chargeProvider
+                                              .fetchProviderDidDetails(data);
                                           CEVApp.router.navigateTo(
                                               context, CEVRoutes.providerDetail,
                                               transition:
