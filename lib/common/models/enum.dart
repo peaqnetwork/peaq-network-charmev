@@ -3,4 +3,5 @@ enum LoadingStatus {
   loading,
   error,
   success,
+  charging,
 }

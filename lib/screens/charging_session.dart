@@ -1,3 +1,4 @@
+import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/keys.dart';
 import 'package:charmev/theme.dart';
@@ -87,21 +88,30 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      CEVCountdown(
-                          maxCount: _totalTimeInSeconds,
-                          onTimeout: () =>
-                              _openAuthorizePaymentBottomSheet(context),
-                          displayChild: (counter) {
-                            var percent = counter / _totalTimeInSeconds;
-                            double progress = (percent <= 1) ? percent : 1;
+                      chargeProvider.status == LoadingStatus.charging
+                          ? CEVCountdown(
+                              maxCount: _totalTimeInSeconds,
+                              onTimeout: () =>
+                                  _openAuthorizePaymentBottomSheet(context),
+                              displayChild: (counter) {
+                                var percent =
+                                    counter / chargeProvider.totalTimeInSeconds;
+                                double progress = (percent <= 1) ? percent : 1;
+                                chargeProvider.progress = progress;
 
-                            return CEVProgressCard(
-                              progress: progress,
+                                return CEVProgressCard(
+                                  progress: progress,
+                                  child: _buildPump(context),
+                                  size: 172,
+                                  margin: const EdgeInsets.all(32),
+                                );
+                              })
+                          : CEVProgressCard(
+                              progress: chargeProvider.progress,
                               child: _buildPump(context),
                               size: 172,
                               margin: const EdgeInsets.all(32),
-                            );
-                          }),
+                            ),
                       _buildDetails(boxW, chargeProvider),
                       const SizedBox(
                         height: 50.0,

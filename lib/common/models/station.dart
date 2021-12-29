@@ -17,6 +17,7 @@ class CEVStation {
   Map<String, dynamic> toJson() => _$CEVStationToJson(this);
 
   String? did;
+  String? address;
   String? plugType;
   String? status;
   String? power;

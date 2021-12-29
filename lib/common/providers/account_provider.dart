@@ -1,4 +1,5 @@
 import 'package:charmev/common/models/detail.dart';
+import 'package:charmev/common/models/tx_info.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:flutter/widgets.dart';
@@ -165,9 +166,85 @@ class CEVAccountProvider with ChangeNotifier {
           _events = [];
         }
         _events.insert(0, evString);
+
+        var events = ev.data["events"];
+        var eventStrings = "";
+        var eventDataStrings = "";
+        var eventData = [];
+
+        for (var i = 0; events.length > i; i++) {
+          var event = events[i]["method"];
+
+          if (event == Env.serviceDeliveredEvent) {
+            var data = events[i]["data"];
+            var dataString = "";
+
+            if (data != null) {
+              dataString = json.encode(data);
+            }
+            eventDataStrings += "$dataString ";
+
+            eventData.add(data[2]);
+            eventData.add(data[3]);
+          }
+
+          // Add all event strings
+          eventStrings += "$event ";
+        }
+
+        print("eventStrings:: $eventStrings");
+        print("eventDataStrings:: $eventDataStrings");
+        print("eventData:: $eventData");
+
+        _checkServiceRequestedEvent(eventStrings);
+
+        // check if event data contains comsumer key
+        if (eventDataStrings.contains(_account!.address!)) {
+          _checkServiceDeliveredEvent(eventStrings, eventData);
+        }
         notifyListeners();
       }
     }, onError: _onError, onDone: () {});
+  }
+
+  _checkServiceRequestedEvent(String eventStrings) async {
+    if (eventStrings.contains("ServiceRequested") &&
+        eventStrings.contains("ExtrinsicSuccess") &&
+        !eventStrings.contains("ExtrinsicFailed")) {
+      Future.delayed(const Duration(seconds: 2));
+      appProvider!.chargeProvider!
+          .setStatus(LoadingStatus.charging, message: "");
+    }
+  }
+
+  /// if [appProvider!.chargeProvider!.chargingStatus == LoadingStatus.charging]
+  /// it means the charging was stopped by the charging station
+  /// because consumer will stop the charging before executing [ServiceDelivered] extrinsic
+  /// so the following code will execute
+  _checkServiceDeliveredEvent(String eventStrings, List<dynamic> info) async {
+    if (eventStrings.contains("ServiceDelivered") &&
+        eventStrings.contains("ExtrinsicSuccess") &&
+        !eventStrings.contains("ExtrinsicFailed") &&
+        appProvider!.chargeProvider!.chargingStatus == LoadingStatus.charging) {
+      appProvider!.chargeProvider!.chargingStatus = LoadingStatus.idle;
+      List<CEVTxInfo> txinfo = [];
+
+      for (var i = 0; info.length > i; i++) {
+        var newinfo = CEVTxInfo(
+          callHash: info[i]["callHash"],
+          token: info[i]["tokenNum"],
+          timePoint: CEVTimePoint(
+              height: info[i]["timePoint"]["height"],
+              index: info[i]["timePoint"]["index"]),
+          txHash: info[i]["txHash"],
+        );
+
+        txinfo.add(newinfo);
+      }
+
+      appProvider!.chargeProvider!.txInfo = txinfo;
+      appProvider!.chargeProvider!.generateTransactions(notify: true);
+    }
   }
 
   void _onError(error) {
