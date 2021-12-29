@@ -212,4 +212,49 @@ class CEVChargeProvider with ChangeNotifier {
     _status = LoadingStatus.idle;
     generateDetails(notify: true);
   }
+
+  generateAndFundMultisigWallet() async {
+    setStatus(LoadingStatus.idle);
+    var params = {
+      "addresses": [
+        appProvider!.accountProvider!.account.address,
+        _station.address
+      ],
+      "owner_index": 0,
+      "threshold": 2
+    };
+
+    setStatus(LoadingStatus.loading, message: Env.creatingMultisigWallet);
+
+    var url = Env.multisigURL;
+
+    var res1 =
+        await _dio.post(url, data: json.encode(params)).catchError((err) async {
+      setStatus(LoadingStatus.error, message: Env.creatingMultisigWalletFailed);
+      print("Err:: $err");
+      return err;
+    });
+
+    print("generateAndFundMultisigWallet res1  data:: ${res1}");
+    print("generateAndFundMultisigWallet res1 data:: ${res1.data}");
+
+    params = {
+      "address": res1.data["multisig_address"],
+      "amount": "100000000000000000000",
+      "signer_seed": _seed
+    };
+    url = Env.transferURL;
+
+    setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
+
+    var res2 =
+        await _dio.post(url, data: json.encode(params)).catchError((err) async {
+      setStatus(LoadingStatus.error, message: Env.fundingMultisigWalletFailed);
+      print("Err:: $err");
+      return err;
+    });
+
+    print("generateAndFundMultisigWallet res2  data:: ${res2}");
+    print("generateAndFundMultisigWallet res2 data:: ${res2.data}");
+  }
 }
