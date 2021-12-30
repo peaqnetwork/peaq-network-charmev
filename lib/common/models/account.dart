@@ -9,7 +9,7 @@ String accountToJson(CEVAccount data) => json.encode(data.toJson());
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class CEVAccount {
-  CEVAccount({this.pk, this.address, this.did});
+  CEVAccount({this.pk, this.address, this.did, this.seed});
 
   factory CEVAccount.fromJson(Map<String, dynamic> json) =>
       _$CEVAccountFromJson(json);
@@ -19,4 +19,5 @@ class CEVAccount {
   String? pk;
   String? address;
   String? did;
+  String? seed;
 }

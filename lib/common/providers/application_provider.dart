@@ -1,5 +1,7 @@
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/widgets/route.dart';
+import 'package:charmev/screens/charging_session.dart';
+import 'package:charmev/screens/provider_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/utils/logger.dart';
@@ -22,9 +24,9 @@ class CEVApplicationProvider extends ChangeNotifier {
     _initialize(context);
   }
 
-  final CEVSharedPref? cevSharedPrefs;
-  final CEVAccountProvider? accountProvider;
-  final CEVChargeProvider? chargeProvider;
+  final CEVSharedPref cevSharedPrefs;
+  final CEVAccountProvider accountProvider;
+  final CEVChargeProvider chargeProvider;
 
   static CEVApplicationProvider of(BuildContext context) {
     return provider.Provider.of<CEVApplicationProvider>(context);
@@ -51,19 +53,19 @@ class CEVApplicationProvider extends ChangeNotifier {
     initLogger();
     _log.fine("initializing");
     // set application model references
-    cevSharedPrefs?.appProvider = this;
-    accountProvider?.appProvider = this;
-    chargeProvider?.appProvider = this;
+    cevSharedPrefs.appProvider = this;
+    accountProvider.appProvider = this;
+    chargeProvider.appProvider = this;
 
     await Future.wait([
       // charmev shared preferences
       // Initialize the shared preference
-      cevSharedPrefs!.init(),
-      accountProvider!.initBeforeOnboardingPage(),
+      cevSharedPrefs.init(),
+      accountProvider.initBeforeOnboardingPage(),
     ]);
-    chargeProvider!.generateDetails(notify: true);
+    chargeProvider.generateDetails(notify: true);
 
-    if (accountProvider!.isLoggedIn) {
+    if (accountProvider.isLoggedIn) {
       _authenticated = true;
       notifyListeners();
       initAuthenticated();
@@ -80,7 +82,7 @@ class CEVApplicationProvider extends ChangeNotifier {
 
     if (authenticated) {
       _log.fine("navigating to home screen");
-      accountProvider!.connectNode();
+      accountProvider.connectNode();
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         builder: (context) => const HomeScreen(),
         duration: const Duration(milliseconds: 600),

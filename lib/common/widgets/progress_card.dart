@@ -1,3 +1,4 @@
+import 'package:charmev/config/env.dart';
 import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -53,7 +54,7 @@ class CEVProgressCard extends StatelessWidget {
             height: 16,
           ),
           Text(
-            "$progressText% Charged",
+            "$progressText% ${Env.charged}",
             style: CEVTheme.titleLabelStyle,
             overflow: TextOverflow.ellipsis,
           ),

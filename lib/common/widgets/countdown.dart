@@ -8,13 +8,13 @@ class CEVCountdown extends StatelessWidget {
       Key? key})
       : super(key: key);
 
-  final int maxCount;
+  final double maxCount;
   final Function? onTimeout;
-  final Widget Function(int) displayChild;
+  final Widget Function(double) displayChild;
 
   @override
   Widget build(BuildContext context) {
-    int count = 0;
+    double count = 0;
     return StreamBuilder(
         stream: Stream.periodic(const Duration(seconds: 1), (i) => i),
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
@@ -26,7 +26,7 @@ class CEVCountdown extends StatelessWidget {
           }
           if (count == (maxCount - 2)) {
             if (onTimeout != null) {
-              Future.delayed(const Duration(seconds: 2), () {
+              Future.delayed(const Duration(seconds: 3), () {
                 onTimeout!();
               });
             }

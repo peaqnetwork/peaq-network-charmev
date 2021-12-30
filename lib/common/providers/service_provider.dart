@@ -16,10 +16,11 @@ import 'package:charmev/common/widgets/service_container.dart';
 class CEVServiceProvider extends InheritedWidget {
   const CEVServiceProvider({
     required Widget child,
-    this.data,
-  }) : super(child: child);
+    required this.data,
+    Key? key,
+  }) : super(child: child, key: key);
 
-  final CEVServiceContainerState? data;
+  final CEVServiceContainerState data;
 
   static CEVServiceProvider? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<CEVServiceProvider>();

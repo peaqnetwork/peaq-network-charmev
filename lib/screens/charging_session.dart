@@ -1,4 +1,7 @@
+import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/widgets/loading_view.dart';
+import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/keys.dart';
 import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
@@ -25,14 +28,8 @@ class CharginSessionScreen extends StatefulWidget {
 class _CharginSessionScreenState extends State<CharginSessionScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  final List<Detail> _transactions = [
-    Detail("Pay Station", "7.0 PEAQ"),
-    Detail("Refund", "3.0 PEAQ"),
-    Detail("Total", "10.0 PEAQ"),
-  ];
-
-  String qrcode = 'Unknown';
+  bool isScrollStart = false;
+  final ScrollController _tabScrollController = ScrollController();
 
   @override
   void initState() {
@@ -41,6 +38,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   @override
   void dispose() {
+    _tabScrollController.dispose();
     super.dispose();
   }
 
@@ -54,28 +52,65 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
   }
 
   Widget _buildMain(BuildContext context) {
-    return provider.Consumer<CEVChargeProvider>(builder: (context, model, _) {
-      return Stack(children: <Widget>[
-        Scaffold(
-            backgroundColor: CEVTheme.bgColor,
-            appBar: AppBar(
-              title: _buildAppBarTitle(),
-              centerTitle: true,
-              automaticallyImplyLeading: false,
-              backgroundColor: CEVTheme.appBarBgColor,
-              iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-            ),
-            body: GestureDetector(
-              onTap: () => {},
-              child: _buildScreen(context, model),
-            )),
-      ]);
-    });
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
+
+    return Stack(children: <Widget>[
+      Scaffold(
+          backgroundColor: CEVTheme.bgColor,
+          appBar: AppBar(
+            title: _buildAppBarTitle(),
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            backgroundColor: CEVTheme.appBarBgColor,
+            iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+          ),
+          body: GestureDetector(
+            onTap: () => {},
+            child: _buildScreen(context, chargeProvider),
+          )),
+      Visibility(
+          visible: chargeProvider.chargingStatus == LoadingStatus.authorize,
+          child: _buildAuthorizePaymentTab(context, chargeProvider)),
+      Visibility(
+          visible: (chargeProvider.status != LoadingStatus.idle &&
+              chargeProvider.status != LoadingStatus.success),
+          child: CEVLoadingView(
+            status: chargeProvider.status,
+            loadingContent: CEVStatusCard(
+                text: chargeProvider.statusMessage,
+                status: LoadingStatus.loading),
+            errorContent: CEVStatusCard(
+                text: chargeProvider.statusMessage,
+                status: LoadingStatus.error,
+                onTap: () async {
+                  chargeProvider.reset();
+                  if (chargeProvider.chargingStatus == LoadingStatus.idle) {
+                    Navigator.pop(context);
+                  }
+                }),
+            successContent: const SizedBox(),
+          )),
+      Visibility(
+          visible: (chargeProvider.chargingStatus != LoadingStatus.idle &&
+              chargeProvider.chargingStatus == LoadingStatus.success),
+          child: CEVLoadingView(
+            status: chargeProvider.chargingStatus,
+            loadingContent: const SizedBox(),
+            errorContent: const SizedBox(),
+            successContent: CEVStatusCard(
+                text: chargeProvider.statusMessage,
+                status: LoadingStatus.success,
+                onTap: () async {
+                  Navigator.pop(context);
+                  chargeProvider.reset();
+                  chargeProvider.chargingStatus = LoadingStatus.idle;
+                }),
+          )),
+    ]);
   }
 
   Widget _buildScreen(BuildContext context, CEVChargeProvider chargeProvider) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
-    final _totalTimeInSeconds = 10;
 
     return SizedBox(
         height: double.infinity,
@@ -87,21 +122,32 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      CEVCountdown(
-                          maxCount: _totalTimeInSeconds,
-                          onTimeout: () =>
-                              _openAuthorizePaymentBottomSheet(context),
-                          displayChild: (counter) {
-                            var percent = counter / _totalTimeInSeconds;
-                            double progress = (percent <= 1) ? percent : 1;
+                      chargeProvider.chargingStatus == LoadingStatus.charging
+                          ? CEVCountdown(
+                              maxCount: chargeProvider.totalTimeInSeconds,
+                              onTimeout: () async {
+                                var stopUrlSet = false;
+                                if (stopUrlSet) {
+                                  chargeProvider.stopCharge();
+                                }
+                              },
+                              displayChild: (counter) {
+                                counter = (chargeProvider.counter + 1);
+                                chargeProvider.updateTimer(counter);
 
-                            return CEVProgressCard(
-                              progress: progress,
+                                return CEVProgressCard(
+                                  progress: chargeProvider.progress,
+                                  child: _buildPump(context),
+                                  size: 172,
+                                  margin: const EdgeInsets.all(32),
+                                );
+                              })
+                          : CEVProgressCard(
+                              progress: chargeProvider.progress,
                               child: _buildPump(context),
                               size: 172,
                               margin: const EdgeInsets.all(32),
-                            );
-                          }),
+                            ),
                       _buildDetails(boxW, chargeProvider),
                       const SizedBox(
                         height: 50.0,
@@ -122,7 +168,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                             const SizedBox(
                               height: 8.0,
                             ),
-                            _buildStopButton(context),
+                            _buildStopButton(context, chargeProvider),
                             const SizedBox(
                               height: 100.0,
                             ),
@@ -181,14 +227,23 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
             )));
   }
 
-  Widget _buildStopButton(BuildContext ctx) {
+  Widget _buildStopButton(BuildContext ctx, CEVChargeProvider chargeProvider) {
+    var isCharging = chargeProvider.chargingStatus == LoadingStatus.charging;
+    var stopUrlSet = false; //chargeProvider.station!.stopUrl != null;
     return CEVRaisedButton(
-      text: Env.stopCharging,
-      bgColor: Theme.of(ctx).primaryColor,
-      textColor: Colors.white,
+      text: isCharging ? Env.stopCharging : Env.charged,
+      bgColor: isCharging && stopUrlSet
+          ? Theme.of(ctx).primaryColor
+          : CEVTheme.dialogBgColor,
+      textColor: isCharging && stopUrlSet ? Colors.white : CEVTheme.greyColor,
       radius: 10,
       isTextBold: true,
-      onPressed: () => _openAuthorizePaymentBottomSheet(ctx),
+      onPressed: () async {
+        if (isCharging && stopUrlSet) {
+          chargeProvider.stopCharge();
+        }
+        // chargeProvider.simulateStopCharge(true);
+      },
     );
   }
 
@@ -223,43 +278,16 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     return details;
   }
 
-  void _openAuthorizePaymentBottomSheet(BuildContext context) async {
-    await showModalBottomSheet<bool>(
-        context: context,
-        barrierColor: CEVTheme.dialogBgColor.withOpacity(.5),
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (context) {
-          final _header = Container(
-              height: 10,
-              width: 40,
-              margin: const EdgeInsets.only(bottom: 16),
-              // constraints: const BoxConstraints(maxWidth: 30),
-              decoration: const BoxDecoration(
-                  color: CEVTheme.greyColor,
-                  borderRadius: BorderRadius.all(Radius.circular(20))));
-
-          return CEVKeyboardPadding(
-              child: CEVBottomSheet(
-                  key: CEVKeys.authorizeBottomSheet,
-                  childrenFlexSize: 11,
-                  childrenPaddingTop: 1,
-                  height: MediaQuery.of(context).size.height / 1.7,
-                  header: _header,
-                  boxPadding: 0,
-                  children: _buildPayments(context)));
-        });
-  }
-
-  List<Widget> _buildPayments(BuildContext context) {
+  List<Widget> _buildPayments(
+      BuildContext context, CEVChargeProvider chargeProvider) {
     var children = <Widget>[];
 
     var _successIcon = const Padding(
-      padding: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 3),
       child: Icon(
         Icons.check_circle_outline_outlined,
         color: CEVTheme.successColor,
-        size: 50,
+        size: 60,
       ),
     );
 
@@ -271,15 +299,24 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
           textColor: Colors.white,
           radius: 10,
           isTextBold: true,
-          onPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
+          onPressed: () async {
+            await chargeProvider.approveTransactions();
+            // chargeProvider.simulateApproveTransactions();
           },
         ));
 
     children.add(_successIcon);
+    children.add(Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(
+            chargeProvider.progress >= 1 ? Env.fullyCharged : Env.charged,
+            style: CEVTheme.titleLabelStyle,
+            overflow: TextOverflow.ellipsis,
+          )
+        ])));
 
-    for (var e in _transactions) {
+    for (var e in chargeProvider.transactions) {
       var title = Text(
         e.value,
         style: CEVTheme.titleLabelStyle
@@ -305,5 +342,64 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     children.add(_submitButton);
 
     return children;
+  }
+
+  Widget _buildAuthorizePaymentTab(
+      BuildContext context, CEVChargeProvider chargeProvider) {
+    final _header = Container(
+        height: 7,
+        width: 50,
+        margin: const EdgeInsets.only(bottom: 0),
+        // constraints: const BoxConstraints(maxWidth: 30),
+        decoration: const BoxDecoration(
+            color: CEVTheme.greyColor,
+            borderRadius: BorderRadius.all(Radius.circular(20))));
+
+    return Positioned.fill(
+        top: 0,
+        child: Container(
+            color: CEVTheme.dialogBgColor.withOpacity(0.5),
+            child: NotificationListener<ScrollNotification>(
+              child: SingleChildScrollView(
+                controller: _tabScrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height / 2.9),
+                    Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 1.3,
+                        decoration: BoxDecoration(
+                            color: CEVTheme.bgColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                spreadRadius: 1,
+                                blurRadius: 10,
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20))),
+                        child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 0),
+                            child: Column(children: [
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              _header,
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ..._buildPayments(context, chargeProvider)
+                            ]))),
+                  ],
+                ),
+              ),
+            )));
   }
 }

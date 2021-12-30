@@ -1,4 +1,8 @@
+import 'package:charmev/common/models/enum.dart';
+import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/widgets/loading_view.dart';
+import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
@@ -47,43 +51,56 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
           _chargeProvider.qrController.resume();
           return true;
         },
-        child: _buildMain(context));
+        child: _buildMain(context, _chargeProvider));
   }
 
-  Widget _buildMain(BuildContext context) {
-    return provider.Consumer<CEVChargeProvider>(builder: (context, model, _) {
-      return Stack(children: <Widget>[
-        // _backgroundImage,
-        Scaffold(
-            backgroundColor: CEVTheme.bgColor,
-            appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded),
-                onPressed: () {
-                  model.qrController.resume();
-                  Navigator.of(context).pop();
-                },
-              ),
-              title: _buildAppBarTitle(),
-              centerTitle: true,
-              automaticallyImplyLeading: false,
-              backgroundColor: CEVTheme.appBarBgColor,
-              iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.person),
-                  onPressed: () => CEVApp.router.navigateTo(
-                      context, CEVRoutes.account,
-                      transition: TransitionType.inFromRight),
-                )
-              ],
+  Widget _buildMain(BuildContext context, CEVChargeProvider model) {
+    return Stack(children: <Widget>[
+      // _backgroundImage,
+      Scaffold(
+          backgroundColor: CEVTheme.bgColor,
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.qr_code_scanner_rounded),
+              onPressed: () {
+                model.qrController.resume();
+                Navigator.of(context).pop();
+              },
             ),
-            body: GestureDetector(
-              onTap: () => {},
-              child: _buildScreen(context, model),
-            )),
-      ]);
-    });
+            title: _buildAppBarTitle(),
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            backgroundColor: CEVTheme.appBarBgColor,
+            iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.person),
+                onPressed: () => CEVApp.router.navigateTo(
+                    context, CEVRoutes.account,
+                    transition: TransitionType.inFromRight),
+              )
+            ],
+          ),
+          body: GestureDetector(
+            onTap: () => {},
+            child: _buildScreen(context, model),
+          )),
+      Visibility(
+          visible: (model.status != LoadingStatus.idle &&
+              model.status != LoadingStatus.success),
+          child: CEVLoadingView(
+            status: model.status,
+            loadingContent: CEVStatusCard(
+                text: model.statusMessage, status: LoadingStatus.loading),
+            errorContent: CEVStatusCard(
+                text: model.statusMessage,
+                status: LoadingStatus.error,
+                onTap: () {
+                  model.reset();
+                }),
+            successContent: const SizedBox(),
+          )),
+    ]);
   }
 
   Widget _buildScreen(BuildContext context, CEVChargeProvider chargeProvider) {
@@ -117,15 +134,13 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                             const SizedBox(
                               height: 8.0,
                             ),
-                            _buildStartButton(),
+                            _buildStartButton(chargeProvider),
                             const SizedBox(
                               height: 100.0,
                             ),
                           ],
                         ),
                       ),
-
-                      // _buildImportButton(),
                     ]))));
   }
 
@@ -175,17 +190,19 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
     );
   }
 
-  Widget _buildStartButton() {
+  Widget _buildStartButton(CEVChargeProvider chargeProvider) {
+    CEVApplicationProvider appProvider = CEVApplicationProvider.of(context);
     return CEVRaisedButton(
-      text: Env.startCharging,
-      bgColor: Theme.of(context).primaryColor,
-      textColor: Colors.white,
-      radius: 10,
-      isTextBold: true,
-      onPressed: () => CEVApp.router.navigateTo(
-          context, CEVRoutes.chargingSession,
-          transition: TransitionType.inFromRight),
-    );
+        text: Env.startCharging,
+        bgColor: Theme.of(context).primaryColor,
+        textColor: Colors.white,
+        radius: 10,
+        isTextBold: true,
+        onPressed: () async {
+          await chargeProvider.generateAndFundMultisigWallet();
+          // await appProvider.accountProvider
+          //     .simulateServiceRequestedAndDeliveredEvents();
+        });
   }
 
   List<Widget> _buildDetailTitleAndValue(CEVChargeProvider chargeProvider) {
