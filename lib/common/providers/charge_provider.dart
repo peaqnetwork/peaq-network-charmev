@@ -24,9 +24,9 @@ class CEVChargeProvider with ChangeNotifier {
     required this.cevSharedPref,
   });
 
-  final CEVSharedPref? cevSharedPref;
+  final CEVSharedPref cevSharedPref;
 
-  CEVApplicationProvider? appProvider;
+  late CEVApplicationProvider appProvider;
 
   static CEVChargeProvider of(BuildContext context) {
     return provider.Provider.of<CEVChargeProvider>(context);
@@ -38,14 +38,14 @@ class CEVChargeProvider with ChangeNotifier {
   LoadingStatus _chargingStatus = LoadingStatus.idle;
   String _statusMessage = '';
   String _providerDid = "";
-  double _totalTimeInSeconds = 10;
+  double _totalTimeInSeconds = 120;
+  double _counter = 0;
   double _progress = 1;
   CEVStation _station = CEVStation();
   List<Detail> _transactions = [];
   List<CEVTxInfo> _txInfo = [];
   List<Detail> _details = [];
-  String _seed =
-      "scrub peace island turn collect bronze ceiling alter pyramid bring summer gentle";
+  BigInt _atto = BigInt.parse("10000000000000000000");
   final Dio _dio = Dio()..options = BaseOptions(baseUrl: Env.scaleCodecBaseURL);
 
   String get providerDid => _providerDid;
@@ -57,25 +57,16 @@ class CEVChargeProvider with ChangeNotifier {
   List<Detail> get transactions => _transactions;
   List<CEVTxInfo> get txInfo => _txInfo;
   double get progress => _progress;
+  double get counter => _counter;
   String get statusMessage => _statusMessage;
 
-  set chargingStatus(LoadingStatus status) {
-    _chargingStatus = status;
+  set chargingStatus(LoadingStatus cstatus) {
+    _chargingStatus = cstatus;
     notifyListeners();
   }
 
   set txInfo(List<CEVTxInfo> info) {
-    _txInfo.addAll(info);
-    notifyListeners();
-  }
-
-  set progress(double progress) {
-    _progress = progress;
-    notifyListeners();
-  }
-
-  set totalTimeInSeconds(double time) {
-    _totalTimeInSeconds = time;
+    _txInfo = info;
     notifyListeners();
   }
 
@@ -94,6 +85,13 @@ class CEVChargeProvider with ChangeNotifier {
     _status = LoadingStatus.idle;
     _statusMessage = "";
     notifyListeners();
+  }
+
+  updateTimer(double count) async {
+    var percent = _counter / _totalTimeInSeconds;
+    double progress = (percent <= 1) ? percent : 1;
+    _progress = progress;
+    _counter = count;
   }
 
   // generate provider account details
@@ -119,24 +117,28 @@ class CEVChargeProvider with ChangeNotifier {
   }
 
   generateTransactions({bool notify = false}) {
-    List<Detail> _newDetails = [];
+    List<Detail> _newtx = [];
 
-    print("_txInfo:: $_txInfo");
+    print("generateTransactions :: _txInfo:: ${json.encode(_txInfo)}");
 
     if (_txInfo.isNotEmpty) {
-      var refundRawToken = _txInfo[0].token.replaceAll(",", "");
-      var spentRawToken = _txInfo[1].token.replaceAll(",", "");
-      var refundToken = int.parse(refundRawToken).toStringAsFixed(4);
-      var spentToken = int.parse(spentRawToken).toStringAsFixed(4);
-      var total = refundToken + spentToken;
-      _newDetails.addAll([
-        Detail("Pay Station", "$spentToken PEAQ"),
-        Detail("Refund", "$refundToken PEAQ"),
+      var refundRawToken = _txInfo[0].token;
+      var spentRawToken = _txInfo[1].token;
+      var refundToken = (BigInt.parse(refundRawToken) / _atto);
+      print("refundToken:: $refundToken");
+      var refundTokenString = refundToken.toStringAsFixed(4);
+      var spentToken = (BigInt.parse(spentRawToken) / _atto);
+      print("spentToken:: $spentToken");
+      var spentTokenString = spentToken.toStringAsFixed(4);
+      var total = (refundToken + spentToken).toStringAsFixed(4);
+      _newtx.addAll([
+        Detail("Pay Station", "$spentTokenString PEAQ"),
+        Detail("Refund", "$refundTokenString PEAQ"),
         Detail("Total", "$total PEAQ"),
       ]);
     }
 
-    _details = _newDetails;
+    _transactions = _newtx;
     if (notify) {
       notifyListeners();
     }
@@ -193,8 +195,7 @@ class CEVChargeProvider with ChangeNotifier {
     var result = await _dio.get(url);
 
     if (result.data["message"] == "STORAGE NOT FOUND") {
-      _statusMessage = "Provider Did Details not Found";
-      _status = LoadingStatus.error;
+      setStatus(LoadingStatus.error, message: "Provider Did Details not Found");
       notifyListeners();
       return;
     }
@@ -208,8 +209,16 @@ class CEVChargeProvider with ChangeNotifier {
     _station.plugType = enData["plug_type"];
     _station.status = enData["status"];
     _station.power = enData["power"];
+    // _station.stopUrl = enData["stop_url"];
 
-    _status = LoadingStatus.idle;
+    // if (_station.stopUrl == null) {
+    //   setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
+    // } else {
+    //   setStatus(LoadingStatus.idle, message: "");
+    // }
+
+    setStatus(LoadingStatus.idle, message: "");
+
     generateDetails(notify: true);
   }
 
@@ -217,7 +226,7 @@ class CEVChargeProvider with ChangeNotifier {
     setStatus(LoadingStatus.idle);
     var params = {
       "addresses": [
-        appProvider!.accountProvider!.account.address,
+        appProvider.accountProvider.account.address,
         _station.address
       ],
       "owner_index": 0,
@@ -238,23 +247,172 @@ class CEVChargeProvider with ChangeNotifier {
     print("generateAndFundMultisigWallet res1  data:: ${res1}");
     print("generateAndFundMultisigWallet res1 data:: ${res1.data}");
 
+    var token = (10 * pow(10, 19));
+
     params = {
       "address": res1.data["multisig_address"],
-      "amount": "100000000000000000000",
-      "signer_seed": _seed
+      "amount": "$token",
+      "signer_seed": appProvider.accountProvider.account.seed ?? ""
     };
+
+    print("Transfer param:: $params");
+
     url = Env.transferURL;
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
 
-    var res2 =
-        await _dio.post(url, data: json.encode(params)).catchError((err) async {
+    var res2 = await _dio.post(url, data: params).catchError((err) async {
       setStatus(LoadingStatus.error, message: Env.fundingMultisigWalletFailed);
       print("Err:: $err");
       return err;
     });
 
-    print("generateAndFundMultisigWallet res2  data:: ${res2}");
     print("generateAndFundMultisigWallet res2 data:: ${res2.data}");
+
+    await Future.delayed(const Duration(seconds: 3));
+
+    _startCharge(token.toString());
+  }
+
+  _startCharge(String token) async {
+    setStatus(LoadingStatus.idle);
+    var params = {
+      "signer_seed": appProvider.accountProvider.account.seed ?? "",
+      "provider_address": _station.address,
+      "amount": token,
+    };
+
+    setStatus(LoadingStatus.loading, message: Env.requestingService);
+
+    var url = Env.transactionURL;
+
+    var res = await _dio.post(url, data: params).catchError((err) async {
+      setStatus(LoadingStatus.error, message: Env.serviceRequestFailed);
+      print("_startCharge Err:: $err");
+      return err;
+    });
+
+    setStatus(LoadingStatus.loading, message: Env.serviceRequested);
+
+    print("_startCharge res data:: ${res}");
+  }
+
+  stopCharge() async {
+    setStatus(LoadingStatus.loading, message: Env.stoppingCharge);
+
+    // var url = _station.stopUrl ?? "";
+    var url = "";
+
+    if (url.isEmpty) {
+      setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
+      return;
+    }
+
+    var params = {
+      "success": true,
+    };
+
+    print("stopCharge URL:: $url");
+    var res = await _dio.post(url, data: params).catchError((err) async {
+      setStatus(LoadingStatus.error, message: Env.stoppingChargeFailed);
+      print("stopCharge Err:: $err");
+      return err;
+    });
+
+    _chargingStatus = LoadingStatus.waiting;
+
+    setStatus(LoadingStatus.loading, message: Env.stoppingChargeSent);
+
+    print("stopCharge res data:: ${res}");
+  }
+
+  approveTransactions() async {
+    print("approveTransactions:: ${json.encode(_txInfo)}");
+
+    if (_txInfo.isEmpty) {
+      setStatus(LoadingStatus.error, message: "Empty transactions");
+      return;
+    }
+
+    setStatus(LoadingStatus.loading);
+
+    var refundTimePoint = _txInfo[0].timePoint;
+    var spentTimePoint = _txInfo[1].timePoint;
+
+    var _seed = appProvider.accountProvider.account.seed ?? "";
+
+    var refundParams = {
+      "call_hash": _txInfo[0].callHash,
+      "timepoint": refundTimePoint.toJson(),
+      "threshold": 2,
+      "other_sig": [_station.address],
+      "signer_seed": _seed
+    };
+
+    var spentParams = {
+      "call_hash": _txInfo[1].callHash,
+      "timepoint": spentTimePoint.toJson(),
+      "threshold": 2,
+      "other_sig": [_station.address],
+      "signer_seed": _seed
+    };
+
+    setStatus(LoadingStatus.loading, message: Env.approvingRefundTransaction);
+
+    var url = Env.multisigURL;
+
+    var refundRes =
+        await _dio.patch(url, data: refundParams).catchError((err) async {
+      setStatus(LoadingStatus.error,
+          message: Env.approvingRefundTransactionFailed);
+      print("Refund Err:: $err");
+      return err;
+    });
+
+    print("refundRes data:: ${refundRes.data}");
+    await Future.delayed(const Duration(seconds: 7));
+
+    setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
+
+    var spentRes =
+        await _dio.patch(url, data: spentParams).catchError((err) async {
+      setStatus(LoadingStatus.error,
+          message: Env.approvingSpentTransactionFailed);
+      print("spent Err:: $err");
+      return err;
+    });
+    print("spentRes data:: ${spentRes.data}");
+
+    _chargingStatus = LoadingStatus.success;
+    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
+  }
+
+  /// FOR DEV ONLY
+  simulateApproveTransactions() async {
+    setStatus(LoadingStatus.loading, message: Env.approvingRefundTransaction);
+    await Future.delayed(const Duration(seconds: 3));
+    setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
+    await Future.delayed(const Duration(seconds: 3));
+
+    _chargingStatus = LoadingStatus.success;
+    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
+  }
+
+  /// FOR DEV ONLY
+  simulateStopCharge(bool urlExist) async {
+    setStatus(LoadingStatus.loading, message: Env.stoppingCharge);
+
+    if (!urlExist) {
+      setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
+      return;
+    }
+    await Future.delayed(const Duration(seconds: 3));
+
+    _chargingStatus = LoadingStatus.waiting;
+
+    setStatus(LoadingStatus.loading, message: Env.stoppingChargeSent);
+    await Future.delayed(const Duration(seconds: 3));
+
+    appProvider.accountProvider.simulateDeliveredEvent();
   }
 }

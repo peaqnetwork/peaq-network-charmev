@@ -80,3 +80,10 @@ flutter:
     - assets/images/logo.svg
     - assets/images/ev-pump.svg
     - assets/images/avatar.svg
+    - assets/images/icon.png
+  
+flutter_icons:
+  ios: true
+  android: true
+  image_path: "assets/images/icon.png"
+  adaptive_icon_background: ""

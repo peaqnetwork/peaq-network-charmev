@@ -1,4 +1,5 @@
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/common/providers/service_provider.dart';
@@ -16,36 +17,36 @@ class CEVProvidersWrapper extends StatefulWidget {
 }
 
 class CEVProvidersWrapperState extends State<CEVProvidersWrapper> {
-  CEVApplicationProvider? applicationProvider;
-  CEVAccountProvider? accountProvider;
-  CEVChargeProvider? chargeProvider;
+  late CEVApplicationProvider applicationProvider;
+  late CEVAccountProvider accountProvider;
+  late CEVChargeProvider chargeProvider;
 
   @override
   Widget build(BuildContext context) {
     final serviceProvider = CEVServiceProvider.of(context);
 
-    accountProvider ??= CEVAccountProvider(
-      cevSharedPref: serviceProvider!.data!.cevSharedPref,
+    accountProvider = CEVAccountProvider(
+      cevSharedPref: serviceProvider!.data.cevSharedPref,
     );
 
-    chargeProvider ??= CEVChargeProvider(
-      cevSharedPref: serviceProvider!.data!.cevSharedPref,
+    chargeProvider = CEVChargeProvider(
+      cevSharedPref: serviceProvider.data.cevSharedPref,
     );
 
-    applicationProvider ??= CEVApplicationProvider(context,
-        cevSharedPrefs: serviceProvider!.data!.cevSharedPref,
+    applicationProvider = CEVApplicationProvider(context,
+        cevSharedPrefs: serviceProvider.data.cevSharedPref,
         accountProvider: accountProvider,
         chargeProvider: chargeProvider);
 
     return provider.MultiProvider(
       providers: [
-        provider.ChangeNotifierProvider<CEVApplicationProvider?>(
+        provider.ChangeNotifierProvider<CEVApplicationProvider>(
           create: (_) => applicationProvider,
         ),
-        provider.ChangeNotifierProvider<CEVAccountProvider?>(
+        provider.ChangeNotifierProvider<CEVAccountProvider>(
           create: (_) => accountProvider,
         ),
-        provider.ChangeNotifierProvider<CEVChargeProvider?>(
+        provider.ChangeNotifierProvider<CEVChargeProvider>(
           create: (_) => chargeProvider,
         )
       ],

@@ -39,14 +39,14 @@ class CEVBottomSheet extends StatelessWidget {
         child: Column(
           children: <Widget>[
             header != null
-                ? Expanded(
+                ? Flexible(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
+                      padding: const EdgeInsets.only(top: 10.0),
                       child: header,
                     ),
                   )
                 : const Padding(padding: EdgeInsets.only(top: 16.0)),
-            Expanded(
+            Flexible(
                 flex: childrenFlexSize ?? 4,
                 child: Container(
                   color: childrenBGcolor ?? CEVTheme.bgColor,

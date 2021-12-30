@@ -4,4 +4,6 @@ enum LoadingStatus {
   error,
   success,
   charging,
+  waiting,
+  authorize,
 }

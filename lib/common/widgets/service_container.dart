@@ -8,18 +8,12 @@ class CEVServiceContainer extends StatefulWidget {
 
   final Widget child;
 
-  static restartApp(BuildContext context) {
-    final CEVServiceContainerState? state =
-        context.findAncestorWidgetOfExactType();
-    state!.restartApp();
-  }
-
   @override
   CEVServiceContainerState createState() => CEVServiceContainerState();
 }
 
 class CEVServiceContainerState extends State<CEVServiceContainer> {
-  CEVSharedPref? cevSharedPref;
+  late CEVSharedPref cevSharedPref;
 
   Key key = UniqueKey();
 

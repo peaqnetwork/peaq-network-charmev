@@ -6,8 +6,8 @@ import 'package:logging/logging.dart';
 class CEVSharedPref {
   static final Logger _log = Logger("CEVSharedPref");
 
-  SharedPreferences? prefs;
-  CEVApplicationProvider? appProvider;
+  late SharedPreferences prefs;
+  late CEVApplicationProvider appProvider;
 
   Future<void> init() async {
     _log.fine("initializing Shared prefs");
@@ -19,7 +19,7 @@ class CEVSharedPref {
   // / Limits the value if [minLimit] and [maxLimit] are not `null`.
   int getInt(String key, int defaultValue, [int? minLimit, int? maxLimit]) {
     try {
-      final int value = prefs?.getInt(key) ?? defaultValue;
+      final int value = prefs.getInt(key) ?? defaultValue;
 
       if (minLimit != null && maxLimit != null) {
         return value.clamp(minLimit, maxLimit);
