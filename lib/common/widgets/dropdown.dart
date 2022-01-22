@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CEVDropDown extends StatelessWidget {
   const CEVDropDown(
       {required this.items,
-      this.margin = const EdgeInsets.fromLTRB(52, 78, 52, 0),
+      this.margin = const EdgeInsets.fromLTRB(52, 54, 52, 0),
       this.padding = const EdgeInsets.all(2),
       this.borderColor,
       this.radius,
