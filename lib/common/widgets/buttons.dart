@@ -16,6 +16,7 @@ class CEVRaisedButton extends StatelessWidget {
     this.spacing,
     this.padding,
     this.textSize,
+    this.elevation,
     this.radius,
     this.onPressed,
   }) : super(key: key);
@@ -33,6 +34,7 @@ class CEVRaisedButton extends StatelessWidget {
   final bool isIconRight;
   final double? spacing;
   final double? textSize;
+  final MaterialStateProperty<double>? elevation;
   final void Function()? onPressed;
   final double? radius;
 
@@ -41,6 +43,7 @@ class CEVRaisedButton extends StatelessWidget {
     return ElevatedButton(
         onPressed: onPressed,
         style: ButtonStyle(
+          elevation: elevation,
           backgroundColor:
               MaterialStateProperty.all(bgColor ?? Colors.transparent),
           shape: MaterialStateProperty.all(RoundedRectangleBorder(
