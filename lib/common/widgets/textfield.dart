@@ -7,6 +7,7 @@ class CEVTextField extends StatelessWidget {
       required this.label,
       required this.onTap,
       required this.onChanged,
+      this.bottomMargin = 16,
       this.autofocus = false,
       this.obscureText = false,
       this.readOnly = false,
@@ -22,6 +23,7 @@ class CEVTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final bool autofocus;
+  final double bottomMargin;
   final bool obscureText;
   final bool readOnly;
   final bool filled;
@@ -38,7 +40,7 @@ class CEVTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(bottom: bottomMargin),
         // padding: EdgeInsets.only(top:10, left:10),
         child: TextField(
           controller: controller,

@@ -101,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen>
               backgroundColor: Colors.transparent,
               body: CEVDropDown(
                   items: _accountProvider.nodes,
+                  borderColor: CEVTheme.accentColor,
                   onTap: (String item) {
                     _accountProvider.showNodeDropdown =
                         !_accountProvider.showNodeDropdown;
