@@ -1,3 +1,4 @@
+import 'package:charmev/common/widgets/dropdown.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/screens/event_explorer.dart';
@@ -107,9 +108,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       controller: _nodeAddressFieldController,
       filled: false,
       keyboardType: TextInputType.url,
+      bottomMargin: 0,
       suffix: InkWell(
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
             child: Icon(
               accountProvider.showNodeDropdown
                   ? Icons.keyboard_arrow_up
@@ -120,7 +122,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           onTap: () {
             accountProvider.showNodeDropdown =
                 !accountProvider.showNodeDropdown;
-            _openNodePicker(context, accountProvider);
           }),
       onChanged: (value) => {},
       onTap: () => {},
@@ -154,57 +155,71 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 25.0),
         child: SingleChildScrollView(
             child: SizedBox(
-                height: MediaQuery.of(context).size.height / 1.18,
+                // height: MediaQuery.of(context).size.height / 1.18,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      Column(
-                        children: [
-                          (widget.page != 2)
-                              ? _buildLogo(context)
-                              : const SizedBox(),
-                          (widget.page != 2)
-                              ? const SizedBox(
-                                  height: 24.0,
-                                )
-                              : const SizedBox(
-                                  height: 150,
-                                ),
-                          _secretPhraseField,
-                          const SizedBox(
-                            height: 8.0,
-                          ),
-                          _nodeAddressField,
-                          const SizedBox(
-                            height: 8.0,
-                          ),
-                        ],
-                      ),
-                      _buildImportButton(accountProvider),
-                    ]))));
-  }
-
-  void _openNodePicker(
-      BuildContext context, CEVAccountProvider accountProvider) async {
-    await showDialog<bool>(
-        context: context,
-        barrierLabel: "hello",
-        barrierColor: Colors.transparent,
-        barrierDismissible: false,
-        builder: (context) {
-          return Padding(
-              padding: const EdgeInsets.only(top: 220),
-              child: CEVDialog(
-                items: accountProvider.nodes,
-                onTap: (item) {
-                  accountProvider.showNodeDropdown =
-                      !accountProvider.showNodeDropdown;
-                  accountProvider.selectedNode = item;
-                  Navigator.of(context).pop();
-                },
-              ));
-        });
+              Column(
+                children: [
+                  (widget.page != 2) ? _buildLogo(context) : const SizedBox(),
+                  (widget.page != 2)
+                      ? const SizedBox(
+                          height: 24.0,
+                        )
+                      : const SizedBox(
+                          height: 150,
+                        ),
+                  _secretPhraseField,
+                  const SizedBox(
+                    height: 8.0,
+                  ),
+                  SizedBox(
+                    height: 180.0,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          child: _nodeAddressField,
+                        ),
+                        Positioned.fill(
+                          // height: MediaQuery.of(context).size.height / 1.18,
+                          top: 70,
+                          child: Visibility(
+                              visible: accountProvider.showNodeDropdown,
+                              child: Container(
+                                height: 100,
+                                color: Colors.transparent,
+                                child: CEVDropDown(
+                                    items: accountProvider.nodes,
+                                    margin:
+                                        const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                    padding:
+                                        const EdgeInsets.fromLTRB(0, 2, 0, 0),
+                                    borderColor: CEVTheme.accentColor,
+                                    radius: const BorderRadius.only(
+                                        bottomLeft: Radius.circular(10),
+                                        bottomRight: Radius.circular(10)),
+                                    onTap: (String item) {
+                                      _nodeAddressFieldController.text = item;
+                                      accountProvider.showNodeDropdown =
+                                          !accountProvider.showNodeDropdown;
+                                      accountProvider.selectedNode = item;
+                                    }),
+                              )),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 16.0,
+              ),
+              _buildImportButton(accountProvider),
+              const SizedBox(
+                height: 50.0,
+              ),
+            ]))));
   }
 
   Widget _buildLogo(BuildContext context) {
