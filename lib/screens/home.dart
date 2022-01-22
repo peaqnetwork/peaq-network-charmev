@@ -61,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildMain(BuildContext context) {
     CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
+    CEVAccountProvider _accountProvider = CEVAccountProvider.of(context);
     return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
       return Stack(children: <Widget>[
         // _backgroundImage,
@@ -93,25 +94,38 @@ class _HomeScreenState extends State<HomeScreen>
               onTap: () => {},
               child: _buildScreen(context),
             )),
-        (_chargeProvider.status != LoadingStatus.idle &&
-                _chargeProvider.status != LoadingStatus.success)
-            ? CEVLoadingView(
-                status: _chargeProvider.status,
-                loadingContent: CEVStatusCard(
-                    text:
-                        "${_chargeProvider.providerDid} \n\n ${Env.fetchingData}",
-                    status: LoadingStatus.loading),
-                errorContent: CEVStatusCard(
-                    text:
-                        "${_chargeProvider.providerDid} ${_chargeProvider.providerDid != '' ? '\n\n' : ''} ${_chargeProvider.statusMessage}",
-                    status: LoadingStatus.error,
-                    onTap: () {
-                      _chargeProvider.reset();
-                      _dumbChargeProvider!.qrController.resume();
-                    }),
-                successContent: const SizedBox(),
-              )
-            : const SizedBox(),
+        Visibility(
+            visible: _accountProvider.showNodeDropdown,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Container(
+                  margin: const EdgeInsets.fromLTRB(52, 78, 52, 0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: CEVTheme.accentColor, width: 2),
+                    color: CEVTheme.dialogBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: _buildNodeList(_accountProvider)),
+            )),
+        Visibility(
+            visible: (_chargeProvider.status != LoadingStatus.idle &&
+                _chargeProvider.status != LoadingStatus.success),
+            child: CEVLoadingView(
+              status: _chargeProvider.status,
+              loadingContent: CEVStatusCard(
+                  text:
+                      "${_chargeProvider.providerDid} \n\n ${Env.fetchingData}",
+                  status: LoadingStatus.loading),
+              errorContent: CEVStatusCard(
+                  text:
+                      "${_chargeProvider.providerDid} ${_chargeProvider.providerDid != '' ? '\n\n' : ''} ${_chargeProvider.statusMessage}",
+                  status: LoadingStatus.error,
+                  onTap: () {
+                    _chargeProvider.reset();
+                    _dumbChargeProvider!.qrController.resume();
+                  }),
+              successContent: const SizedBox(),
+            )),
       ]);
     });
   }
@@ -204,12 +218,39 @@ class _HomeScreenState extends State<HomeScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text(
-              Env.scanProviderDID,
-              style: CEVTheme.appTitleStyle,
-              textAlign: TextAlign.center,
+            SizedBox(
+              child: Text(
+                Env.scanProviderDID,
+                style: CEVTheme.appTitleStyle,
+                textAlign: TextAlign.start,
+              ),
             ),
-            _buildDropdown(context, accountProvider),
+            Container(
+              height: 20,
+              width: 270,
+              // color: Colors.red,
+              child: CEVRaisedButton(
+                  text: accountProvider.selectedNode,
+                  icon: accountProvider.showNodeDropdown
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  iconColor: CEVTheme.textFadeColor,
+                  textColor: CEVTheme.textFadeColor,
+                  spacing: 8,
+                  padding: const EdgeInsets.all(2),
+                  isIconRight: true,
+                  textSize: 13,
+                  isTextBold: true,
+                  bgColor: Colors.transparent,
+                  borderColor: Colors.transparent,
+                  elevation: MaterialStateProperty.all(0),
+                  onPressed: () {
+                    accountProvider.showNodeDropdown =
+                        !accountProvider.showNodeDropdown;
+                  }),
+            )
+
+            // _buildDropdown(context, accountProvider),
           ],
         )
       ],
@@ -228,14 +269,17 @@ class _HomeScreenState extends State<HomeScreen>
 
             ),
         underline: const SizedBox(),
-        alignment: AlignmentDirectional.center,
+        alignment: AlignmentDirectional.centerEnd,
         icon: const Icon(
           Icons.keyboard_arrow_down,
           color: CEVTheme.textFadeColor,
         ),
+        borderRadius: BorderRadius.circular(10),
+        elevation: 0,
         items:
             accountProvider.nodes.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
+              alignment: AlignmentDirectional.center,
               value: value,
               onTap: () {
                 accountProvider.selectedNode = value;
@@ -248,5 +292,34 @@ class _HomeScreenState extends State<HomeScreen>
               ));
         }).toList(),
         onChanged: (value) {});
+  }
+
+  Widget _buildNodeList(CEVAccountProvider accountProvider) {
+    return ListView.builder(
+        padding: const EdgeInsets.all(8),
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        // itemExtent: 4,
+        itemCount: accountProvider.nodes.length,
+        // reverse: true,
+        itemBuilder: (context, i) {
+          return GestureDetector(
+              onTap: () {
+                accountProvider.showNodeDropdown =
+                    !accountProvider.showNodeDropdown;
+                accountProvider.selectedNode = accountProvider.nodes[i];
+                accountProvider.connectNode();
+              },
+              child: Container(
+                  width: double.infinity,
+                  color: CEVTheme.dialogBgColor,
+                  padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
+                  child: Text(
+                    accountProvider.nodes[i],
+                    style: CEVTheme.labelStyle
+                        .copyWith(fontSize: 14, color: CEVTheme.textFadeColor),
+                    overflow: TextOverflow.ellipsis,
+                  )));
+        });
   }
 }

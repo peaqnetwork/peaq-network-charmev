@@ -41,6 +41,7 @@ class CEVAccountProvider with ChangeNotifier {
   String _error = '';
   String _statusMessage = '';
   bool _isLoggedIn = false;
+  bool _showNodeDropdown = false;
   CEVAccount? _account;
   List<Detail> _details = [];
   // set the SS58 registry prefix
@@ -66,6 +67,12 @@ class CEVAccountProvider with ChangeNotifier {
   List<String> get events => _events;
   List<String> get nodes => _nodes;
   String get selectedNode => _selectedNode;
+  bool get showNodeDropdown => _showNodeDropdown;
+
+  set showNodeDropdown(bool show) {
+    _showNodeDropdown = show;
+    notifyListeners();
+  }
 
   set selectedNode(String node) {
     _selectedNode = node;
