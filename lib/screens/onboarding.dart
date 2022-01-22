@@ -108,15 +108,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       filled: false,
       keyboardType: TextInputType.url,
       suffix: InkWell(
-        child: const Padding(
-          padding: EdgeInsets.all(8),
-          child: Icon(
-            Icons.keyboard_arrow_down,
-            color: CEVTheme.greyColor,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(
+              accountProvider.showNodeDropdown
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+              color: CEVTheme.greyColor,
+            ),
           ),
-        ),
-        onTap: () => _openNodePicker(context, accountProvider),
-      ),
+          onTap: () {
+            accountProvider.showNodeDropdown =
+                !accountProvider.showNodeDropdown;
+            _openNodePicker(context, accountProvider);
+          }),
       onChanged: (value) => {},
       onTap: () => {},
     );
@@ -186,12 +191,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         context: context,
         barrierLabel: "hello",
         barrierColor: Colors.transparent,
+        barrierDismissible: false,
         builder: (context) {
           return Padding(
               padding: const EdgeInsets.only(top: 220),
               child: CEVDialog(
                 items: accountProvider.nodes,
                 onTap: (item) {
+                  accountProvider.showNodeDropdown =
+                      !accountProvider.showNodeDropdown;
                   accountProvider.selectedNode = item;
                   Navigator.of(context).pop();
                 },
