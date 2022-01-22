@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/widgets/dropdown.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/config/app.dart';
@@ -98,14 +99,14 @@ class _HomeScreenState extends State<HomeScreen>
             visible: _accountProvider.showNodeDropdown,
             child: Scaffold(
               backgroundColor: Colors.transparent,
-              body: Container(
-                  margin: const EdgeInsets.fromLTRB(52, 78, 52, 0),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: CEVTheme.accentColor, width: 2),
-                    color: CEVTheme.dialogBgColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: _buildNodeList(_accountProvider)),
+              body: CEVDropDown(
+                  items: _accountProvider.nodes,
+                  onTap: (String item) {
+                    _accountProvider.showNodeDropdown =
+                        !_accountProvider.showNodeDropdown;
+                    _accountProvider.selectedNode = item;
+                    _accountProvider.connectNode();
+                  }),
             )),
         Visibility(
             visible: (_chargeProvider.status != LoadingStatus.idle &&
@@ -255,71 +256,5 @@ class _HomeScreenState extends State<HomeScreen>
         )
       ],
     );
-  }
-
-  Widget _buildDropdown(
-      BuildContext context, CEVAccountProvider accountProvider) {
-    return DropdownButton<String>(
-        value: accountProvider.selectedNode,
-        isDense: true,
-        isExpanded: false,
-        style: Theme.of(context).textTheme.headline6?.copyWith(
-            letterSpacing: 0, color: CEVTheme.textFadeColor, fontSize: 12
-            // fontWeight: FontWeight.bold
-
-            ),
-        underline: const SizedBox(),
-        alignment: AlignmentDirectional.centerEnd,
-        icon: const Icon(
-          Icons.keyboard_arrow_down,
-          color: CEVTheme.textFadeColor,
-        ),
-        borderRadius: BorderRadius.circular(10),
-        elevation: 0,
-        items:
-            accountProvider.nodes.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-              alignment: AlignmentDirectional.center,
-              value: value,
-              onTap: () {
-                accountProvider.selectedNode = value;
-                accountProvider.connectNode();
-              },
-              child: Text(
-                value,
-                style: const TextStyle(
-                    fontSize: 13, color: CEVTheme.textFadeColor),
-              ));
-        }).toList(),
-        onChanged: (value) {});
-  }
-
-  Widget _buildNodeList(CEVAccountProvider accountProvider) {
-    return ListView.builder(
-        padding: const EdgeInsets.all(8),
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        // itemExtent: 4,
-        itemCount: accountProvider.nodes.length,
-        // reverse: true,
-        itemBuilder: (context, i) {
-          return GestureDetector(
-              onTap: () {
-                accountProvider.showNodeDropdown =
-                    !accountProvider.showNodeDropdown;
-                accountProvider.selectedNode = accountProvider.nodes[i];
-                accountProvider.connectNode();
-              },
-              child: Container(
-                  width: double.infinity,
-                  color: CEVTheme.dialogBgColor,
-                  padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
-                  child: Text(
-                    accountProvider.nodes[i],
-                    style: CEVTheme.labelStyle
-                        .copyWith(fontSize: 14, color: CEVTheme.textFadeColor),
-                    overflow: TextOverflow.ellipsis,
-                  )));
-        });
   }
 }
