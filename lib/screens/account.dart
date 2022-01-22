@@ -90,7 +90,7 @@ class _AccountScreenState extends State<AccountScreen>
         child: SingleChildScrollView(
             child: Container(
                 padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 32.0),
-                height: MediaQuery.of(context).size.height / 1.18,
+                // height: MediaQuery.of(context).size.height / 1.18,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
@@ -103,7 +103,7 @@ class _AccountScreenState extends State<AccountScreen>
                       ),
                       _buildLogoutButton(accountProvider),
                       const SizedBox(
-                        height: 40.0,
+                        height: 100.0,
                       ),
                     ]))));
   }
