@@ -64,7 +64,8 @@ class _HomeScreenState extends State<HomeScreen>
     CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
     CEVAccountProvider _accountProvider = CEVAccountProvider.of(context);
     return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
-      return Stack(children: <Widget>[
+      return SafeArea(
+          child: Stack(children: <Widget>[
         // _backgroundImage,
         Scaffold(
             backgroundColor: CEVTheme.bgColor,
@@ -96,19 +97,17 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildScreen(context),
             )),
         Visibility(
-            visible: _accountProvider.showNodeDropdown,
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: CEVDropDown(
-                  items: _accountProvider.nodes,
-                  borderColor: CEVTheme.accentColor,
-                  onTap: (String item) {
-                    _accountProvider.showNodeDropdown =
-                        !_accountProvider.showNodeDropdown;
-                    _accountProvider.selectedNode = item;
-                    _accountProvider.connectNode();
-                  }),
-            )),
+          visible: _accountProvider.showNodeDropdown,
+          child: CEVDropDown(
+              items: _accountProvider.nodes,
+              borderColor: CEVTheme.accentColor,
+              onTap: (String item) {
+                _accountProvider.showNodeDropdown =
+                    !_accountProvider.showNodeDropdown;
+                _accountProvider.selectedNode = item;
+                _accountProvider.connectNode();
+              }),
+        ),
         Visibility(
             visible: (_chargeProvider.status != LoadingStatus.idle &&
                 _chargeProvider.status != LoadingStatus.success),
@@ -128,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen>
                   }),
               successContent: const SizedBox(),
             )),
-      ]);
+      ]));
     });
   }
 
@@ -229,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             Container(
               height: 20,
-              width: 270,
+              width: 240,
               // color: Colors.red,
               child: CEVRaisedButton(
                   text: accountProvider.selectedNode,
