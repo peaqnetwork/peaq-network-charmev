@@ -29,9 +29,9 @@ spec:
           resources: {}
           script: |
             #!/usr/bin/bash
-            ls -al /tekton/home
+            ls -al -R /tekton/home
             mkdir -p /tekton/home
-            ls -al /tekton/home
+            ls -al -R /tekton/home
             pwd
             flutter upgrade
             flutter pub get
