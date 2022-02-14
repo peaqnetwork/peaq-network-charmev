@@ -24,8 +24,15 @@ spec:
           resources: {}
         - name: jx-variables
           resources: {}
-        - name: build
+        - image: mobiledevops/flutter-sdk-image:2.0.1
+          name: build
           resources: {}
+          script: |
+            #!/usr/bin/bash
+            flutter upgrade
+            flutter pub get
+            flutter test
+            flutter build apk
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
