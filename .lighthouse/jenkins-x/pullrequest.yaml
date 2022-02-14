@@ -29,6 +29,7 @@ spec:
           resources: {}
           script: |
             #!/usr/bin/bash
+            mkdir -p /tekton/home
             flutter upgrade
             flutter pub get
             flutter test
