@@ -31,6 +31,7 @@ spec:
             #!/usr/bin/bash
             ls -al -R /tekton/home
             mkdir -p /tekton/home
+            chmod 777 /tekton/home
             ls -al -R /tekton/home
             pwd
             flutter upgrade
