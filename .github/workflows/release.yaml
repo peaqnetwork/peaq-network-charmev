@@ -38,12 +38,10 @@ jobs:
     - name: Push APK to Releases
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        artifacts: "build/app/outputs/flutter-apk/app-release.apk"
-        token: ${{ secrets.TOKEN }}
         repo_token: "${{ secrets.TOKEN }}"
-        automatic_release_tag: "${{ env.NOW }}"
+        #automatic_release_tag: "${{ env.NOW }}"
         prerelease: false
-        title: "${{ env.NOW }}"
+        #title: "${{ env.NOW }}"
         files: |
          build/app/outputs/flutter-apk/app-release.apk 
     # - name: release-apk
