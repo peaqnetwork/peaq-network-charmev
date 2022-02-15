@@ -3,7 +3,7 @@ on:
     branches:
       - 'main'
       - 'dev'
-      - 'build/1201814544319626_apk-build-support'
+      - 'abuild/1201814544319626_apk-build-support'
     tags:
       - 'v*'
   pull_request:
