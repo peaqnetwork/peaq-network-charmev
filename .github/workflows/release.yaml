@@ -52,3 +52,8 @@ jobs:
       with:
         name: app-release.apk
         path: build/app/outputs/flutter-apk/app-release.apk
+    - name: Releasing using Hub
+      uses: kyze8439690/action-release-releaseapk@master
+      env:
+       GITHUB_TOKEN: ${{ secrets.TOKEN }}
+       APP_FOLDER: build/app
