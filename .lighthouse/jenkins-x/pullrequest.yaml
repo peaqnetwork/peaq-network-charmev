@@ -37,8 +37,12 @@ spec:
             flutter pub get
             flutter build apk
             echo $VERSION
-            mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/app-release-$VERSION.apk
             ls -R build/app/outputs/flutter-apk/
+        - image: uses:actions/upload-artifact@v1
+          name: Upload APK
+          with:
+            name: apk
+            path: build/app/outputs/flutter-apk/app-release.apk 
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
