@@ -32,8 +32,16 @@ spec:
           resources: {}
         - name: jx-variables
           resources: {}
-        - name: build
+        - image: cirrusci/flutter:2.5.3
+          name: build
           resources: {}
+          script: |
+            #!/usr/bin/bash
+            flutter clean
+            flutter pub upgrade
+            flutter doctor -v
+            flutter pub get
+            flutter build apk
         - name: promote-release
           resources: {}
         volumes:

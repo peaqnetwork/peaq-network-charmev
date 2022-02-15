@@ -7,10 +7,18 @@ spec:
     always_run: true
     optional: false
     source: "pullrequest.yaml"
+    ignore_changes: "OWNERS"
   postsubmits:
+  - name: devbranch
+    context: "devbranch"
+    source: "devbranch.yaml"
+    ignore_changes: "OWNERS"
+    branches:
+    - ^dev$
   - name: release
     context: "release"
     source: "release.yaml"
+    ignore_changes: "OWNERS"
     branches:
     - ^main$
     - ^master$

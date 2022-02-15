@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   creationTimestamp: null
-  name: pullrequest
+  name: devbranch
 spec:
   pipelineSpec:
     tasks:
@@ -11,16 +11,24 @@ spec:
       taskSpec:
         metadata: {}
         stepTemplate:
-          image: uses:jenkins-x/jx3-pipeline-catalog/tasks/flutter/pullrequest.yaml@versionStream
+          env:
+          - name: NPM_CONFIG_USERCONFIG
+            value: /tekton/home/npm/.npmrc
+          image: uses:jenkins-x/jx3-pipeline-catalog/tasks/flutter/release.yaml@versionStream
           name: ""
           resources:
             requests:
               cpu: 400m
               memory: 512Mi
+          volumeMounts:
+          - mountPath: /tekton/home/npm
+            name: npmrc
           workingDir: /workspace/source
         steps:
-        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/git-clone/git-clone-pr.yaml@versionStream
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/git-clone/git-clone.yaml@versionStream
           name: ""
+          resources: {}
+        - name: next-version
           resources: {}
         - name: jx-variables
           resources: {}
@@ -34,6 +42,13 @@ spec:
             flutter doctor -v
             flutter pub get
             flutter build apk
+        - name: promote-release
+          resources: {}
+        volumes:
+        - name: npmrc
+          secret:
+            optional: true
+            secretName: npmrc
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
