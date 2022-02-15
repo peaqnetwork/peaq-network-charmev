@@ -34,26 +34,26 @@ jobs:
     - run: ls -R 
     #--debug --split-per-abi
     - name: set env
-      run: echo "NOW=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
-   # - name: Push APK to Releases
-      #uses: ncipollo/release-action@v1
-    #  uses: "marvinpinto/action-automatic-releases@latest"
-     # with:
+      run: echo "NOW=$(date +'%Y.%m.%d-%H:%M')" >> $GITHUB_ENV
+    - name: Push APK to Releases
+      uses: ncipollo/release-action@v1
+      with:
         #artifacts: "build/app/outputs/flutter-apk/app-release.apk"
         #token: ${{ secrets.TOKEN }}
-     #   repo_token: "${{ secrets.TOKEN }}"
-     #   automatic_release_tag: "${{ env.NOW }}"
-      #  prerelease: false
-      #  title: "${{ env.NOW }}"
-      #  files: |
-      #   build/app/outputs/flutter-apk/app-release.apk
-    - name: release-apk
-      uses: actions/upload-artifact@v2
-      with:
-        name: app-release.apk
-        path: build/app/outputs/flutter-apk/app-release.apk
-    - name: Releasing using Hub
-      uses: kyze8439690/action-release-releaseapk@master
-      env:
-       GITHUB_TOKEN: ${{ secrets.TOKEN }}
-       APP_FOLDER: build/app
+        repo_token: "${{ secrets.TOKEN }}"
+        automatic_release_tag: "${{ env.NOW }}"
+        prerelease: false
+        title: "${{ env.NOW }}"
+        files: |
+         build/app/outputs/flutter-apk/app-release.apk
+    # - name: release-apk
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: app-release.apk
+    #     path: build/app/outputs/flutter-apk/app-release.apk
+    # - name: Releasing using Hub
+    #   uses: kyze8439690/action-release-releaseapk@master
+    #   run: echo "NOW=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
+    #   env:
+    #    GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    #    APP_FOLDER:  build/app/outputs/flutter-apk/app-release.apk
