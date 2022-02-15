@@ -36,16 +36,16 @@ jobs:
     - name: set env
       run: echo "NOW=$(date +'%Y.%m.%d-%H:%M')" >> $GITHUB_ENV
     - name: Push APK to Releases
-      uses: ncipollo/release-action@v1
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        #artifacts: "build/app/outputs/flutter-apk/app-release.apk"
-        #token: ${{ secrets.TOKEN }}
+        artifacts: "build/app/outputs/flutter-apk/app-release.apk"
+        token: ${{ secrets.TOKEN }}
         repo_token: "${{ secrets.TOKEN }}"
         automatic_release_tag: "${{ env.NOW }}"
         prerelease: false
         title: "${{ env.NOW }}"
         files: |
-         build/app/outputs/flutter-apk/app-release.apk
+         build/app/outputs/flutter-apk/app-release.apk 
     # - name: release-apk
     #   uses: actions/upload-artifact@v2
     #   with:
