@@ -11,7 +11,7 @@ jobs:
     #- uses: actions/setup-java@v1
      # with:
       #  java-version: '12.x'
-    - uses: subosito/flutter-action@v1
+    #- uses: subosito/flutter-action@v1
       #with:
        # flutter-version: '1.7.8+hotfix.4'
     - run: flutter clean
@@ -24,5 +24,5 @@ jobs:
     - name: Push APK to Releases
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "build/app/outputs/apk/debug/*.apk"
+        artifacts: "build/app/outputs/flutter-apk/app-release.apk"
         token: ${{ secrets.TOKEN }}
