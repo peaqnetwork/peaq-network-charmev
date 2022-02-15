@@ -1,18 +1,11 @@
-name: Draft Github Release
+name: Charmev Github Release
 on:
   # Enable manual run
   workflow_dispatch:
   # Refs/tags push events to matching v*, i.e. v1.0, v20.15.10
   push:
-    branches:
-      - 'main'
-      - 'dev'
-      - 'build/1201814544319626_apk-build-support'
     tags:
       - 'v*'
-    pull_request:
-      branches:
-        - 'dev'
 
 jobs:
   generate-changelog:
@@ -23,8 +16,9 @@ jobs:
         id: get_latest_release
         uses: pozetroninc/github-action-get-latest-release@2b51d48e904071035d6632715d41966f516711dd
         with:
+          excludes: prerelease
+          token: ${{ secrets.TOKEN }}
           repository: ${{ github.repository }}
-          excludes: prerelease, draft
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
