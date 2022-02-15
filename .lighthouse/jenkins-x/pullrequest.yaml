@@ -36,6 +36,16 @@ spec:
             flutter doctor -v
             flutter pub get
             flutter build apk
+        - name: promote-release
+          resources: {}
+          script: |
+            #!/usr/bin/bash
+            ls -al build/app/outputs/flutter-apk/app-release.apk
+        volumes:
+        - name: npmrc
+          secret:
+            optional: true
+            secretName: npmrc
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
