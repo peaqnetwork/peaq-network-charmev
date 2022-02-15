@@ -19,7 +19,7 @@ spec:
               memory: 512Mi
           workingDir: /workspace/source
         steps:
-        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/git-clone/git-clone.yaml@versionStream
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/git-clone/git-clone-pr.yaml@versionStream
           name: ""
           resources: {}
         - name: jx-variables
@@ -36,16 +36,9 @@ spec:
             flutter doctor -v
             flutter pub get
             flutter build apk
-        - name: promote-release
-          resources: {}
-          script: |
-            #!/usr/bin/bash
-            ls -al build/app/outputs/flutter-apk/app-release.apk
-        volumes:
-        - name: npmrc
-          secret:
-            optional: true
-            secretName: npmrc
+            echo $VERSION
+            mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/app-release-$VERSION.apk
+            ls
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
