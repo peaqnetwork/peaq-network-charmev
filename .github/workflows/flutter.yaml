@@ -57,6 +57,8 @@ jobs:
   create-build:
     name: Create ${{ matrix.target }} build
     runs-on: ${{ matrix.os }}
+    container:
+        image: cirrusci/flutter:2.5.3
     strategy:
       matrix:
         target: [Android]
