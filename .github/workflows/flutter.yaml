@@ -97,7 +97,9 @@ jobs:
       # Checkout Charmev code, recreate missing files, and get packages.
       - name: Checkout charmev code
         uses: actions/checkout@v2
-      - run: flutter create --org peaq.network
+      #- run: flutter create --org peaq.network
+      - run: flutter clean
+      - run: flutter pub upgrade
       - run: flutter pub get
       # Build the application.
       - run: flutter build -v ${{ matrix.build_target }} --release
