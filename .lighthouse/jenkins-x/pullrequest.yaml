@@ -29,11 +29,11 @@ spec:
           resources: {}
           script: |
             #!/usr/bin/bash
-            RUN flutter clean
-            RUN flutter pub upgrade
-            RUN flutter doctor -v
-            RUN flutter pub get
-            RUN flutter build apk
+            flutter clean
+            flutter pub upgrade
+            flutter doctor -v
+            flutter pub get
+            flutter build apk
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
