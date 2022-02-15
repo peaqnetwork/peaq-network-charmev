@@ -38,7 +38,7 @@ spec:
             flutter build apk
             echo $VERSION
             mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/app-release-$VERSION.apk
-            ls
+            ls -R build/app/outputs/flutter-apk/
   podTemplate: {}
   serviceAccountName: tekton-bot
   timeout: 12h0m0s
