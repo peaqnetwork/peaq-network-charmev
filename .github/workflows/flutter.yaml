@@ -21,7 +21,8 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           excludes: prerelease
-          repository: ${{ github.repository }}
+          owner: peaqnetwork
+          repository: peaq-network-charmev
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
