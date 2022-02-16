@@ -67,8 +67,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: peaq Charmev ${{ github.ref }}
+          tag_name: ${{ steps.bump_version.outputs.next-version }}
+          release_name: peaq Charmev ${{ steps.bump_version.outputs.next-version }}
           body_path: CHANGELOG.md
           draft: true
           prerelease: false
