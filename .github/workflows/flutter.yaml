@@ -21,8 +21,8 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           excludes: prerelease
-          owner: peaqnetwork
-          repo: peaq-network-charmev
+          owner: containers
+          repo: skopeo
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
