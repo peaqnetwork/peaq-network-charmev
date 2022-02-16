@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   # Refs/tags push events to matching v*, i.e. v1.0, v20.15.10
   push:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'build/1201814544319626_apk-build-support'
     tags:
       - 'v*'
 
@@ -12,19 +16,18 @@ jobs:
     name: Generate changelog
     runs-on: ubuntu-latest
     steps:
-      # - name: Get latest published release tag
-      #   id: get_latest_release
-      #   uses: pozetroninc/github-action-get-latest-release@2b51d48e904071035d6632715d41966f516711dd
-      #   with:
-      #     excludes: prerelease
-      #     repository: ${{ github.repository }}
+      - name: Get latest published release tag
+        id: get_latest_release
+        uses: pozetroninc/github-action-get-latest-release@2b51d48e904071035d6632715d41966f516711dd
+        with:
+          excludes: prerelease
+          repository: ${{ github.repository }}
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
           token: ${{ secrets.TOKEN }}
           future_release: ${{ github.ref }}
-          since_tag: v0.0.2
-          #${{ steps.get_latest_release.outputs.release }}
+          since_tag: ${{ steps.get_latest_release.outputs.release }}
       - name: Upload changelog
         uses: actions/upload-artifact@v2
         with:
