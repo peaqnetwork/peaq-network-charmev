@@ -89,12 +89,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "12.x"
-      - name: Enable desktop support
-        if: matrix.target != 'Android'
-        run: |
-          flutter config --enable-linux-desktop
-          flutter config --enable-macos-desktop
-          flutter config --enable-windows-desktop
       - run: flutter doctor -v
       # Checkout Charmev code, recreate missing files, and get packages.
       - name: Checkout charmev code
@@ -108,30 +102,11 @@ jobs:
       - run: flutter build -v ${{ matrix.build_target }} --release
 
       # Package the build.
-      - name: Copy VC redistributables to release directory for Windows
-        if: matrix.target == 'Windows'
-        run: |
-          Copy-Item (vswhere -latest -find 'VC\Redist\MSVC\*\x64\*\msvcp140.dll') .
-          Copy-Item (vswhere -latest -find 'VC\Redist\MSVC\*\x64\*\vcruntime140.dll') .
-          Copy-Item (vswhere -latest -find 'VC\Redist\MSVC\*\x64\*\vcruntime140_1.dll') .
-        working-directory: ${{ matrix.build_path }}
       - name: Rename build for Android
         if: matrix.target == 'Android'
         run: mv app-release.apk $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.apk
         working-directory: ${{ matrix.build_path }}
-      - name: Compress build for Linux
-        if: matrix.target == 'Linux'
-        run: tar czf $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.tar.gz *
-        working-directory: ${{ matrix.build_path }}
-      - name: Compress build for macOS
-        if: matrix.target == 'macOS'
-        run: ditto -c -k --sequesterRsrc --keepParent peaq\ charmev.app $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.zip
-        working-directory: ${{ matrix.build_path }}
-      - name: Compress build for Windows
-        if: matrix.target == 'Windows'
-        run: compress-archive -Path * -DestinationPath ${env:GITHUB_WORKSPACE}\peaq_charmev_${{ matrix.target }}.zip
-        working-directory: ${{ matrix.build_path }}
-
+              
       # Upload the build.
       - name: Add packaged build to release draft
         id: upload_release_asset
@@ -140,6 +115,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
+          asset_path: /__w/peaq-network-charmev/peaq-network-charmev/peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
           asset_name: peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
           asset_content_type: ${{ matrix.asset_content_type }}
