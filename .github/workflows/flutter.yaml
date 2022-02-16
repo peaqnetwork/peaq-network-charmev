@@ -23,21 +23,19 @@ jobs:
       #     excludes: prerelease
       #     owner: containers
       #     repo: skopeo
-      - name: Get latest release of NodeJS
+      - name: Get latest release 
         uses: rez0n/actions-github-release@main
         id: get_latest_release
         env:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: "peaqnetwork/peaq-network-charmev"
           type: "latest"
-      - name: Bump release version
+      - name: Next release version
         id: bump_version
         uses: christian-draeger/increment-semantic-version@1.0.2
         with:
           current-version: ${{ steps.get_latest_release.outputs.release }}
           version-fragment: 'bug'
-      - name: Do something with your bumped release version
-        run: echo ${{ steps.bump_version.outputs.next-version }}
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
@@ -57,6 +55,19 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
+      - name: Get latest release 
+        uses: rez0n/actions-github-release@main
+        id: get_latest_release
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: "peaqnetwork/peaq-network-charmev"
+          type: "latest"
+      - name: Next release version
+        id: bump_version
+        uses: christian-draeger/increment-semantic-version@1.0.2
+        with:
+          current-version: ${{ steps.get_latest_release.outputs.release }}
+          version-fragment: 'bug'
       - name: Download changelog
         uses: actions/download-artifact@v2
         with:
