@@ -16,19 +16,24 @@ jobs:
     name: Generate changelog
     runs-on: ubuntu-latest
     steps:
-      - name: Get latest published release tag
-        id: get_latest_release
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          excludes: prerelease
-          owner: containers
-          repo: skopeo
+      # - name: Get latest published release tag
+      #   id: get_latest_release
+      #   uses: pozetroninc/github-action-get-latest-release@master
+      #   with:
+      #     excludes: prerelease
+      #     owner: containers
+      #     repo: skopeo
+      - name: set env
+        run: current_release=$(curl -i -u test:${{ secrets.TOKEN }}  --silent "https://api.github.com/repos/peaqnetwork/peaq-network-charmev/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+      - name: Print
+        run: echo $current_release
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
           token: ${{ secrets.TOKEN }}
           future_release: ${{ github.ref }}
-          since_tag: ${{ steps.get_latest_release.outputs.release }}
+          since_tag: ${{ current_release }}
+          #${{ steps.get_latest_release.outputs.release }}
       - name: Upload changelog
         uses: actions/upload-artifact@v2
         with:
