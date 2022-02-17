@@ -94,7 +94,6 @@ jobs:
       - name: Checkout charmev code
         uses: actions/checkout@v2
       #- run: flutter create --org peaq.network
-      - run: echo  $GITHUB_WORKSPACE
       - run: flutter clean
       - run: flutter pub upgrade
       - run: flutter pub get
