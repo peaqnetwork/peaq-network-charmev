@@ -12,12 +12,19 @@ jobs:
     name: Generate changelog
     runs-on: ubuntu-latest
     steps:
+      - name: Get latest release 
+        uses: rez0n/actions-github-release@main
+        id: get_latest_release
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: "peaqnetwork/peaq-network-charmev"
+          type: "latest"
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
           token: ${{ secrets.TOKEN }}
           future_release: ${{ GITHUB.REF_NAME }}
-          since_tag: ${{ GITHUB.REF_NAME }}
+          since_tag: ${{ steps.get_latest_release.outputs.release }}
       - name: Upload changelog
         uses: actions/upload-artifact@v2
         with:
