@@ -22,8 +22,9 @@ jobs:
         continue-on-error: true
       - name: Delete draft release
         uses: liudonghua123/delete-release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          token: ${{ github.token }}
           release_id: ${{ steps.latest_release.outputs.id }}
         continue-on-error: true
       # - name: Get latest release 
