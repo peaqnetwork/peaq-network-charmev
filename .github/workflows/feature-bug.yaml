@@ -12,13 +12,21 @@ jobs:
     name: Generate changelog
     runs-on: ubuntu-latest
     steps:
-      - name: Get latest release 
-        uses: rez0n/actions-github-release@main
-        id: get_latest_release
-        env:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "peaqnetwork/peaq-network-charmev"
-          type: "draft"
+      - name: Get latest release
+        id: latest_release
+        uses: kaliber5/action-get-release@v1
+        with:
+          token: ${{ github.token }}
+          draft: true
+          tag_name: ${{ GITHUB.REF_NAME }}
+        continue-on-error: true
+      # - name: Get latest release 
+      #   uses: rez0n/actions-github-release@main
+      #   id: get_latest_release
+      #   env:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     repository: "peaqnetwork/peaq-network-charmev"
+      #     type: "draft"
       - name: Generate changelog since last published release
         uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
         with:
@@ -104,8 +112,7 @@ jobs:
       - name: Rename build for Android
         if: matrix.target == 'Android'
         run: mv app-release.apk $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.apk
-        working-directory: ${{ matrix.build_path }}
-              
+        working-directory: ${{ matrix.build_path }}       
       # Upload the build.
       - name: Add packaged build to release draft
         id: upload_release_asset
