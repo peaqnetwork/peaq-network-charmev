@@ -1,0 +1,134 @@
+name: Feature/Fix Draft Release
+on:
+  # Enable manual run
+  workflow_dispatch:
+  # Refs/tags push events to matching v*, i.e. v1.0, v20.15.10
+  pull_request:
+    branches:
+      - 'dev'
+concurrency:
+  group: draft-release-${{ github.head_ref }}
+  cancel-in-progress: true
+jobs:
+  generate-changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: print env
+        run: env
+      - name: Get latest release
+        id: get_latest_release
+        uses: kaliber5/action-get-release@v1
+        with:
+          token: ${{ github.token }}
+          draft: true
+          tag_name: ${{ GITHUB.HEAD_REF }}
+        continue-on-error: true
+      - name: Print env
+        run: env
+      - name: Delete draft release
+        uses: liudonghua123/delete-release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          release_id: ${{ steps.get_latest_release.outputs.id }}
+        continue-on-error: true
+      - name: Generate changelog since last published release
+        uses: charmixer/auto-changelog-action@5c6320ae4dedc8743e4439a3c56294c294553fb9
+        with:
+          token: ${{ secrets.TOKEN }}
+          future_release: ${{ github.ref }}
+          #since_tag: ${{ steps.get_latest_release.outputs.release }}
+      - name: Upload changelog
+        uses: actions/upload-artifact@v2
+        with:
+          name: changelog
+          path: CHANGELOG.md
+
+  draft-release:
+    name: Draft Github release
+    needs: generate-changelog
+    runs-on: ubuntu-20.04
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Download changelog
+        uses: actions/download-artifact@v2
+        with:
+          name: changelog
+      - name: Draft release with changelog
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          tag_name: ${{ GITHUB.HEAD_REF}}
+          release_name: peaq charmev ${{ GITHUB.HEAD_REF }}
+          body_path: CHANGELOG.md
+          draft: true
+          prerelease: false
+
+  create-build:
+    name: Create ${{ matrix.target }} build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        target: [Android]
+        include:
+          - os: ubuntu-20.04
+            target: Android
+            build_target: apk
+            build_path: build/app/outputs/flutter-apk
+            asset_extension: .apk
+            asset_content_type: application/vnd.android.package-archive
+      # Disable fail-fast as we want results from all even if one fails.
+      fail-fast: false
+    needs: draft-release
+    steps:
+      # Set up Flutter.
+      - name: Clone Flutter repository with master channel
+        uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+        with:
+          channel: master
+
+      - name: Install Linux dependencies
+        if: matrix.target == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev
+      - name: Install Android dependencies
+        if: matrix.target == 'Android'
+        uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+      - run: flutter doctor -v
+      # Checkout gallery code, recreate missing files, and get packages.
+      - name: Checkout gallery code
+        uses: actions/checkout@v2
+      #- run: flutter create .
+      - run: echo  $GITHUB_WORKSPACE 
+      - run: echo "workspcae=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+      - run: flutter clean
+      - run: flutter pub upgrade
+      - run: flutter pub get
+      - run: echo  $GITHUB_WORKSPACE
+      # Build the application.
+      - run: flutter build -v ${{ matrix.build_target }} --release
+
+      # Package the build.
+      - name: Rename build for Android
+        if: matrix.target == 'Android'
+        run: mv app-release.apk $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.apk
+        working-directory: ${{ matrix.build_path }}
+      
+      # Upload the build.
+      - name: Add packaged build to release draft
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ needs.draft-release.outputs.upload_url }}
+          asset_path: ${{ env.workspcae }}/peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
+          asset_name: peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
+          asset_content_type: ${{ matrix.asset_content_type }}
