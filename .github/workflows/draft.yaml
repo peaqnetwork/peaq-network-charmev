@@ -104,6 +104,7 @@ jobs:
       # Checkout charmev code, recreate missing files, and get packages.
       - name: Checkout gallery code
         uses: actions/checkout@v2
+      - run: echo "workspcae=$GITHUB_WORKSPACE" >> $GITHUB_ENV
       - run: flutter clean
       - run: flutter pub upgrade
       - run: flutter pub get
