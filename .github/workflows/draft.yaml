@@ -87,9 +87,9 @@ jobs:
     steps:
       # Set up Flutter.
       - name: Clone Flutter repository with master channel
-        uses: subosito/flutter-action@4389e6cbc6cb8a4b18c628ff96ff90be0e926aa8
+        uses: subosito/flutter-action@v2
         with:
-          channel: master
+          flutter-version: '2.5.3'
 
       - name: Install Linux dependencies
         if: matrix.target == 'Linux'
@@ -100,7 +100,7 @@ jobs:
         if: matrix.target == 'Android'
         uses: actions/setup-java@v1
         with:
-          java-version: "12.x"
+          java-version: "1.8"
       - run: flutter doctor -v
       # Checkout gallery code, recreate missing files, and get packages.
       - name: Checkout gallery code
