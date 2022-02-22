@@ -1,0 +1,19 @@
+on:
+  pull_request:
+    branches:
+      - 'dev'
+
+name: Delete Draft Releases
+concurrency:
+  group: delete-draft-release
+  cancel-in-progress: true
+jobs:
+  delete-draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete drafts
+        uses: hugo19941994/delete-draft-releases@v1.0.0
+        with:
+          threshold: 5d
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

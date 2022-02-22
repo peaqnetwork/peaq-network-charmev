@@ -8,7 +8,7 @@ on:
       - 'dev'
       - 'main'
 concurrency:
-  group: release-${{ github.ref_name }}
+  group: release
 jobs:
   generate-changelog:
     name: Generate changelog
@@ -42,14 +42,13 @@ jobs:
              echo ::set-output name=prerelease::false
              echo ::set-output name=release-type::stable
           fi
-          echo $comment
       - name: Get latest release 
         uses: rez0n/actions-github-release@main
         id: get_latest_release
         env:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           repository: ${{ github.repository }}
-          type: ${{ steps.set_outputs.outputs.release-type }}
+          type: "nodraft"
       - name: Next release version
         id: bump_version
         uses: christian-draeger/increment-semantic-version@1.0.2
@@ -109,7 +108,7 @@ jobs:
     needs: release
     steps:
       # Set up Flutter.
-      - name: Clone Flutter repository with master channel
+      - name: Clone Flutter repository with flutter-version 2.5.3
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '2.5.3'
@@ -124,10 +123,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "1.8"
-      - run: echo "workspcae=$GITHUB_WORKSPACE" >> $GITHUB_ENV
       - run: flutter doctor -v
       - name: Checkout charmev code
         uses: actions/checkout@v2
+      - run: echo "workspcae=$GITHUB_WORKSPACE" >> $GITHUB_ENV
       - run: flutter clean
       - run: flutter pub upgrade
       - run: flutter pub get
