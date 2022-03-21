@@ -129,15 +129,15 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "1.8"
+      - name: Checkout charmev code
+        uses: actions/checkout@v2
+      - run: echo "workspcae=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+      - run: flutter clean
       - name: Enable desktop support
         if: matrix.target != 'Android'
         run: |
           flutter config --enable-linux-desktop
       - run: flutter doctor -v
-      - name: Checkout charmev code
-        uses: actions/checkout@v2
-      - run: echo "workspcae=$GITHUB_WORKSPACE" >> $GITHUB_ENV
-      - run: flutter clean
       - run: flutter pub upgrade
       - run: flutter pub get
       # Build the application.
