@@ -95,7 +95,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [Android]
+        target: [Android,Linux]
         include:
           - os: ubuntu-20.04
             target: Android
@@ -103,6 +103,12 @@ jobs:
             build_path: build/app/outputs/flutter-apk
             asset_extension: .apk
             asset_content_type: application/vnd.android.package-archive
+          - os: ubuntu-20.04
+            target: Linux
+            build_target: linux
+            build_path: build/linux/x64/release/bundle
+            asset_extension: .tar.gz
+            asset_content_type: application/gzip
       # Disable fail-fast as we want results from all even if one fails.
       fail-fast: false
     needs: release
@@ -123,6 +129,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "1.8"
+      - name: Enable desktop support
+        if: matrix.target != 'Android'
+        run: |
+          flutter config --enable-linux-desktop
       - run: flutter doctor -v
       - name: Checkout charmev code
         uses: actions/checkout@v2
@@ -138,7 +148,10 @@ jobs:
         if: matrix.target == 'Android'
         run: mv app-release.apk $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.apk
         working-directory: ${{ matrix.build_path }}
-      
+      - name: Compress build for Linux
+        if: matrix.target == 'Linux'
+        run: tar czf $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.tar.gz *
+        working-directory: ${{ matrix.build_path }}
       # Upload the build.
       - name: Add packaged build to release of ${{ github.ref_name }}
         id: upload_release_asset
