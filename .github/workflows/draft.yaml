@@ -72,7 +72,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [Android,Linux]
+        target: [Android]
         include:
           - os: ubuntu-20.04
             target: Android
@@ -120,7 +120,9 @@ jobs:
       - run: flutter pub get
       - run: echo  $GITHUB_WORKSPACE
       # Build the application.
-      - run: flutter build -v ${{ matrix.build_target }} --release
+      - run: flutter build apk --split-per-abi
+      - run: ls -R
+      #- run: flutter build -v ${{ matrix.build_target }} --release
 
       # Package the build.
       - name: Rename build for Android
