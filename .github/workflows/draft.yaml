@@ -136,6 +136,10 @@ jobs:
         if: matrix.target == 'Android'
         run: mv app-x86_64-release.apk $GITHUB_WORKSPACE/peaq_charmev-x86_64-release.apk
         working-directory: ${{ matrix.build_path }}
+      - name: Compress build for Android
+        if: matrix.target == 'Android'
+        run: zip -r charmev_apk.zip . 
+        working-directory: ${{ matrix.build_path }}
       # Upload the build.
       - name: Add packaged build to release draft
         id: upload_release_asset
@@ -144,36 +148,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: ${{ env.workspcae }}/peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
-          asset_name: peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
-          asset_content_type: ${{ matrix.asset_content_type }}
-      - name: Add arm64 packaged build to release draft
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: ${{ env.workspcae }}/peaq_charmev-arm64-v8a-release.apk
-          asset_name: peaq_charmev-arm64-v8a-release.apk
-          asset_content_type: ${{ matrix.asset_content_type }}
-      - name: Add armeabi packaged build to release draft
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: ${{ env.workspcae }}/peaq_charmev-armeabi-v7a-release.apk
-          asset_name: peaq_charmev-armeabi-v7a-release.apk
-          asset_content_type: ${{ matrix.asset_content_type }}
-      - name: Add x86_64 packaged build to release draft
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: ${{ env.workspcae }}/peaq_charmev-x86_64-release.apk
-          asset_name: peaq_charmev-x86_64-release.apk
-          asset_content_type: ${{ matrix.asset_content_type }}
+          asset_path: ${{ env.workspcae }}/charmev_apk.zip
+          asset_name: peaq_charmev_${{ matrix.target }}.zip
+          asset_content_type: application/zip
+    
