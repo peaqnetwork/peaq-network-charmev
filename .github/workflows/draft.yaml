@@ -80,12 +80,7 @@ jobs:
             build_path: build/app/outputs/flutter-apk
             asset_extension: .apk
             asset_content_type: application/vnd.android.package-archive
-          - os: ubuntu-20.04
-            target: Linux
-            build_target: linux
-            build_path: build/linux/x64/release/bundle
-            asset_extension: .tar.gz
-            asset_content_type: application/gzip
+         
       # Disable fail-fast as we want results from all even if one fails.
       fail-fast: false
     needs: draft-release
@@ -140,6 +135,10 @@ jobs:
         if: matrix.target == 'Android'
         run: zip -r charmev_apk.zip . 
         working-directory: ${{ matrix.build_path }}
+      - name: Compress build for Android
+        if: matrix.target == 'Android'
+        run: ls -R
+        working-directory: ${{ matrix.build_path }}
       # Upload the build.
       - name: Add packaged build to release draft
         id: upload_release_asset
@@ -149,6 +148,6 @@ jobs:
         with:
           upload_url: ${{ needs.draft-release.outputs.upload_url }}
           asset_path: ${{ env.workspcae }}/charmev_apk.zip
-          asset_name: peaq_charmev_${{ matrix.target }}.zip
+          asset_name: charmev_${{ matrix.target }}.zip
           asset_content_type: application/zip
     
