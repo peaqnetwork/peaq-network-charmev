@@ -115,30 +115,15 @@ jobs:
       #- run: flutter build -v ${{ matrix.build_target }} --release
 
       # Package the build.
+      - name: Compress build for Android
+        if: matrix.target == 'Android'
+        run: zip -r charmev_apk.zip app-arm64-v8a-release.apk app-arm64-v8a-release.apk app-armeabi-v7a-release.apk app.apk
+        working-directory: ${{ matrix.build_path }}
       - name: Rename build for Android
         if: matrix.target == 'Android'
-        run: mv app.apk $GITHUB_WORKSPACE/peaq_charmev-${{ matrix.target }}.apk
+        run: mv charmev_apk.zip $GITHUB_WORKSPACE/charmev_apk.zip
         working-directory: ${{ matrix.build_path }}
-      - name: Rename build for arm64
-        if: matrix.target == 'Android'
-        run: mv app-arm64-v8a-release.apk $GITHUB_WORKSPACE/peaq_charmev-arm64-v8a-release.apk
-        working-directory: ${{ matrix.build_path }}
-      - name: Rename build for armeabi
-        if: matrix.target == 'Android'
-        run: mv app-armeabi-v7a-release.apk $GITHUB_WORKSPACE/peaq_charmev-armeabi-v7a-release.apk
-        working-directory: ${{ matrix.build_path }}
-      - name: Rename build for x86_64
-        if: matrix.target == 'Android'
-        run: mv app-x86_64-release.apk $GITHUB_WORKSPACE/peaq_charmev-x86_64-release.apk
-        working-directory: ${{ matrix.build_path }}
-      - name: Compress build for Android
-        if: matrix.target == 'Android'
-        run: zip -r charmev_apk.zip *
-        working-directory: ${{ matrix.build_path }}
-      - name: Compress build for Android
-        if: matrix.target == 'Android'
-        run: ls -R
-        
+              
       # Upload the build.
       - name: Add packaged build to release draft
         id: upload_release_asset
@@ -147,7 +132,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: ${{ matrix.build_path }}/charmev_apk.zip
+          asset_path: ${{ env.workspcae }}/charmev_apk.zip
           asset_name: charmev_${{ matrix.target }}.zip
           asset_content_type: application/zip
     
