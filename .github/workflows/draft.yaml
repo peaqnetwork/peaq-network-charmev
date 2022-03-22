@@ -133,12 +133,12 @@ jobs:
         working-directory: ${{ matrix.build_path }}
       - name: Compress build for Android
         if: matrix.target == 'Android'
-        run: zip -r charmev_apk.zip . 
+        run: zip -r charmev_apk.zip *
         working-directory: ${{ matrix.build_path }}
       - name: Compress build for Android
         if: matrix.target == 'Android'
         run: ls -R
-        working-directory: ${{ matrix.build_path }}
+        
       # Upload the build.
       - name: Add packaged build to release draft
         id: upload_release_asset
@@ -147,7 +147,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ needs.draft-release.outputs.upload_url }}
-          asset_path: ${{ env.workspcae }}/charmev_apk.zip
+          asset_path: ${{ matrix.build_path }}/charmev_apk.zip
           asset_name: charmev_${{ matrix.target }}.zip
           asset_content_type: application/zip
     
