@@ -95,7 +95,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        target: [Android,Linux]
+        target: [Android]
         include:
           - os: ubuntu-20.04
             target: Android
@@ -103,12 +103,7 @@ jobs:
             build_path: build/app/outputs/flutter-apk
             asset_extension: .apk
             asset_content_type: application/vnd.android.package-archive
-          - os: ubuntu-20.04
-            target: Linux
-            build_target: linux
-            build_path: build/linux/x64/release/bundle
-            asset_extension: .tar.gz
-            asset_content_type: application/gzip
+          
       # Disable fail-fast as we want results from all even if one fails.
       fail-fast: false
     needs: release
@@ -141,16 +136,16 @@ jobs:
       - run: flutter pub upgrade
       - run: flutter pub get
       # Build the application.
-      - run: flutter build -v ${{ matrix.build_target }} --release
+      - run: flutter build ${{ matrix.build_target }} --split-per-abi
 
       # Package the build.
+      - name: Compress build for Android
+        if: matrix.target == 'Android'
+        run: zip -r charmev_apk.zip app-x86_64-release.apk app-arm64-v8a-release.apk app-armeabi-v7a-release.apk app.apk
+        working-directory: ${{ matrix.build_path }}
       - name: Rename build for Android
         if: matrix.target == 'Android'
-        run: mv app-release.apk $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.apk
-        working-directory: ${{ matrix.build_path }}
-      - name: Compress build for Linux
-        if: matrix.target == 'Linux'
-        run: tar czf $GITHUB_WORKSPACE/peaq_charmev_${{ matrix.target }}.tar.gz *
+        run: mv charmev_apk.zip $GITHUB_WORKSPACE/charmev_apk.zip
         working-directory: ${{ matrix.build_path }}
       # Upload the build.
       - name: Add packaged build to release of ${{ github.ref_name }}
@@ -159,7 +154,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ${{ env.workspcae }}/peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
-          asset_name: peaq_charmev_${{ matrix.target }}${{ matrix.asset_extension }}
-          asset_content_type: ${{ matrix.asset_content_type }}
+          upload_url: ${{ needs.draft-release.outputs.upload_url }}
+          asset_path: ${{ env.workspcae }}/charmev_apk.zip
+          asset_name: charmev_${{ matrix.target }}.zip
+          asset_content_type: application/zip

@@ -117,7 +117,7 @@ jobs:
       # Package the build.
       - name: Compress build for Android
         if: matrix.target == 'Android'
-        run: zip -r charmev_apk.zip app-arm64-v8a-release.apk app-arm64-v8a-release.apk app-armeabi-v7a-release.apk app.apk
+        run: zip -r charmev_apk.zip app-x86_64-release.apk app-arm64-v8a-release.apk app-armeabi-v7a-release.apk app.apk
         working-directory: ${{ matrix.build_path }}
       - name: Rename build for Android
         if: matrix.target == 'Android'
