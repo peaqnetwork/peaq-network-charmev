@@ -4,13 +4,17 @@ use libp2p::{
         muxing::StreamMuxerBox,
         upgrade::{self, SelectUpgrade},
     },
+    gossipsub::{
+        Gossipsub, GossipsubConfigBuilder, GossipsubEvent, IdentTopic as Topic,
+        MessageAuthenticity, ValidationMode,
+    },
     identify::{Identify, IdentifyConfig, IdentifyEvent},
     identity, mplex, noise,
     swarm::{NetworkBehaviourEventProcess, SwarmBuilder, SwarmEvent},
     tcp::TokioTcpConfig,
     yamux, Multiaddr, NetworkBehaviour, PeerId, Transport,
 };
-use std::error::Error;
+use std::{error::Error, time::Duration};
 use tokio::io::{self, AsyncBufReadExt};
 
 #[tokio::main]
@@ -40,13 +44,27 @@ pub async fn connect(peer_url: String) -> Result<(), Box<dyn Error>> {
         .map(|(peer, muxer), _| (peer, StreamMuxerBox::new(muxer)))
         .boxed();
 
+    let topic = Topic::new("charmev");
+
     let mut swarm = {
-        let behaviour = EventBehaviour {
-            identify: Identify::new(IdentifyConfig::new(
-                "/ipfs/id/1.0.0".into(),
-                local_key.clone().public(),
-            )),
-        };
+        let gossipsub_config = GossipsubConfigBuilder::default()
+            .heartbeat_interval(Duration::from_secs(10)) // This is set to aid debugging by not cluttering the log space
+            .validation_mode(ValidationMode::Strict) // This sets the kind of message validation. The default is Strict (enforce message signing)
+            // .message_id_fn(message_id_fn) // content-address messages. No two messages of the
+            // same content will be propagated.
+            .build()
+            .expect("Valid config");
+        // build a gossipsub network behaviour
+        let mut gossipsub: Gossipsub = Gossipsub::new(
+            MessageAuthenticity::Signed(local_key.clone()),
+            gossipsub_config,
+        )
+        .expect("Correct configuration");
+
+        // subscribes to the topic
+        gossipsub.subscribe(&topic).unwrap();
+
+        let behaviour = EventBehaviour { gossip: gossipsub };
 
         SwarmBuilder::new(transport, behaviour, local_peer_id)
             .executor(Box::new(|fut| {
@@ -92,12 +110,18 @@ pub async fn connect(peer_url: String) -> Result<(), Box<dyn Error>> {
 #[derive(NetworkBehaviour)]
 #[behaviour(event_process = true)]
 struct EventBehaviour {
-    identify: Identify,
+    gossip: Gossipsub,
 }
 
-impl NetworkBehaviourEventProcess<IdentifyEvent> for EventBehaviour {
+impl NetworkBehaviourEventProcess<GossipsubEvent> for EventBehaviour {
     // Called when `identify` produces an event.
-    fn inject_event(&mut self, event: IdentifyEvent) {
-        println!("identify: {:?}", event);
+    fn inject_event(&mut self, event: GossipsubEvent) {
+        println!("MSG: {:?}", event);
+        match event {
+            GossipsubEvent::Subscribed { peer_id, topic } => {
+                println!("Subscribed:: peer: {} topic/channel: {}", peer_id, topic)
+            }
+            _ => (),
+        }
     }
 }
