@@ -8,7 +8,7 @@ use crate::request;
 //
 
 pub fn connect_p2p(url: String) -> Result<()> {
-    println!("\n\n WS URL ON RUST {}", url);
+    println!("\n\n P2P URL ON RUST {}", url);
     request::connect_p2p(url).unwrap();
     Ok(())
 }

@@ -52,6 +52,7 @@ class CEVPeerProvider with ChangeNotifier {
     await api.connectP2P(
         url:
             "${Env.p2pURL}/12D3KooWCazx4ZLTdrA1yeTTmCy5sGW32SFejztJTGdSZwnGf5Yo");
+
     // String s = String.fromCharCodes(data);
     // var outputAsUint8List = Uint8List.fromList(s.codeUnits);
     // var decoded = utf8.decode(data);

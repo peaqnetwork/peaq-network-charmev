@@ -86,6 +86,7 @@ class CEVApplicationProvider extends ChangeNotifier {
     if (authenticated) {
       _log.fine("navigating to home screen");
       accountProvider.connectNode();
+      // initiate the p2p connection
       peerProvider.connectP2P();
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         builder: (context) => const HomeScreen(),

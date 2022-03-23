@@ -2132,7 +2132,18 @@ dependencies = [
  "futures",
  "libp2p",
  "log",
+ "once_cell",
+ "peaq-p2p-proto-message",
+ "protobuf",
  "tokio",
+]
+
+[[package]]
+name = "peaq-p2p-proto-message"
+version = "0.1.0"
+source = "git+https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git?branch=dev#6ed453e70651cea539b4b8b742361e46142b7095"
+dependencies = [
+ "protobuf",
 ]
 
 [[package]]
@@ -2374,6 +2385,15 @@ checksum = "534b7a0e836e3c482d2693070f982e39e7611da9695d4d1f5a4b186b51faef0a"
 dependencies = [
  "bytes",
  "prost",
+]
+
+[[package]]
+name = "protobuf"
+version = "3.0.0-alpha.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a416d5c5d48e9cec99c6348d72567827a7db92eb9a6dac4c6bbf498c92b5387c"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]
