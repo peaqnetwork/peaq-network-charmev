@@ -13,6 +13,7 @@ import 'package:charmev/config/navigator.dart';
 import 'package:charmev/screens/onboarding.dart';
 
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/providers/peer_provider.dart';
 
 // / The [CEVApplicationProvider] handles initialization in the [EntryScreen] when
 /// starting the app.
@@ -20,13 +21,15 @@ class CEVApplicationProvider extends ChangeNotifier {
   CEVApplicationProvider(BuildContext context,
       {required this.cevSharedPrefs,
       required this.accountProvider,
-      required this.chargeProvider}) {
+      required this.chargeProvider,
+      required this.peerProvider}) {
     _initialize(context);
   }
 
   final CEVSharedPref cevSharedPrefs;
   final CEVAccountProvider accountProvider;
   final CEVChargeProvider chargeProvider;
+  final CEVPeerProvider peerProvider;
 
   static CEVApplicationProvider of(BuildContext context) {
     return provider.Provider.of<CEVApplicationProvider>(context);
@@ -83,6 +86,7 @@ class CEVApplicationProvider extends ChangeNotifier {
     if (authenticated) {
       _log.fine("navigating to home screen");
       accountProvider.connectNode();
+      peerProvider.connectP2P();
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         builder: (context) => const HomeScreen(),
         duration: const Duration(milliseconds: 600),
