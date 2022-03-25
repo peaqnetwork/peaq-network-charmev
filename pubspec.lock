@@ -353,7 +353,7 @@ packages:
     source: hosted
     version: "0.6.3"
   json_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: json_annotation
       url: "https://pub.dartlang.org"
@@ -478,6 +478,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.4"
+  peaq_network_ev_charging_message_format:
+    dependency: "direct main"
+    description:
+      path: dart
+      ref: efdd8d1dfe0c69fd2c76fb7d0472c78dc7add19d
+      resolved-ref: efdd8d1dfe0c69fd2c76fb7d0472c78dc7add19d
+      url: "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git"
+    source: git
+    version: "0.1.0"
   petitparser:
     dependency: transitive
     description:
@@ -513,6 +522,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.4"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   provider:
     dependency: "direct main"
     description:

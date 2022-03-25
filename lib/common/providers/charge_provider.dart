@@ -18,6 +18,8 @@ import 'package:schnorr/schnorr.dart' as scn;
 import 'package:elliptic/elliptic.dart' as ec;
 import 'package:substrate_sign_flutter/substrate_sign_flutter.dart' as subsign;
 import 'package:scan/scan.dart';
+import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart';
+import 'package:peaq_network_ev_charging_message_format/did_document_format.pbenum.dart';
 
 class CEVChargeProvider with ChangeNotifier {
   CEVChargeProvider({
@@ -144,8 +146,8 @@ class CEVChargeProvider with ChangeNotifier {
     }
   }
 
-  /// fetch provider Did  details from chain state storage
-  fetchProviderDidDetails(String did) async {
+  /// fetch provider Did  document from chain state storage
+  fetchProviderDidDocument(String did) async {
     reset();
     if (_providerDid == _station.did) {
       generateDetails(notify: true);
@@ -160,62 +162,29 @@ class CEVChargeProvider with ChangeNotifier {
 
     var address = did.split(":")[2];
 
+    var doc = await appProvider.peerProvider.fetchDidDocument(address);
+
+    if (doc.id.isEmpty) {
+      setStatus(LoadingStatus.error, message: Env.providerDidNotFound);
+      notifyListeners();
+    }
+
     _status = LoadingStatus.loading;
     notifyListeners();
 
-    var key = "station_data";
-    var params = {
-      "address": address,
-      "key": key,
-    };
-
-    var url = Env.storageURL;
-
-    print(_dio.options.baseUrl);
-
-    var res =
-        await _dio.post(url, data: json.encode(params)).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.providerDidNotFound);
-      print("Err:: $err");
-      return err;
-    });
-
-    print("res data:: ${res}");
-    print("res data:: ${res.data}");
-
-    String hashKey = res.data ?? "";
-
-    if (hashKey.length < 64) {
-      setStatus(LoadingStatus.error, message: Env.storageKeyGenError);
-      notifyListeners();
-      return;
-    }
-
-    url = "$url/$hashKey";
-    var result = await _dio.get(url);
-
-    if (result.data["message"] == "STORAGE NOT FOUND") {
-      setStatus(LoadingStatus.error, message: "Provider Did Details not Found");
-      notifyListeners();
-      return;
-    }
-
-    print(result.data);
-
-    var enData = json.decode(result.data["value"]);
-
     _station.did = _providerDid;
     _station.address = address;
-    _station.plugType = enData["plug_type"];
-    _station.status = enData["status"];
-    _station.power = enData["power"];
-    // _station.stopUrl = enData["stop_url"];
 
-    // if (_station.stopUrl == null) {
-    //   setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
-    // } else {
-    //   setStatus(LoadingStatus.idle, message: "");
-    // }
+    for (var i = 0; i < doc.services.length; i++) {
+      var service = doc.services[i];
+      // Get the station metadata
+      if (service.type == ServiceType.metadata) {
+        var metadata = service.metadata;
+        _station.plugType = metadata.plugType;
+        _station.status = metadata.status.toString();
+        _station.power = metadata.power;
+      }
+    }
 
     setStatus(LoadingStatus.idle, message: "");
 

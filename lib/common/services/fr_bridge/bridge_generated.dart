@@ -13,6 +13,12 @@ import 'dart:ffi' as ffi;
 
 abstract class PeaqCodecApi {
   Future<void> connectP2P({required String url, dynamic hint});
+
+  Future<Uint8List> fetchDidDocument(
+      {required String wsUrl,
+      required String publicKey,
+      required String storageName,
+      dynamic hint});
 }
 
 class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
@@ -32,6 +38,26 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: ["url"],
         ),
         argValues: [url],
+        hint: hint,
+      ));
+
+  Future<Uint8List> fetchDidDocument(
+          {required String wsUrl,
+          required String publicKey,
+          required String storageName,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_fetch_did_document(
+            port_,
+            _api2wire_String(wsUrl),
+            _api2wire_String(publicKey),
+            _api2wire_String(storageName)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "fetch_did_document",
+          argNames: ["wsUrl", "publicKey", "storageName"],
+        ),
+        argValues: [wsUrl, publicKey, storageName],
         hint: hint,
       ));
 
@@ -55,6 +81,14 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
 }
 
 // Section: wire2api
+int _wire2api_u8(dynamic raw) {
+  return raw as int;
+}
+
+Uint8List _wire2api_uint_8_list(dynamic raw) {
+  return raw as Uint8List;
+}
+
 void _wire2api_unit(dynamic raw) {
   return;
 }
@@ -97,6 +131,31 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
               ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_connect_p2p');
   late final _wire_connect_p2p = _wire_connect_p2pPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_fetch_did_document(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> ws_url,
+    ffi.Pointer<wire_uint_8_list> public_key,
+    ffi.Pointer<wire_uint_8_list> storage_name,
+  ) {
+    return _wire_fetch_did_document(
+      port_,
+      ws_url,
+      public_key,
+      storage_name,
+    );
+  }
+
+  late final _wire_fetch_did_documentPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_fetch_did_document');
+  late final _wire_fetch_did_document = _wire_fetch_did_documentPtr.asFunction<
+      void Function(int, ffi.Pointer<wire_uint_8_list>,
+          ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,

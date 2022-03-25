@@ -13,6 +13,7 @@ import 'package:charmev/common/services/fr_bridge/bridge_generated.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:charmev/config/env.dart';
+import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart';
 
 const base = 'peaq_codec_api';
 final path = Platform.isWindows
@@ -52,12 +53,26 @@ class CEVPeerProvider with ChangeNotifier {
     await api.connectP2P(
         url:
             "${Env.p2pURL}/12D3KooWCazx4ZLTdrA1yeTTmCy5sGW32SFejztJTGdSZwnGf5Yo");
+  }
 
-    // String s = String.fromCharCodes(data);
-    // var outputAsUint8List = Uint8List.fromList(s.codeUnits);
-    // var decoded = utf8.decode(data);
-    // print("P2P DATA:: $data");
-    // print('P2P decoded DATA:: $decoded');
-    // print("P2P outputAsUint8List DATA:: $outputAsUint8List");
+  Future<Document> fetchDidDocument(String publicKey) async {
+    var data = await api.fetchDidDocument(
+        wsUrl: Env.peaqTestnet,
+        publicKey: publicKey,
+        storageName: Env.didDocAttributeName);
+
+    String s = String.fromCharCodes(data);
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    // decode did document data
+    List<int> docRawData = List<int>.from(decodedRes["data"]);
+    String docCharCode = String.fromCharCodes(docRawData);
+    var docOutputAsUint8List = Uint8List.fromList(docCharCode.codeUnits);
+
+    var doc = Document();
+    doc.mergeFromBuffer(docOutputAsUint8List);
+
+    return doc;
   }
 }

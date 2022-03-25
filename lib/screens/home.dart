@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen>
                                               .pause();
                                           _chargeProvider.providerDid = data;
                                           await _chargeProvider
-                                              .fetchProviderDidDetails(data);
+                                              .fetchProviderDidDocument(data);
                                           CEVApp.router.navigateTo(
                                               context, CEVRoutes.providerDetail,
                                               transition:

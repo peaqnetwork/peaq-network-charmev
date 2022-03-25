@@ -28,6 +28,28 @@ pub extern "C" fn wire_connect_p2p(port_: i64, url: *mut wire_uint_8_list) {
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_fetch_did_document(
+    port_: i64,
+    ws_url: *mut wire_uint_8_list,
+    public_key: *mut wire_uint_8_list,
+    storage_name: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "fetch_did_document",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_ws_url = ws_url.wire2api();
+            let api_public_key = public_key.wire2api();
+            let api_storage_name = storage_name.wire2api();
+            move |task_callback| fetch_did_document(api_ws_url, api_public_key, api_storage_name)
+        },
+    )
+}
+
 // Section: wire structs
 
 #[repr(C)]
