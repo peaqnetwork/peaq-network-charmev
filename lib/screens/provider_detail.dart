@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/providers/peer_provider.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/config/app.dart';
@@ -192,6 +193,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   Widget _buildStartButton(CEVChargeProvider chargeProvider) {
     CEVApplicationProvider appProvider = CEVApplicationProvider.of(context);
+    CEVPeerProvider _peerProvider = CEVPeerProvider.of(context);
     return CEVRaisedButton(
         text: Env.startCharging,
         bgColor: Theme.of(context).primaryColor,
@@ -199,6 +201,11 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         radius: 10,
         isTextBold: true,
         onPressed: () async {
+          await _peerProvider.verifyPeerDidDocument();
+          if (_peerProvider.isPeerVerified) {
+            _peerProvider.connectP2P();
+          }
+
           await chargeProvider.generateAndFundMultisigWallet();
           // await appProvider.accountProvider
           //     .simulateServiceRequestedAndDeliveredEvents();

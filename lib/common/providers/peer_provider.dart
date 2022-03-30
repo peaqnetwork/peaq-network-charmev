@@ -13,7 +13,8 @@ import 'package:charmev/common/services/fr_bridge/bridge_generated.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:charmev/config/env.dart';
-import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart';
+import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart'
+    as doc;
 import 'package:peaq_network_ev_charging_message_format/p2p_message_format.pb.dart'
     as msg;
 
@@ -52,6 +53,12 @@ class CEVPeerProvider with ChangeNotifier {
   List<Detail> _details = [];
 
   String _identityChallengeData = '';
+  bool _isPeerVerified = false;
+  bool _isPeerAuthenticated = false;
+  doc.Document _providerDidDoc = doc.Document();
+
+  bool get isPeerVerified => _isPeerVerified;
+  bool get isPeerAuthenticated => _isPeerAuthenticated;
 
   Future<void> connectP2P() async {
     api.connectP2P(
@@ -69,7 +76,7 @@ class CEVPeerProvider with ChangeNotifier {
     var decodedRes = json.decode(utf8Res);
 
     if (!decodedRes["error"]) {
-      // decode did document data
+      // decode event data
       List<int> docRawData = List<int>.from(decodedRes["data"]);
       String docCharCode = String.fromCharCodes(docRawData);
       var docOutputAsUint8List = Uint8List.fromList(docCharCode.codeUnits);
@@ -77,7 +84,31 @@ class CEVPeerProvider with ChangeNotifier {
       var ev = msg.Event();
       ev.mergeFromBuffer(docOutputAsUint8List);
 
+      switch (ev.eventId) {
+        case msg.EventType.IDENTITY_RESPONSE:
+          {}
+      }
+
       // print("EVENT:: ${ev.toProto3Json()}");
+    }
+  }
+
+  verifyPeerDidDocument() async {
+    print("verifyPeerDidDocument hitts");
+    print("verifyPeerDidDocument signature :: ${_providerDidDoc.signature} ");
+
+    var sig = _providerDidDoc.signature.writeToBuffer();
+    var providerPK = _providerDidDoc.id.split(":")[2];
+
+    var data =
+        await api.verifyPeerDidDocument(providerPk: providerPK, signature: sig);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (!decodedRes["error"]) {
+      _isPeerVerified = true;
+      notifyListeners();
     }
   }
 
@@ -98,7 +129,7 @@ class CEVPeerProvider with ChangeNotifier {
     return;
   }
 
-  Future<Document> fetchDidDocument(String publicKey) async {
+  Future<doc.Document> fetchDidDocument(String publicKey) async {
     var data = await api.fetchDidDocument(
         wsUrl: Env.peaqTestnet,
         publicKey: publicKey,
@@ -107,15 +138,19 @@ class CEVPeerProvider with ChangeNotifier {
     String s = String.fromCharCodes(data);
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
+    var didDoc = doc.Document();
 
-    // decode did document data
-    List<int> docRawData = List<int>.from(decodedRes["data"]);
-    String docCharCode = String.fromCharCodes(docRawData);
-    var docOutputAsUint8List = Uint8List.fromList(docCharCode.codeUnits);
+    if (!decodedRes["error"]) {
+      // decode did document data
+      List<int> docRawData = List<int>.from(decodedRes["data"]);
+      String docCharCode = String.fromCharCodes(docRawData);
+      var docOutputAsUint8List = Uint8List.fromList(docCharCode.codeUnits);
 
-    var doc = Document();
-    doc.mergeFromBuffer(docOutputAsUint8List);
+      didDoc.mergeFromBuffer(docOutputAsUint8List);
 
-    return doc;
+      _providerDidDoc = didDoc;
+      notifyListeners();
+    }
+    return didDoc;
   }
 }

@@ -53,6 +53,26 @@ pub extern "C" fn wire_get_event(port_: i64) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_verify_peer_did_document(
+    port_: i64,
+    provider_pk: *mut wire_uint_8_list,
+    signature: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "verify_peer_did_document",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_provider_pk = provider_pk.wire2api();
+            let api_signature = signature.wire2api();
+            move |task_callback| verify_peer_did_document(api_provider_pk, api_signature)
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_fetch_did_document(
     port_: i64,
     ws_url: *mut wire_uint_8_list,

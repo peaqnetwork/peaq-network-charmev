@@ -212,7 +212,10 @@ class _HomeScreenState extends State<HomeScreen>
                           bgColor: Colors.white,
                           text: "Send Event",
                           onPressed: () async {
-                            await _peerProvider.sendIdentityChallengeEvent();
+                            // await _peerProvider.sendIdentityChallengeEvent();
+                            await _chargeProvider.fetchProviderDidDocument(
+                                "did:peaq:5HpG9w8EBLe5XCrbczpwq5TSXvedjrBGCwqxK1iQ7qUsSWFc");
+                            await _peerProvider.verifyPeerDidDocument();
                           })
                       // _buildImportButton(),
                     ]))));

@@ -26,6 +26,12 @@ pub fn get_event() -> Result<Vec<u8>> {
     Ok(res)
 }
 
+// verify provider did doc signature hash
+pub fn verify_peer_did_document(provider_pk: String, signature: Vec<u8>) -> Result<Vec<u8>> {
+    let res = request::verify_peer_did_document(provider_pk, signature).unwrap();
+    Ok(res)
+}
+
 // Fetch DiD Document from chain
 pub fn fetch_did_document(
     ws_url: String,

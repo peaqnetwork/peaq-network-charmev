@@ -18,6 +18,9 @@ abstract class PeaqCodecApi {
 
   Future<Uint8List> getEvent({dynamic hint});
 
+  Future<Uint8List> verifyPeerDidDocument(
+      {required String providerPk, required Uint8List signature, dynamic hint});
+
   Future<Uint8List> fetchDidDocument(
       {required String wsUrl,
       required String publicKey,
@@ -66,6 +69,22 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: [],
         ),
         argValues: [],
+        hint: hint,
+      ));
+
+  Future<Uint8List> verifyPeerDidDocument(
+          {required String providerPk,
+          required Uint8List signature,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_verify_peer_did_document(port_,
+            _api2wire_String(providerPk), _api2wire_uint_8_list(signature)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "verify_peer_did_document",
+          argNames: ["providerPk", "signature"],
+        ),
+        argValues: [providerPk, signature],
         hint: hint,
       ));
 
@@ -187,6 +206,27 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           'wire_get_event');
   late final _wire_get_event =
       _wire_get_eventPtr.asFunction<void Function(int)>();
+
+  void wire_verify_peer_did_document(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> provider_pk,
+    ffi.Pointer<wire_uint_8_list> signature,
+  ) {
+    return _wire_verify_peer_did_document(
+      port_,
+      provider_pk,
+      signature,
+    );
+  }
+
+  late final _wire_verify_peer_did_documentPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_verify_peer_did_document');
+  late final _wire_verify_peer_did_document =
+      _wire_verify_peer_did_documentPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_fetch_did_document(
     int port_,

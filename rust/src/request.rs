@@ -3,6 +3,7 @@ use log::{trace, Level};
 
 use android_logger::Config;
 use core::result::Result::Ok as CoreOk;
+use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
 use serde::{Deserialize, Serialize};
 
@@ -76,6 +77,29 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
             Ok(res_data)
         }
     }
+}
+
+// Verify that the signed hash on the signature == provider_pk
+pub fn verify_peer_did_document(provider_pk: String, signature: Vec<u8>) -> Result<Vec<u8>> {
+    let mut res = ResponseData {
+        error: true,
+        message: "Verification Failed".to_string(),
+        data: vec![],
+    };
+
+    let sig =
+        doc::Signature::parse_from_bytes(&signature).expect("Failed to parse did doc signature");
+
+    trace!("\n verify_peer_did_document signature {} \n", &sig);
+    let verify = utils::verify_peer_did_signature(provider_pk, sig);
+
+    if verify {
+        res.error = false;
+        res.message = "success".to_string();
+    }
+
+    let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+    Ok(res_data)
 }
 
 pub fn fetch_did_document(

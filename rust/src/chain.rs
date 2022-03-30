@@ -44,8 +44,10 @@ pub fn get_did_document(
 
     // generate public key from string slice
     let pk = sr25519::Public::from_str(&public_key).unwrap();
+    let storage_pallet = "PeaqDid".to_string();
+    let storage_store = "AttributeStore".to_string();
 
-    let key = generate_storage_key(&pk, storage_name).unwrap();
+    let key = generate_storage_key(&pk, storage_pallet, storage_store, storage_name).unwrap();
 
     // make a request to the chain to fetch document
     // and serialize it to Attribute struct
@@ -65,6 +67,8 @@ pub fn get_did_document(
 // generate storage key needed to query the chain storage
 fn generate_storage_key(
     public_key: &sr25519::Public,
+    storage_pallet: String,
+    storage_store: String,
     storage_name: String,
 ) -> Result<subclient::StorageKey, Box<dyn Error>> {
     let attr_key = get_hashed_key_for_attr(&public_key, storage_name.as_bytes());
@@ -83,11 +87,11 @@ fn generate_storage_key(
     let attr_byte_hash_hex = hex::encode(&attr_byte_hash);
 
     // hash the pallet name
-    let pallet_hash = sp_core::twox_128("PeaqDid".as_bytes()).to_vec();
+    let pallet_hash = sp_core::twox_128(storage_pallet.as_bytes()).to_vec();
     let pallet_hash_hex = hex::encode(&pallet_hash);
 
     // hash the storage store name
-    let storage_store_hash = sp_core::twox_128("AttributeStore".as_bytes()).to_vec();
+    let storage_store_hash = sp_core::twox_128(storage_store.as_bytes()).to_vec();
     let storage_store_hash_hex = hex::encode(&storage_store_hash);
 
     // concatenate pallet_hash_hex storage_store_hash_hex attr_byte_hash_hex

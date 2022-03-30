@@ -3177,6 +3177,8 @@ dependencies = [
  "serde",
  "serde_json",
  "sp-core 4.0.0-dev",
+ "sp-keyring",
+ "sp-runtime",
  "substrate-api-client",
  "tokio",
 ]
@@ -4344,6 +4346,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp-keyring"
+version = "4.0.0-dev"
+source = "git+https://github.com/paritytech/substrate.git?branch=master#b9cafba3d0e7a5950ac78d81e4ab7f2074938666"
+dependencies = [
+ "lazy_static",
+ "sp-core 4.1.0-dev",
+ "sp-runtime",
+ "strum",
+]
+
+[[package]]
 name = "sp-keystore"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=master#b9cafba3d0e7a5950ac78d81e4ab7f2074938666"
@@ -4666,6 +4679,27 @@ dependencies = [
  "nalgebra",
  "num-traits",
  "rand 0.8.4",
+]
+
+[[package]]
+name = "strum"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7ac893c7d471c8a21f31cfe213ec4f6d9afeed25537c772e08ef3f005f8729e"
+dependencies = [
+ "strum_macros",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "339f799d8b549e3744c7ac7feb216383e4005d94bdb22561b3ab8f3b808ae9fb"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
