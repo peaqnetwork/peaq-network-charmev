@@ -1,7 +1,6 @@
 use anyhow::*;
-use log::{trace, Level};
+use log::trace;
 
-use android_logger::Config;
 use core::result::Result::Ok as CoreOk;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
@@ -21,7 +20,6 @@ pub struct ResponseData {
 }
 
 pub fn connect_p2p(url: String) -> Result<()> {
-    android_logger::init_once(Config::default().with_min_level(Level::Trace));
     trace!("\n\n connect_p2p RUST hitts:: p2p URL = {}", url);
 
     behaviour::connect(url).expect("p2p connection failed");
@@ -92,6 +90,33 @@ pub fn verify_peer_did_document(provider_pk: String, signature: Vec<u8>) -> Resu
 
     trace!("\n verify_peer_did_document signature {} \n", &sig);
     let verify = utils::verify_peer_did_signature(provider_pk, sig);
+
+    if verify {
+        res.error = false;
+        res.message = "success".to_string();
+    }
+
+    let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+    Ok(res_data)
+}
+
+// Verify that the signed hash of the identity reponse == GENERRATED RANDOM_DATA
+pub fn verify_peer_challenge_data(
+    provider_pk: String,
+    plain_data: String,
+    challenge_data: Vec<u8>,
+) -> Result<Vec<u8>> {
+    let mut res = ResponseData {
+        error: true,
+        message: "Verification Failed".to_string(),
+        data: vec![],
+    };
+
+    let sig = doc::Signature::parse_from_bytes(&challenge_data)
+        .expect("Failed to parse  identity challenge data");
+   
+    // trace!("\n verify_peer_challenge_data signature {:?} \n", &sig);
+    let verify = utils::verify_identity_challenge(provider_pk, plain_data, sig);
 
     if verify {
         res.error = false;

@@ -169,33 +169,33 @@ class _HomeScreenState extends State<HomeScreen>
                                           color: Colors.black,
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(20))),
-                                      // child: ScanView(
-                                      //   controller:
-                                      //       _dumbChargeProvider!.qrController,
-                                      //   scanAreaScale: 1,
-                                      //   scanLineColor: CEVTheme.dialogBgColor,
-                                      //   onCapture: (data) async {
-                                      //     print("Sacnned:: $data");
-                                      //     print("Sacnned len:: ${data.length}");
-                                      //     if (data.length > 64) {
-                                      //       _chargeProvider.setStatus(
-                                      //           LoadingStatus.error,
-                                      //           message:
-                                      //               Env.invalidProviderDid);
+                                      child: ScanView(
+                                        controller:
+                                            _dumbChargeProvider!.qrController,
+                                        scanAreaScale: 1,
+                                        scanLineColor: CEVTheme.dialogBgColor,
+                                        onCapture: (data) async {
+                                          print("Sacnned:: $data");
+                                          print("Sacnned len:: ${data.length}");
+                                          if (data.length > 64) {
+                                            _chargeProvider.setStatus(
+                                                LoadingStatus.error,
+                                                message:
+                                                    Env.invalidProviderDid);
 
-                                      //       return;
-                                      //     }
-                                      //     _dumbChargeProvider!.qrController
-                                      //         .pause();
-                                      //     _chargeProvider.providerDid = data;
-                                      //     await _chargeProvider
-                                      //         .fetchProviderDidDocument(data);
-                                      //     CEVApp.router.navigateTo(
-                                      //         context, CEVRoutes.providerDetail,
-                                      //         transition:
-                                      //             TransitionType.inFromRight);
-                                      //   },
-                                      // ),
+                                            return;
+                                          }
+                                          _dumbChargeProvider!.qrController
+                                              .pause();
+                                          _chargeProvider.providerDid = data;
+                                          await _chargeProvider
+                                              .fetchProviderDidDocument(data);
+                                          CEVApp.router.navigateTo(
+                                              context, CEVRoutes.providerDetail,
+                                              transition:
+                                                  TransitionType.inFromRight);
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -208,15 +208,6 @@ class _HomeScreenState extends State<HomeScreen>
                       const Text(
                         Env.scanQRCode,
                       ),
-                      CEVRaisedButton(
-                          bgColor: Colors.white,
-                          text: "Send Event",
-                          onPressed: () async {
-                            // await _peerProvider.sendIdentityChallengeEvent();
-                            await _chargeProvider.fetchProviderDidDocument(
-                                "did:peaq:5HpG9w8EBLe5XCrbczpwq5TSXvedjrBGCwqxK1iQ7qUsSWFc");
-                            await _peerProvider.verifyPeerDidDocument();
-                          })
                       // _buildImportButton(),
                     ]))));
   }

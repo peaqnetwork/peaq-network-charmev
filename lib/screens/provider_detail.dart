@@ -201,14 +201,25 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         radius: 10,
         isTextBold: true,
         onPressed: () async {
+          chargeProvider.setStatus(LoadingStatus.loading,
+              message: Env.verifyingDidDocument);
           await _peerProvider.verifyPeerDidDocument();
-          if (_peerProvider.isPeerVerified) {
+          if (_peerProvider.isPeerDidDocVerified) {
+            chargeProvider.setStatus(LoadingStatus.loading,
+                message: Env.connectingToPeer);
             _peerProvider.connectP2P();
-          }
 
-          await chargeProvider.generateAndFundMultisigWallet();
-          // await appProvider.accountProvider
-          //     .simulateServiceRequestedAndDeliveredEvents();
+            // delay to allow app to establish peer connection
+            await Future.delayed(const Duration(milliseconds: 2000));
+
+            chargeProvider.setStatus(LoadingStatus.loading,
+                message: Env.authenticatingProvider);
+            // send identity challenge to peer for verification
+            await _peerProvider.sendIdentityChallengeEvent();
+          } else {
+            chargeProvider.setStatus(LoadingStatus.error,
+                message: Env.didVerificationFailed);
+          }
         });
   }
 

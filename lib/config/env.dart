@@ -52,6 +52,14 @@ class Env {
   static const String fundingMultisigWallet = "Funding Multisig wallet...";
   static const String fundingMultisigWalletFailed =
       "Multisig wallet funding failed";
+  static const String authenticatingProvider =
+      "Authenticating Provider Peer...";
+  static const String didVerificationFailed =
+      "Provider DID Document verification failed";
+  static const String connectingToPeer = "Connecting to Provider Peer...";
+  static const String verifyingDidDocument =
+      "Verifying Provider DID Document...";
+
   static const String stopUrlNotSet =
       "Station charge Stop URL not set. You won't be able to stop a charging session.";
   static const String serviceDeliveredEvent = "ServiceDelivered";

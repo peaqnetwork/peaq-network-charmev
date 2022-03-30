@@ -53,12 +53,16 @@ class CEVPeerProvider with ChangeNotifier {
   List<Detail> _details = [];
 
   String _identityChallengeData = '';
-  bool _isPeerVerified = false;
+  bool _isPeerDidDocVerified = false;
   bool _isPeerAuthenticated = false;
   doc.Document _providerDidDoc = doc.Document();
 
-  bool get isPeerVerified => _isPeerVerified;
+  bool get isPeerDidDocVerified => _isPeerDidDocVerified;
   bool get isPeerAuthenticated => _isPeerAuthenticated;
+
+  Future<void> initLog() async {
+    api.initLogger();
+  }
 
   Future<void> connectP2P() async {
     api.connectP2P(
@@ -86,16 +90,18 @@ class CEVPeerProvider with ChangeNotifier {
 
       switch (ev.eventId) {
         case msg.EventType.IDENTITY_RESPONSE:
+          {
+            _authenticatePeer(ev.identityResponseData);
+            break;
+          }
+        default:
           {}
       }
-
-      // print("EVENT:: ${ev.toProto3Json()}");
     }
   }
 
   verifyPeerDidDocument() async {
     print("verifyPeerDidDocument hitts");
-    print("verifyPeerDidDocument signature :: ${_providerDidDoc.signature} ");
 
     var sig = _providerDidDoc.signature.writeToBuffer();
     var providerPK = _providerDidDoc.id.split(":")[2];
@@ -107,8 +113,46 @@ class CEVPeerProvider with ChangeNotifier {
     var decodedRes = json.decode(utf8Res);
 
     if (!decodedRes["error"]) {
-      _isPeerVerified = true;
+      _isPeerDidDocVerified = true;
       notifyListeners();
+    }
+  }
+
+  _verifyPeerIdentity(
+      String providerPK, String plainData, doc.Signature signature) async {
+    print("verifyPeerIdentity hitts");
+
+    var sig = signature.writeToBuffer();
+
+    var data = await api.verifyPeerIdentity(
+        providerPk: providerPK, plainData: plainData, signature: sig);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (!decodedRes["error"]) {
+      _isPeerAuthenticated = true;
+      notifyListeners();
+    }
+  }
+
+  _authenticatePeer(msg.IdentityResponseData data) async {
+    for (var i = 0; i < _providerDidDoc.verificationMethods.length; i++) {
+      var vm = _providerDidDoc.verificationMethods[i];
+
+      var signature = doc.Signature(
+          type: vm.type, issuer: vm.controller, hash: data.signature);
+
+      await _verifyPeerIdentity(vm.id, _identityChallengeData, signature);
+    }
+
+    if (_isPeerAuthenticated) {
+      await appProvider.chargeProvider.generateAndFundMultisigWallet();
+      // await appProvider.accountProvider
+      //     .simulateServiceRequestedAndDeliveredEvents();
+    } else {
+      appProvider.chargeProvider.setStatus(LoadingStatus.error,
+          message: "Unable to Authenticate Prover Peer...");
     }
   }
 

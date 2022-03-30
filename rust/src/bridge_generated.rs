@@ -14,6 +14,18 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
+pub extern "C" fn wire_init_logger(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "init_logger",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| init_logger(),
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_connect_p2p(port_: i64, url: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -68,6 +80,30 @@ pub extern "C" fn wire_verify_peer_did_document(
             let api_provider_pk = provider_pk.wire2api();
             let api_signature = signature.wire2api();
             move |task_callback| verify_peer_did_document(api_provider_pk, api_signature)
+        },
+    )
+}
+
+#[no_mangle]
+pub extern "C" fn wire_verify_peer_identity(
+    port_: i64,
+    provider_pk: *mut wire_uint_8_list,
+    plain_data: *mut wire_uint_8_list,
+    signature: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "verify_peer_identity",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_provider_pk = provider_pk.wire2api();
+            let api_plain_data = plain_data.wire2api();
+            let api_signature = signature.wire2api();
+            move |task_callback| {
+                verify_peer_identity(api_provider_pk, api_plain_data, api_signature)
+            }
         },
     )
 }

@@ -12,6 +12,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'dart:ffi' as ffi;
 
 abstract class PeaqCodecApi {
+  Future<void> initLogger({dynamic hint});
+
   Future<void> connectP2P({required String url, dynamic hint});
 
   Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
@@ -20,6 +22,12 @@ abstract class PeaqCodecApi {
 
   Future<Uint8List> verifyPeerDidDocument(
       {required String providerPk, required Uint8List signature, dynamic hint});
+
+  Future<Uint8List> verifyPeerIdentity(
+      {required String providerPk,
+      required String plainData,
+      required Uint8List signature,
+      dynamic hint});
 
   Future<Uint8List> fetchDidDocument(
       {required String wsUrl,
@@ -34,6 +42,18 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
       PeaqCodecApiImpl.raw(PeaqCodecApiWire(dylib));
 
   PeaqCodecApiImpl.raw(PeaqCodecApiWire inner) : super(inner);
+
+  Future<void> initLogger({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_init_logger(port_),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "init_logger",
+          argNames: [],
+        ),
+        argValues: [],
+        hint: hint,
+      ));
 
   Future<void> connectP2P({required String url, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
@@ -85,6 +105,26 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: ["providerPk", "signature"],
         ),
         argValues: [providerPk, signature],
+        hint: hint,
+      ));
+
+  Future<Uint8List> verifyPeerIdentity(
+          {required String providerPk,
+          required String plainData,
+          required Uint8List signature,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_verify_peer_identity(
+            port_,
+            _api2wire_String(providerPk),
+            _api2wire_String(plainData),
+            _api2wire_uint_8_list(signature)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "verify_peer_identity",
+          argNames: ["providerPk", "plainData", "signature"],
+        ),
+        argValues: [providerPk, plainData, signature],
         hint: hint,
       ));
 
@@ -162,6 +202,20 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           lookup)
       : _lookup = lookup;
 
+  void wire_init_logger(
+    int port_,
+  ) {
+    return _wire_init_logger(
+      port_,
+    );
+  }
+
+  late final _wire_init_loggerPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_init_logger');
+  late final _wire_init_logger =
+      _wire_init_loggerPtr.asFunction<void Function(int)>();
+
   void wire_connect_p2p(
     int port_,
     ffi.Pointer<wire_uint_8_list> url,
@@ -227,6 +281,32 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
       _wire_verify_peer_did_documentPtr.asFunction<
           void Function(int, ffi.Pointer<wire_uint_8_list>,
               ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_verify_peer_identity(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> provider_pk,
+    ffi.Pointer<wire_uint_8_list> plain_data,
+    ffi.Pointer<wire_uint_8_list> signature,
+  ) {
+    return _wire_verify_peer_identity(
+      port_,
+      provider_pk,
+      plain_data,
+      signature,
+    );
+  }
+
+  late final _wire_verify_peer_identityPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_verify_peer_identity');
+  late final _wire_verify_peer_identity =
+      _wire_verify_peer_identityPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_fetch_did_document(
     int port_,
