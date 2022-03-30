@@ -15,14 +15,24 @@ use libp2p::{
 };
 use peaq_p2p_proto_message::p2p_message_format as msg;
 use protobuf::Message;
-use std::{error::Error, time::Duration};
+use std::{collections::VecDeque, error::Error, time::Duration};
 
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
 // static mut EVENT_BEHAVIOUR: Option<&Gossipsub> = None;
+// Static GLOBAL variable of TOPIC so other event publishing function can use it
+// outside of this scope
 pub(crate) static mut EVENT_TOPIC: Option<Topic> = None;
 
+// Static GLOBAL variable of Events that holds all the events received from peer provider
+// for the frontend side to fetch from
+// Stores event received from peer
+// Frontend make a request to fetch from these events
+pub(crate) static mut EVENTS: Lazy<VecDeque<Vec<u8>>> = Lazy::new(|| VecDeque::new());
+
+// Static GLOBAL variable of SWARM so other event publishing function can use it
+// outside of this scope
 pub(crate) static mut EVENT_BEHAVIOUR: Lazy<Mutex<Swarm<EventBehaviour>>> = Lazy::new(|| {
     let gossipsub_config = GossipsubConfigBuilder::default()
         .heartbeat_interval(Duration::from_secs(10)) // This is set to aid debugging by not cluttering the log space
@@ -33,6 +43,9 @@ pub(crate) static mut EVENT_BEHAVIOUR: Lazy<Mutex<Swarm<EventBehaviour>>> = Lazy
         .expect("Valid config");
     let local_key = identity::Keypair::generate_ed25519();
     let topic = Topic::new("charmev");
+
+    // save topic to global variable
+    unsafe { EVENT_TOPIC = Some(topic.clone()) }
 
     let mut gossipsub = Gossipsub::new(
         MessageAuthenticity::Signed(local_key.clone()),
@@ -151,6 +164,10 @@ impl NetworkBehaviourEventProcess<GossipsubEvent> for EventBehaviour {
                     id,
                     peer_id
                 );
+                // Add the event slice to the global EVENT variable
+                unsafe {
+                    EVENTS.push_back(message.data);
+                }
             }
             _ => (),
         }

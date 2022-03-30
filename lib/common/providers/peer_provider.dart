@@ -14,6 +14,8 @@ import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:charmev/config/env.dart';
 import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart';
+import 'package:peaq_network_ev_charging_message_format/p2p_message_format.pb.dart'
+    as msg;
 
 const base = 'peaq_codec_api';
 final path = Platform.isWindows
@@ -52,12 +54,35 @@ class CEVPeerProvider with ChangeNotifier {
   String _identityChallengeData = '';
 
   Future<void> connectP2P() async {
-    await api.connectP2P(
+    api.connectP2P(
         url:
             "${Env.p2pURL}/12D3KooWCazx4ZLTdrA1yeTTmCy5sGW32SFejztJTGdSZwnGf5Yo");
+    runPeriodically(getEvent);
+  }
+
+  Future<void> getEvent() async {
+    print("getEvent hitts");
+
+    var data = await api.getEvent();
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (!decodedRes["error"]) {
+      // decode did document data
+      List<int> docRawData = List<int>.from(decodedRes["data"]);
+      String docCharCode = String.fromCharCodes(docRawData);
+      var docOutputAsUint8List = Uint8List.fromList(docCharCode.codeUnits);
+
+      var ev = msg.Event();
+      ev.mergeFromBuffer(docOutputAsUint8List);
+
+      // print("EVENT:: ${ev.toProto3Json()}");
+    }
   }
 
   Future<void> sendIdentityChallengeEvent() async {
+    print("sendIdentityChallengeEvent hitts");
     var data = await api.sendIdentityChallengeEvent();
 
     var utf8Res = utf8.decode(data);
@@ -68,6 +93,7 @@ class CEVPeerProvider with ChangeNotifier {
     String docCharCode = String.fromCharCodes(docRawData);
 
     _identityChallengeData = docCharCode;
+    // print("RANDOM DATA:: $_identityChallengeData");
 
     return;
   }

@@ -41,6 +41,18 @@ pub extern "C" fn wire_send_identity_challenge_event(port_: i64) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_get_event(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "get_event",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| get_event(),
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_fetch_did_document(
     port_: i64,
     ws_url: *mut wire_uint_8_list,

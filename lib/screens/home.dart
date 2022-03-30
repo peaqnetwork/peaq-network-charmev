@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/providers/peer_provider.dart';
 import 'package:charmev/common/widgets/dropdown.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
@@ -133,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildScreen(BuildContext context) {
     CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
+    CEVPeerProvider _peerProvider = CEVPeerProvider.of(context);
     final qrcodeSize = MediaQuery.of(context).size.width - 32;
     return SizedBox(
         height: double.infinity,
@@ -167,33 +169,33 @@ class _HomeScreenState extends State<HomeScreen>
                                           color: Colors.black,
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(20))),
-                                      child: ScanView(
-                                        controller:
-                                            _dumbChargeProvider!.qrController,
-                                        scanAreaScale: 1,
-                                        scanLineColor: CEVTheme.dialogBgColor,
-                                        onCapture: (data) async {
-                                          print("Sacnned:: $data");
-                                          print("Sacnned len:: ${data.length}");
-                                          if (data.length > 64) {
-                                            _chargeProvider.setStatus(
-                                                LoadingStatus.error,
-                                                message:
-                                                    Env.invalidProviderDid);
+                                      // child: ScanView(
+                                      //   controller:
+                                      //       _dumbChargeProvider!.qrController,
+                                      //   scanAreaScale: 1,
+                                      //   scanLineColor: CEVTheme.dialogBgColor,
+                                      //   onCapture: (data) async {
+                                      //     print("Sacnned:: $data");
+                                      //     print("Sacnned len:: ${data.length}");
+                                      //     if (data.length > 64) {
+                                      //       _chargeProvider.setStatus(
+                                      //           LoadingStatus.error,
+                                      //           message:
+                                      //               Env.invalidProviderDid);
 
-                                            return;
-                                          }
-                                          _dumbChargeProvider!.qrController
-                                              .pause();
-                                          _chargeProvider.providerDid = data;
-                                          await _chargeProvider
-                                              .fetchProviderDidDocument(data);
-                                          CEVApp.router.navigateTo(
-                                              context, CEVRoutes.providerDetail,
-                                              transition:
-                                                  TransitionType.inFromRight);
-                                        },
-                                      ),
+                                      //       return;
+                                      //     }
+                                      //     _dumbChargeProvider!.qrController
+                                      //         .pause();
+                                      //     _chargeProvider.providerDid = data;
+                                      //     await _chargeProvider
+                                      //         .fetchProviderDidDocument(data);
+                                      //     CEVApp.router.navigateTo(
+                                      //         context, CEVRoutes.providerDetail,
+                                      //         transition:
+                                      //             TransitionType.inFromRight);
+                                      //   },
+                                      // ),
                                     ),
                                   ),
                                 ),
@@ -210,8 +212,7 @@ class _HomeScreenState extends State<HomeScreen>
                           bgColor: Colors.white,
                           text: "Send Event",
                           onPressed: () async {
-                            await _chargeProvider.appProvider.peerProvider
-                                .sendIdentityChallengeEvent();
+                            await _peerProvider.sendIdentityChallengeEvent();
                           })
                       // _buildImportButton(),
                     ]))));

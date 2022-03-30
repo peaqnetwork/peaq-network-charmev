@@ -28,9 +28,28 @@ pub fn connect_p2p(url: String) -> Result<()> {
     Ok(())
 }
 
+// get events from the the global variable
+pub fn get_event() -> Result<Vec<u8>> {
+    trace!("\n\n RUST - get_event  hitts");
+
+    let mut res = ResponseData {
+        error: true,
+        message: "Event Not Found".to_string(),
+        data: vec![],
+    };
+
+    if let Some(ev) = event::get_event_from_global() {
+        res.error = false;
+        res.message = "Event Found".to_string();
+        res.data = ev;
+    };
+
+    let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+    Ok(res_data)
+}
+
 pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
-    android_logger::init_once(Config::default().with_min_level(Level::Trace));
-    trace!("\n\n send_identity_challenge_event RUST hitts");
+    trace!("\n\n RUST - send_identity_challenge_event hitts");
 
     let random_data = utils::generate_random_data();
 
@@ -64,7 +83,6 @@ pub fn fetch_did_document(
     public_key: String,
     storage_name: String,
 ) -> Result<Vec<u8>> {
-    android_logger::init_once(Config::default().with_min_level(Level::Trace));
     trace!("\n\n fetch_did_document RUST hitts:: WS URL = {}", ws_url);
 
     let doc = chain::get_did_document(ws_url, public_key, storage_name)

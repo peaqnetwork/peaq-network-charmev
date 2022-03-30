@@ -16,6 +16,8 @@ abstract class PeaqCodecApi {
 
   Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
 
+  Future<Uint8List> getEvent({dynamic hint});
+
   Future<Uint8List> fetchDidDocument(
       {required String wsUrl,
       required String publicKey,
@@ -49,6 +51,18 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
         parseSuccessData: _wire2api_uint_8_list,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "send_identity_challenge_event",
+          argNames: [],
+        ),
+        argValues: [],
+        hint: hint,
+      ));
+
+  Future<Uint8List> getEvent({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_get_event(port_),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "get_event",
           argNames: [],
         ),
         argValues: [],
@@ -159,6 +173,20 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           'wire_send_identity_challenge_event');
   late final _wire_send_identity_challenge_event =
       _wire_send_identity_challenge_eventPtr.asFunction<void Function(int)>();
+
+  void wire_get_event(
+    int port_,
+  ) {
+    return _wire_get_event(
+      port_,
+    );
+  }
+
+  late final _wire_get_eventPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_get_event');
+  late final _wire_get_event =
+      _wire_get_eventPtr.asFunction<void Function(int)>();
 
   void wire_fetch_did_document(
     int port_,

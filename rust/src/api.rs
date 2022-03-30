@@ -20,6 +20,12 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
     Ok(res)
 }
 
+// get peer provider event
+pub fn get_event() -> Result<Vec<u8>> {
+    let res = request::get_event().unwrap();
+    Ok(res)
+}
+
 // Fetch DiD Document from chain
 pub fn fetch_did_document(
     ws_url: String,
