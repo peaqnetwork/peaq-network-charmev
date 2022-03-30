@@ -14,6 +14,12 @@ pub fn connect_p2p(url: String) -> Result<()> {
     Ok(())
 }
 
+// Send Identity Challenge event to provider peer
+pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
+    let res = request::send_identity_challenge_event().unwrap();
+    Ok(res)
+}
+
 // Fetch DiD Document from chain
 pub fn fetch_did_document(
     ws_url: String,

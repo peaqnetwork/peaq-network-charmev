@@ -206,6 +206,13 @@ class _HomeScreenState extends State<HomeScreen>
                       const Text(
                         Env.scanQRCode,
                       ),
+                      CEVRaisedButton(
+                          bgColor: Colors.white,
+                          text: "Send Event",
+                          onPressed: () async {
+                            await _chargeProvider.appProvider.peerProvider
+                                .sendIdentityChallengeEvent();
+                          })
                       // _buildImportButton(),
                     ]))));
   }

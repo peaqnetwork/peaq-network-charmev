@@ -2,10 +2,15 @@ use anyhow::*;
 use log::{trace, Level};
 
 use android_logger::Config;
+use core::result::Result::Ok as CoreOk;
 use protobuf::Message;
 use serde::{Deserialize, Serialize};
 
-use crate::{behaviour, chain};
+use crate::{
+    chain,
+    p2p::{behaviour, event},
+    utils,
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResponseData {
@@ -16,11 +21,42 @@ pub struct ResponseData {
 
 pub fn connect_p2p(url: String) -> Result<()> {
     android_logger::init_once(Config::default().with_min_level(Level::Trace));
-    trace!("\n\n connect_p2p RUST hitts:: WS URL = {}", url);
+    trace!("\n\n connect_p2p RUST hitts:: p2p URL = {}", url);
 
     behaviour::connect(url).expect("p2p connection failed");
 
     Ok(())
+}
+
+pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
+    android_logger::init_once(Config::default().with_min_level(Level::Trace));
+    trace!("\n\n send_identity_challenge_event RUST hitts");
+
+    let random_data = utils::generate_random_data();
+
+    let ev_res = event::send_identity_challenge_event(random_data.clone());
+
+    let mut res = ResponseData {
+        error: false,
+        message: "Event Sent".to_string(),
+        data: vec![],
+    };
+
+    match ev_res {
+        CoreOk(()) => {
+            // return the random data if event is sent succesfully
+            res.data = random_data.as_bytes().to_vec();
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+        Err(_) => {
+            // return the random data if event is sent succesfully
+            res.error = true;
+            res.message = "Error Occurred While sending event".to_string();
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+    }
 }
 
 pub fn fetch_did_document(

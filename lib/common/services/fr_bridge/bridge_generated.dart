@@ -14,6 +14,8 @@ import 'dart:ffi' as ffi;
 abstract class PeaqCodecApi {
   Future<void> connectP2P({required String url, dynamic hint});
 
+  Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
+
   Future<Uint8List> fetchDidDocument(
       {required String wsUrl,
       required String publicKey,
@@ -38,6 +40,18 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: ["url"],
         ),
         argValues: [url],
+        hint: hint,
+      ));
+
+  Future<Uint8List> sendIdentityChallengeEvent({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_send_identity_challenge_event(port_),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "send_identity_challenge_event",
+          argNames: [],
+        ),
+        argValues: [],
         hint: hint,
       ));
 
@@ -131,6 +145,20 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
               ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_connect_p2p');
   late final _wire_connect_p2p = _wire_connect_p2pPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_send_identity_challenge_event(
+    int port_,
+  ) {
+    return _wire_send_identity_challenge_event(
+      port_,
+    );
+  }
+
+  late final _wire_send_identity_challenge_eventPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_send_identity_challenge_event');
+  late final _wire_send_identity_challenge_event =
+      _wire_send_identity_challenge_eventPtr.asFunction<void Function(int)>();
 
   void wire_fetch_did_document(
     int port_,

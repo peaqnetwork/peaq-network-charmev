@@ -49,10 +49,27 @@ class CEVPeerProvider with ChangeNotifier {
   bool _showNodeDropdown = false;
   List<Detail> _details = [];
 
+  String _identityChallengeData = '';
+
   Future<void> connectP2P() async {
     await api.connectP2P(
         url:
             "${Env.p2pURL}/12D3KooWCazx4ZLTdrA1yeTTmCy5sGW32SFejztJTGdSZwnGf5Yo");
+  }
+
+  Future<void> sendIdentityChallengeEvent() async {
+    var data = await api.sendIdentityChallengeEvent();
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    // decode did document data
+    List<int> docRawData = List<int>.from(decodedRes["data"]);
+    String docCharCode = String.fromCharCodes(docRawData);
+
+    _identityChallengeData = docCharCode;
+
+    return;
   }
 
   Future<Document> fetchDidDocument(String publicKey) async {

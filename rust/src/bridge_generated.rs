@@ -29,6 +29,18 @@ pub extern "C" fn wire_connect_p2p(port_: i64, url: *mut wire_uint_8_list) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_send_identity_challenge_event(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "send_identity_challenge_event",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| send_identity_challenge_event(),
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_fetch_did_document(
     port_: i64,
     ws_url: *mut wire_uint_8_list,
