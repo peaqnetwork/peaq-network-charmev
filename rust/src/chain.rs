@@ -73,13 +73,10 @@ fn generate_storage_key(
 ) -> Result<subclient::StorageKey, Box<dyn Error>> {
     let attr_key = get_hashed_key_for_attr(&public_key, storage_name.as_bytes());
     // encode the key using blake2b
-    let attr_key_hex = hex::encode(&attr_key);
-    // convert the hash_key to bytes
-    let attr_byte = hex::decode(&attr_key_hex).unwrap();
-    // hash the attr_byte to bytes using blake2b concat method
-    let attr_byte_hash = sp_core::blake2_128(&attr_byte[..])
+    // hash the attr_key to bytes using blake2b concat method
+    let attr_byte_hash = sp_core::blake2_128(&attr_key)
         .iter()
-        .chain(attr_byte.iter())
+        .chain(attr_key.iter())
         .cloned()
         .collect::<Vec<_>>();
 
