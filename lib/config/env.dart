@@ -73,7 +73,7 @@ class Env {
   // static const String scaleCodecBaseURL =
   // "https:///955c-197-210-70-117.ngrok.io";
   static const String didDocAttributeName = "v2";
-  static const String p2pURL = "/ip4/10.0.2.2/tcp/10333/p2p";
+  // static const String p2pURL = "/ip4/10.0.2.2/tcp/10333/p2p";
   static const String eventURL = "/events";
   static const String storageURL = "/storage";
   static const String multisigURL = "/multisig";

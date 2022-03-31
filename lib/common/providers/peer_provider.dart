@@ -53,6 +53,7 @@ class CEVPeerProvider with ChangeNotifier {
   List<Detail> _details = [];
 
   String _identityChallengeData = '';
+  String _p2pURL = '';
   bool _isPeerDidDocVerified = false;
   bool _isPeerAuthenticated = false;
   doc.Document _providerDidDoc = doc.Document();
@@ -65,9 +66,15 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<void> connectP2P() async {
-    api.connectP2P(
-        url:
-            "${Env.p2pURL}/12D3KooWCazx4ZLTdrA1yeTTmCy5sGW32SFejztJTGdSZwnGf5Yo");
+    // validate p2p URL
+    var splitURL = _p2pURL.trim().split("/");
+
+    if (splitURL.length != 6) {
+      appProvider.chargeProvider
+          .setStatus(LoadingStatus.error, message: "Invalid P2P URL found");
+    }
+
+    api.connectP2P(url: _p2pURL);
     runPeriodically(getEvent);
   }
 
@@ -129,6 +136,7 @@ class CEVPeerProvider with ChangeNotifier {
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
+    print("verifyPeerIdentity decodedRes:: $decodedRes");
 
     if (!decodedRes["error"]) {
       _isPeerAuthenticated = true;
@@ -193,8 +201,20 @@ class CEVPeerProvider with ChangeNotifier {
       didDoc.mergeFromBuffer(docOutputAsUint8List);
 
       _providerDidDoc = didDoc;
+      _setP2PURL(didDoc.services);
       notifyListeners();
     }
     return didDoc;
+  }
+
+  _setP2PURL(List<doc.Service> services) {
+    for (var i = 0; i < services.length; i++) {
+      var service = services[i];
+
+      if (service.type == doc.ServiceType.p2p) {
+        _p2pURL = service.stringData;
+        break;
+      }
+    }
   }
 }

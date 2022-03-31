@@ -183,6 +183,7 @@ class CEVChargeProvider with ChangeNotifier {
         _station.plugType = metadata.plugType;
         _station.status = metadata.status.toString();
         _station.power = metadata.power;
+        break;
       }
     }
 
