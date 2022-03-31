@@ -4,7 +4,6 @@ use keyring::sr25519;
 use sp_runtime::traits::Verify;
 use std::str::FromStr;
 
-use log::trace;
 use peaq_p2p_proto_message::did_document_format as doc;
 
 pub fn generate_random_data() -> String {

@@ -20,6 +20,8 @@ use std::{collections::VecDeque, error::Error, time::Duration};
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
+use crate::p2p::event;
+
 // static mut EVENT_BEHAVIOUR: Option<&Gossipsub> = None;
 // Static GLOBAL variable of TOPIC so other event publishing function can use it
 // outside of this scope
@@ -114,8 +116,15 @@ pub async fn connect(peer_url: String) -> Result<(), Box<dyn Error>> {
     if let Some(to_dial) = Some(peer_url) {
         let address: Multiaddr = to_dial.parse().expect("User to provide valid address.");
         match swarm.dial(address.clone()) {
-            Ok(_) => println!("Dialed {:?}", address),
-            Err(e) => println!("Dial {:?} failed: {:?}", address, e),
+            Ok(_) => {
+                event::add_event_to_global(msg::EventType::PEER_CONNECTED);
+                println!("Dialed {:?}", address);
+            }
+            Err(e) => {
+                event::add_event_to_global(msg::EventType::PEER_CONNECTION_FAILED);
+
+                println!("Dial {:?} failed: {:?}", address, e);
+            }
         };
     }
 
@@ -151,6 +160,7 @@ impl NetworkBehaviourEventProcess<GossipsubEvent> for EventBehaviour {
         println!("MSG: {:?}", event);
         match event {
             GossipsubEvent::Subscribed { peer_id, topic } => {
+                event::add_event_to_global(msg::EventType::PEER_SUBSCRIBED);
                 println!("Subscribed:: peer: {} topic/channel: {}", peer_id, topic)
             }
             GossipsubEvent::Message {

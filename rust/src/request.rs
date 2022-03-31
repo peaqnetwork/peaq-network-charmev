@@ -114,7 +114,7 @@ pub fn verify_peer_challenge_data(
 
     let sig = doc::Signature::parse_from_bytes(&challenge_data)
         .expect("Failed to parse  identity challenge data");
-   
+
     // trace!("\n verify_peer_challenge_data signature {:?} \n", &sig);
     let verify = utils::verify_identity_challenge(provider_pk, plain_data, sig);
 

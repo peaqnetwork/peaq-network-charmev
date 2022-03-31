@@ -3186,7 +3186,7 @@ dependencies = [
 [[package]]
 name = "peaq-p2p-proto-message"
 version = "0.1.0"
-source = "git+https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git?rev=82829f54886e560cbc6686c4c3c1f063efcd72ac#82829f54886e560cbc6686c4c3c1f063efcd72ac"
+source = "git+https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git#685dd5c4a1a4baecd7041b4b336ddb676250071a"
 dependencies = [
  "protobuf",
 ]

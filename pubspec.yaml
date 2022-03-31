@@ -57,7 +57,7 @@ dependencies:
     git: 
       url: https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git
       path: dart
-      ref: efdd8d1dfe0c69fd2c76fb7d0472c78dc7add19d
+      ref: 0567eeb20e2709a4da5c870f61ed46ae466d0634
 
 dev_dependencies:
   flutter_test:

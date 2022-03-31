@@ -56,10 +56,14 @@ class CEVPeerProvider with ChangeNotifier {
   String _p2pURL = '';
   bool _isPeerDidDocVerified = false;
   bool _isPeerAuthenticated = false;
+  bool _isPeerConnected = false;
+  bool _isPeerSubscribed = false;
   doc.Document _providerDidDoc = doc.Document();
 
   bool get isPeerDidDocVerified => _isPeerDidDocVerified;
   bool get isPeerAuthenticated => _isPeerAuthenticated;
+  bool get isPeerConnected => _isPeerConnected;
+  bool get isPeerSubscribed => _isPeerSubscribed;
 
   Future<void> initLog() async {
     api.initLogger();
@@ -69,7 +73,7 @@ class CEVPeerProvider with ChangeNotifier {
     // validate p2p URL
     var splitURL = _p2pURL.trim().split("/");
 
-    if (splitURL.length != 6) {
+    if (splitURL.length != 7) {
       appProvider.chargeProvider
           .setStatus(LoadingStatus.error, message: "Invalid P2P URL found");
     }
@@ -86,6 +90,8 @@ class CEVPeerProvider with ChangeNotifier {
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
 
+    print("getEvent EVENT decodedRes $decodedRes");
+
     if (!decodedRes["error"]) {
       // decode event data
       List<int> docRawData = List<int>.from(decodedRes["data"]);
@@ -94,8 +100,34 @@ class CEVPeerProvider with ChangeNotifier {
 
       var ev = msg.Event();
       ev.mergeFromBuffer(docOutputAsUint8List);
+      print("getEvent EVENT ev $ev");
 
       switch (ev.eventId) {
+        case msg.EventType.PEER_CONNECTED:
+          {
+            _isPeerConnected = true;
+            break;
+          }
+        case msg.EventType.PEER_CONNECTION_FAILED:
+          {
+            _isPeerConnected = false;
+            appProvider.chargeProvider.setStatus(LoadingStatus.error,
+                message:
+                    "Unable to Connect to Provider Peer. Please check the p2p URL on DID document is correct.");
+            break;
+          }
+        case msg.EventType.PEER_SUBSCRIBED:
+          {
+            _isPeerSubscribed = true;
+            // Authenticate peer is it's connected and subscribed
+            if (_isPeerConnected) {
+              appProvider.chargeProvider.setStatus(LoadingStatus.loading,
+                  message: Env.authenticatingProvider);
+              // send identity challenge to peer for verification
+              _sendIdentityChallengeEvent();
+            }
+            break;
+          }
         case msg.EventType.IDENTITY_RESPONSE:
           {
             _authenticatePeer(ev.identityResponseData);
@@ -164,7 +196,7 @@ class CEVPeerProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sendIdentityChallengeEvent() async {
+  Future<void> _sendIdentityChallengeEvent() async {
     print("sendIdentityChallengeEvent hitts");
     var data = await api.sendIdentityChallengeEvent();
 
@@ -176,7 +208,7 @@ class CEVPeerProvider with ChangeNotifier {
     String docCharCode = String.fromCharCodes(docRawData);
 
     _identityChallengeData = docCharCode;
-    // print("RANDOM DATA:: $_identityChallengeData");
+    print("RANDOM DATA:: $_identityChallengeData");
 
     return;
   }

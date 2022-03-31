@@ -208,14 +208,6 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             chargeProvider.setStatus(LoadingStatus.loading,
                 message: Env.connectingToPeer);
             _peerProvider.connectP2P();
-
-            // delay to allow app to establish peer connection
-            await Future.delayed(const Duration(milliseconds: 2000));
-
-            chargeProvider.setStatus(LoadingStatus.loading,
-                message: Env.authenticatingProvider);
-            // send identity challenge to peer for verification
-            await _peerProvider.sendIdentityChallengeEvent();
           } else {
             chargeProvider.setStatus(LoadingStatus.error,
                 message: Env.didVerificationFailed);

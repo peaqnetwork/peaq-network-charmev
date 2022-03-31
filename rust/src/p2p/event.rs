@@ -1,4 +1,3 @@
-// use log::trace;
 use peaq_p2p_proto_message::p2p_message_format as msg;
 use protobuf::Message;
 use std::error::Error;
@@ -50,4 +49,15 @@ pub fn send_identity_challenge_event(plain_data: String) -> Result<(), Box<dyn E
     }
 
     Ok(())
+}
+
+pub fn add_event_to_global(event: msg::EventType) {
+    let mut ev = msg::Event::new();
+    ev.event_id = event.into();
+
+    let ev_vec = ev.write_to_bytes().expect("Failed to write event to byte");
+
+    unsafe {
+        behaviour::EVENTS.lock().unwrap().push_back(ev_vec);
+    }
 }
