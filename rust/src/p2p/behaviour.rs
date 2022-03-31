@@ -23,13 +23,14 @@ use std::sync::Mutex;
 // static mut EVENT_BEHAVIOUR: Option<&Gossipsub> = None;
 // Static GLOBAL variable of TOPIC so other event publishing function can use it
 // outside of this scope
-pub(crate) static mut EVENT_TOPIC: Option<Topic> = None;
+pub(crate) static mut EVENT_TOPIC: Lazy<Mutex<Option<Topic>>> = Lazy::new(|| Mutex::new(None));
 
 // Static GLOBAL variable of Events that holds all the events received from peer provider
 // for the frontend side to fetch from
 // Stores event received from peer
 // Frontend make a request to fetch from these events
-pub(crate) static mut EVENTS: Lazy<VecDeque<Vec<u8>>> = Lazy::new(|| VecDeque::new());
+pub(crate) static mut EVENTS: Lazy<Mutex<VecDeque<Vec<u8>>>> =
+    Lazy::new(|| Mutex::new(VecDeque::new()));
 
 // Static GLOBAL variable of SWARM so other event publishing function can use it
 // outside of this scope
@@ -45,7 +46,9 @@ pub(crate) static mut EVENT_BEHAVIOUR: Lazy<Mutex<Swarm<EventBehaviour>>> = Lazy
     let topic = Topic::new("charmev");
 
     // save topic to global variable
-    unsafe { EVENT_TOPIC = Some(topic.clone()) }
+    unsafe {
+        *EVENT_TOPIC.lock().unwrap() = Some(topic.clone());
+    }
 
     let mut gossipsub = Gossipsub::new(
         MessageAuthenticity::Signed(local_key.clone()),
@@ -166,7 +169,7 @@ impl NetworkBehaviourEventProcess<GossipsubEvent> for EventBehaviour {
                 );
                 // Add the event slice to the global EVENT variable
                 unsafe {
-                    EVENTS.push_back(message.data);
+                    EVENTS.lock().unwrap().push_back(message.data);
                 }
             }
             _ => (),

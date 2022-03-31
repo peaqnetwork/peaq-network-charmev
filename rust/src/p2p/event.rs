@@ -10,10 +10,10 @@ pub fn get_event_from_global() -> Option<Vec<u8>> {
     let mut event: Option<Vec<u8>> = None;
 
     unsafe {
-        if let Some(ev) = behaviour::EVENTS.front() {
+        if let Some(ev) = behaviour::EVENTS.get_mut().unwrap().front() {
             event = Some(ev.to_vec());
             // remove the element from the slice
-            behaviour::EVENTS.pop_front();
+            behaviour::EVENTS.get_mut().unwrap().pop_front();
         };
     }
 
@@ -41,7 +41,7 @@ pub fn send_identity_challenge_event(plain_data: String) -> Result<(), Box<dyn E
 
     unsafe {
         swarm = behaviour::EVENT_BEHAVIOUR.get_mut().unwrap();
-        topic = behaviour::EVENT_TOPIC.clone();
+        topic = behaviour::EVENT_TOPIC.get_mut().unwrap().clone();
     }
     // trace!("send_identity_challenge_event topic:: {:?}", &topic);
 
