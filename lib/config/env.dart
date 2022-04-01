@@ -52,6 +52,14 @@ class Env {
   static const String fundingMultisigWallet = "Funding Multisig wallet...";
   static const String fundingMultisigWalletFailed =
       "Multisig wallet funding failed";
+  static const String authenticatingProvider =
+      "Authenticating Provider Peer...";
+  static const String didVerificationFailed =
+      "Provider DID Document verification failed";
+  static const String connectingToPeer = "Connecting to Provider Peer...";
+  static const String verifyingDidDocument =
+      "Verifying Provider DID Document...";
+
   static const String stopUrlNotSet =
       "Station charge Stop URL not set. You won't be able to stop a charging session.";
   static const String serviceDeliveredEvent = "ServiceDelivered";
@@ -59,12 +67,13 @@ class Env {
   static const String extrinsicSuccessEvent = "ExtrinsicSuccess";
   static const String extrinsicFailedEvent = "ExtrinsicFailed";
   static const String approved = "Approved";
-  static const String peaqTestnet = "wss://fn1.test.peaq.network";
+  static const String peaqTestnet = "wss://wss.test.peaq.network";
   // static const String peaqTestnet = "wss://98e0-197-210-70-213.ngrok.io";
   static const String scaleCodecBaseURL = "https://codec.test.peaq.network";
   // static const String scaleCodecBaseURL =
   // "https:///955c-197-210-70-117.ngrok.io";
-  static const String p2pURL = "/ip4/10.0.2.2/tcp/10333/p2p";
+  static const String didDocAttributeName = "v2";
+  // static const String p2pURL = "/ip4/10.0.2.2/tcp/10333/p2p";
   static const String eventURL = "/events";
   static const String storageURL = "/storage";
   static const String multisigURL = "/multisig";

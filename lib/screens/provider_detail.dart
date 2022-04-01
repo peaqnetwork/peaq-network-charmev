@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/providers/peer_provider.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/config/app.dart';
@@ -192,6 +193,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   Widget _buildStartButton(CEVChargeProvider chargeProvider) {
     CEVApplicationProvider appProvider = CEVApplicationProvider.of(context);
+    CEVPeerProvider _peerProvider = CEVPeerProvider.of(context);
     return CEVRaisedButton(
         text: Env.startCharging,
         bgColor: Theme.of(context).primaryColor,
@@ -199,9 +201,17 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
         radius: 10,
         isTextBold: true,
         onPressed: () async {
-          await chargeProvider.generateAndFundMultisigWallet();
-          // await appProvider.accountProvider
-          //     .simulateServiceRequestedAndDeliveredEvents();
+          chargeProvider.setStatus(LoadingStatus.loading,
+              message: Env.verifyingDidDocument);
+          await _peerProvider.verifyPeerDidDocument();
+          if (_peerProvider.isPeerDidDocVerified) {
+            chargeProvider.setStatus(LoadingStatus.loading,
+                message: Env.connectingToPeer);
+            _peerProvider.connectP2P();
+          } else {
+            chargeProvider.setStatus(LoadingStatus.error,
+                message: Env.didVerificationFailed);
+          }
         });
   }
 

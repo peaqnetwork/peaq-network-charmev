@@ -59,6 +59,7 @@ class CEVApplicationProvider extends ChangeNotifier {
     cevSharedPrefs.appProvider = this;
     accountProvider.appProvider = this;
     chargeProvider.appProvider = this;
+    peerProvider.appProvider = this;
 
     await Future.wait([
       // charmev shared preferences
@@ -86,8 +87,9 @@ class CEVApplicationProvider extends ChangeNotifier {
     if (authenticated) {
       _log.fine("navigating to home screen");
       accountProvider.connectNode();
+      peerProvider.initLog();
       // initiate the p2p connection
-      peerProvider.connectP2P();
+      // peerProvider.connectP2P();
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         builder: (context) => const HomeScreen(),
         duration: const Duration(milliseconds: 600),

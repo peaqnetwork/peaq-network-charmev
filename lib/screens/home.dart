@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/providers/peer_provider.dart';
 import 'package:charmev/common/widgets/dropdown.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
@@ -133,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildScreen(BuildContext context) {
     CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
+    CEVPeerProvider _peerProvider = CEVPeerProvider.of(context);
     final qrcodeSize = MediaQuery.of(context).size.width - 32;
     return SizedBox(
         height: double.infinity,
@@ -187,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen>
                                               .pause();
                                           _chargeProvider.providerDid = data;
                                           await _chargeProvider
-                                              .fetchProviderDidDetails(data);
+                                              .fetchProviderDidDocument(data);
                                           CEVApp.router.navigateTo(
                                               context, CEVRoutes.providerDetail,
                                               transition:
