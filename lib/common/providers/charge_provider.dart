@@ -231,7 +231,8 @@ class CEVChargeProvider with ChangeNotifier {
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
 
-    var res2 = await _dio.post(url, data: params).catchError((err) async {
+    var res2 =
+        await _dio.post(url, data: json.encode(params)).catchError((err) async {
       setStatus(LoadingStatus.error, message: Env.fundingMultisigWalletFailed);
       print("Err:: $err");
       return err;
@@ -255,12 +256,16 @@ class CEVChargeProvider with ChangeNotifier {
     setStatus(LoadingStatus.loading, message: Env.requestingService);
 
     var url = Env.transactionURL;
+    var consumer = appProvider.accountProvider.account.address;
+    var provider = _station.address;
 
-    var res = await _dio.post(url, data: params).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.serviceRequestFailed);
-      print("_startCharge Err:: $err");
-      return err;
-    });
+    var res = await appProvider.peerProvider
+        .sendServiceRequestedEvent(provider!, consumer!, token);
+
+    if (!res) {
+      setStatus(LoadingStatus.loading, message: Env.serviceRequestFailed);
+      return;
+    }
 
     setStatus(LoadingStatus.loading, message: Env.serviceRequested);
 

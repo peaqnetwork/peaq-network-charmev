@@ -53,6 +53,30 @@ pub extern "C" fn wire_send_identity_challenge_event(port_: i64) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_send_service_requested_event(
+    port_: i64,
+    provider: *mut wire_uint_8_list,
+    consumer: *mut wire_uint_8_list,
+    token_deposited: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "send_service_requested_event",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_provider = provider.wire2api();
+            let api_consumer = consumer.wire2api();
+            let api_token_deposited = token_deposited.wire2api();
+            move |task_callback| {
+                send_service_requested_event(api_provider, api_consumer, api_token_deposited)
+            }
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_get_event(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {

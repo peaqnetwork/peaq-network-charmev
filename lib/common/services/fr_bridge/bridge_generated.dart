@@ -18,6 +18,12 @@ abstract class PeaqCodecApi {
 
   Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
 
+  Future<Uint8List> sendServiceRequestedEvent(
+      {required String provider,
+      required String consumer,
+      required String tokenDeposited,
+      dynamic hint});
+
   Future<Uint8List> getEvent({dynamic hint});
 
   Future<Uint8List> verifyPeerDidDocument(
@@ -77,6 +83,26 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: [],
         ),
         argValues: [],
+        hint: hint,
+      ));
+
+  Future<Uint8List> sendServiceRequestedEvent(
+          {required String provider,
+          required String consumer,
+          required String tokenDeposited,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_send_service_requested_event(
+            port_,
+            _api2wire_String(provider),
+            _api2wire_String(consumer),
+            _api2wire_String(tokenDeposited)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "send_service_requested_event",
+          argNames: ["provider", "consumer", "tokenDeposited"],
+        ),
+        argValues: [provider, consumer, tokenDeposited],
         hint: hint,
       ));
 
@@ -246,6 +272,33 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           'wire_send_identity_challenge_event');
   late final _wire_send_identity_challenge_event =
       _wire_send_identity_challenge_eventPtr.asFunction<void Function(int)>();
+
+  void wire_send_service_requested_event(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> provider,
+    ffi.Pointer<wire_uint_8_list> consumer,
+    ffi.Pointer<wire_uint_8_list> token_deposited,
+  ) {
+    return _wire_send_service_requested_event(
+      port_,
+      provider,
+      consumer,
+      token_deposited,
+    );
+  }
+
+  late final _wire_send_service_requested_eventPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Void Function(
+                  ffi.Int64,
+                  ffi.Pointer<wire_uint_8_list>,
+                  ffi.Pointer<wire_uint_8_list>,
+                  ffi.Pointer<wire_uint_8_list>)>>(
+      'wire_send_service_requested_event');
+  late final _wire_send_service_requested_event =
+      _wire_send_service_requested_eventPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_get_event(
     int port_,

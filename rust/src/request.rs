@@ -3,6 +3,7 @@ use log::trace;
 
 use core::result::Result::Ok as CoreOk;
 use peaq_p2p_proto_message::did_document_format as doc;
+use peaq_p2p_proto_message::p2p_message_format as msg;
 use protobuf::Message;
 use serde::{Deserialize, Serialize};
 
@@ -52,7 +53,51 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
 
     let random_data = utils::generate_random_data();
 
-    let ev_res = event::send_identity_challenge_event(random_data.clone());
+    let mut challenge_data = msg::IdentityChallengeData::new();
+    challenge_data.plain_data = random_data.clone();
+    let data = msg::event::Data::identity_challenge_data(challenge_data);
+
+    let ev_res = event::send_event(msg::EventType::IDENTITY_CHALLENGE, data);
+
+    let mut res = ResponseData {
+        error: false,
+        message: "Event Sent".to_string(),
+        data: vec![],
+    };
+
+    match ev_res {
+        CoreOk(()) => {
+            // return the random data if event is sent succesfully
+            res.data = random_data.as_bytes().to_vec();
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+        Err(_) => {
+            // return the random data if event is sent succesfully
+            res.error = true;
+            res.message = "Error Occurred While sending event".to_string();
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+    }
+}
+
+pub fn send_service_requested_event(
+    provider: String,
+    consumer: String,
+    token_deposited: String,
+) -> Result<Vec<u8>> {
+    trace!("\n\n RUST - send_service_requested_event hitts");
+
+    let random_data = utils::generate_random_data();
+
+    let mut service_data = msg::ServiceRequestedData::new();
+    service_data.provider = provider;
+    service_data.consumer = consumer;
+    service_data.token_deposited = token_deposited;
+    let data = msg::event::Data::service_requested_data(service_data);
+
+    let ev_res = event::send_event(msg::EventType::SERVICE_REQUESTED, data);
 
     let mut res = ResponseData {
         error: false,

@@ -67,11 +67,10 @@ class Env {
   static const String extrinsicSuccessEvent = "ExtrinsicSuccess";
   static const String extrinsicFailedEvent = "ExtrinsicFailed";
   static const String approved = "Approved";
-  static const String peaqTestnet = "wss://wss.test.peaq.network";
-  // static const String peaqTestnet = "wss://98e0-197-210-70-213.ngrok.io";
-  static const String scaleCodecBaseURL = "https://codec.test.peaq.network";
-  // static const String scaleCodecBaseURL =
-  // "https:///955c-197-210-70-117.ngrok.io";
+  // static const String peaqTestnet = "wss://wss.test.peaq.network";
+  static const String peaqTestnet = "ws://10.0.2.2:9944";
+  // static const String scaleCodecBaseURL = "https://codec.test.peaq.network";
+  static const String scaleCodecBaseURL = "http://10.0.2.2:3030";
   static const String didDocAttributeName = "v2";
   // static const String p2pURL = "/ip4/10.0.2.2/tcp/10333/p2p";
   static const String eventURL = "/events";

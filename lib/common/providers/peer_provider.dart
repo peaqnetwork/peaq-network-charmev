@@ -6,9 +6,12 @@ import 'dart:async';
 
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
+import 'package:charmev/common/widgets/route.dart';
+import 'package:charmev/screens/charging_session.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/models/enum.dart';
 
+import 'package:charmev/config/navigator.dart';
 import 'package:charmev/common/services/fr_bridge/bridge_generated.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
@@ -100,12 +103,32 @@ class CEVPeerProvider with ChangeNotifier {
 
       var ev = msg.Event();
       ev.mergeFromBuffer(docOutputAsUint8List);
-      print("getEvent EVENT ev $ev");
+      print("getEvent EVENT ev ${ev.toProto3Json()}");
 
       switch (ev.eventId) {
         case msg.EventType.PEER_CONNECTED:
           {
             _isPeerConnected = true;
+            break;
+          }
+        case msg.EventType.SERVICE_REQUEST_ACK:
+          {
+            if (!ev.serviceAckData.resp.error) {
+              appProvider.chargeProvider
+                  .setStatus(LoadingStatus.idle, message: "");
+              await Future.delayed(const Duration(milliseconds: 300));
+              appProvider.chargeProvider.chargingStatus =
+                  LoadingStatus.charging;
+
+              CEVNavigator.pushRoute(CEVFadeRoute(
+                builder: (context) => const CharginSessionScreen(),
+                duration: const Duration(milliseconds: 600),
+              ));
+            } else {
+              appProvider.chargeProvider.setStatus(LoadingStatus.error,
+                  message: "Provider Refused the service");
+            }
+
             break;
           }
         case msg.EventType.PEER_CONNECTION_FAILED:
@@ -209,8 +232,22 @@ class CEVPeerProvider with ChangeNotifier {
 
     _identityChallengeData = docCharCode;
     print("RANDOM DATA:: $_identityChallengeData");
+  }
 
-    return;
+  Future<bool> sendServiceRequestedEvent(
+      String provider, String consumer, String tokenDeposited) async {
+    print("sendServiceRequestedEvent hitts");
+    var data = await api.sendServiceRequestedEvent(
+        provider: provider, consumer: consumer, tokenDeposited: tokenDeposited);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (decodedRes["error"]) {
+      return false;
+    }
+
+    return true;
   }
 
   Future<doc.Document> fetchDidDocument(String publicKey) async {

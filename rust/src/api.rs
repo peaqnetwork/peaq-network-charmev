@@ -28,6 +28,16 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
     Ok(res)
 }
 
+// Send Service Requested event to provider peer
+pub fn send_service_requested_event(
+    provider: String,
+    consumer: String,
+    token_deposited: String,
+) -> Result<Vec<u8>> {
+    let res = request::send_service_requested_event(provider, consumer, token_deposited).unwrap();
+    Ok(res)
+}
+
 // get peer provider event
 pub fn get_event() -> Result<Vec<u8>> {
     let res = request::get_event().unwrap();

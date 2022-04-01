@@ -19,12 +19,14 @@ pub fn get_event_from_global() -> Option<Vec<u8>> {
     event
 }
 
-pub fn send_identity_challenge_event(plain_data: String) -> Result<(), Box<dyn Error>> {
+pub fn send_event(
+    event_type: msg::EventType,
+    data: msg::event::Data,
+) -> Result<(), Box<dyn Error>> {
     let mut ev = msg::Event::new();
-    ev.event_id = msg::EventType::IDENTITY_CHALLENGE.into();
-    let mut challenge_data = msg::IdentityChallengeData::new();
-    challenge_data.plain_data = plain_data;
-    let data = Some(msg::event::Data::identity_challenge_data(challenge_data));
+    ev.event_id = event_type.into();
+
+    let data = Some(data);
     ev.data = data;
 
     let v = ev.write_to_bytes().expect("Failed to write event");
