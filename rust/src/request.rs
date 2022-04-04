@@ -1,11 +1,13 @@
 use anyhow::*;
 use log::trace;
+use substrate_api_client::Balance;
 
 use core::result::Result::Ok as CoreOk;
 use peaq_p2p_proto_message::did_document_format as doc;
 use peaq_p2p_proto_message::p2p_message_format as msg;
 use protobuf::Message;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 use crate::{
     chain,
@@ -65,6 +67,39 @@ pub fn create_multisig_wallet(consumer: String, provider: String) -> Result<Vec<
 
     let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
     Ok(res_data)
+}
+
+pub fn transfer_fund(
+    ws_url: String,
+    address: String,
+    amount: String,
+    seed: String,
+) -> Result<Vec<u8>> {
+    trace!("\n\n RUST - transfer_fund hitts");
+
+    let amount: Balance = u128::from_str(amount.as_str()).unwrap();
+
+    let ev_res = chain::transfer(ws_url, address, amount, seed).unwrap();
+
+    let mut res = ResponseData {
+        error: false,
+        message: "Transfer Sent".to_string(),
+        data: vec![],
+    };
+
+    match ev_res {
+        chain::ChainError::Error(err) => {
+            // return the error data if transfer error occurred
+            res.error = true;
+            res.message = err;
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+        _ => {
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+    }
 }
 
 pub fn send_identity_challenge_event() -> Result<Vec<u8>> {

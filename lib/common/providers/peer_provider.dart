@@ -5,6 +5,7 @@ import 'dart:ffi';
 import 'dart:async';
 
 import 'package:charmev/common/models/detail.dart';
+import 'package:charmev/common/models/rust_data.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/screens/charging_session.dart';
@@ -271,6 +272,23 @@ class CEVPeerProvider with ChangeNotifier {
     }
 
     return true;
+  }
+
+  Future<CEVRustResponse> transferFund(
+      String address, String amount, String seed) async {
+    print("transferFund hitts");
+
+    var data = await api.transferFund(
+        wsUrl: Env.peaqTestnet, address: address, amount: amount, seed: seed);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    print("transferFund decodedRes:: $decodedRes");
+
+    // decode rust data data
+    var rData = CEVRustResponse.fromJson(decodedRes);
+    return rData;
   }
 
   Future<doc.Document> fetchDidDocument(String publicKey) async {

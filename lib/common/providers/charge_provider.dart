@@ -210,30 +210,22 @@ class CEVChargeProvider with ChangeNotifier {
       setStatus(LoadingStatus.error, message: Env.creatingMultisigWalletFailed);
     }
 
-    print("generateAndFundMultisigWallet  multisigAddress:: $multisigAddress");
+    // print("generateAndFundMultisigWallet  multisigAddress:: $multisigAddress");
 
     var token = (10 * pow(10, 19));
-
-    var params = {
-      "address": multisigAddress,
-      "amount": "$token",
-      "signer_seed": appProvider.accountProvider.account.seed ?? ""
-    };
-
-    print("Transfer param:: $params");
+    var seed = appProvider.accountProvider.account.seed!;
 
     url = Env.transferURL;
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
 
-    var res2 =
-        await _dio.post(url, data: json.encode(params)).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.fundingMultisigWalletFailed);
-      print("Err:: $err");
-      return err;
-    });
+    var resp = await appProvider.peerProvider
+        .transferFund(multisigAddress, "$token", seed);
+    // print("generateAndFundMultisigWallet resp data:: ${resp.toJson()}");
 
-    print("generateAndFundMultisigWallet res2 data:: ${res2.data}");
+    if (resp.error!) {
+      setStatus(LoadingStatus.error, message: resp.message!);
+    }
 
     await Future.delayed(const Duration(seconds: 3));
 

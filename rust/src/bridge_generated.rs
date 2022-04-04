@@ -97,6 +97,30 @@ pub extern "C" fn wire_create_multisig_address(
 }
 
 #[no_mangle]
+pub extern "C" fn wire_transfer_fund(
+    port_: i64,
+    ws_url: *mut wire_uint_8_list,
+    address: *mut wire_uint_8_list,
+    amount: *mut wire_uint_8_list,
+    seed: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "transfer_fund",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_ws_url = ws_url.wire2api();
+            let api_address = address.wire2api();
+            let api_amount = amount.wire2api();
+            let api_seed = seed.wire2api();
+            move |task_callback| transfer_fund(api_ws_url, api_address, api_amount, api_seed)
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_get_event(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
