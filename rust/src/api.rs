@@ -38,6 +38,11 @@ pub fn send_service_requested_event(
     Ok(res)
 }
 
+pub fn create_multisig_address(consumer: String, provider: String) -> Result<Vec<u8>> {
+    let res = request::create_multisig_wallet(consumer, provider).unwrap();
+    Ok(res)
+}
+
 // get peer provider event
 pub fn get_event() -> Result<Vec<u8>> {
     let res = request::get_event().unwrap();

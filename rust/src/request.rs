@@ -48,6 +48,25 @@ pub fn get_event() -> Result<Vec<u8>> {
     Ok(res_data)
 }
 
+// create multisig account
+pub fn create_multisig_wallet(consumer: String, provider: String) -> Result<Vec<u8>> {
+    trace!("\n\n RUST - get_event  hitts");
+
+    let mut res = ResponseData {
+        error: true,
+        message: "Event Not Found".to_string(),
+        data: vec![],
+    };
+
+    let address = utils::create_multisig_account(consumer.as_str(), &provider.as_str());
+    res.error = false;
+    res.message = "Event Found".to_string();
+    res.data = address.as_bytes().to_vec();
+
+    let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+    Ok(res_data)
+}
+
 pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
     trace!("\n\n RUST - send_identity_challenge_event hitts");
 

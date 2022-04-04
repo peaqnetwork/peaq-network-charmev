@@ -57,6 +57,7 @@ class CEVPeerProvider with ChangeNotifier {
 
   String _identityChallengeData = '';
   String _p2pURL = '';
+  String _multisigAddress = '';
   bool _isPeerDidDocVerified = false;
   bool _isPeerAuthenticated = false;
   bool _isPeerConnected = false;
@@ -67,6 +68,7 @@ class CEVPeerProvider with ChangeNotifier {
   bool get isPeerAuthenticated => _isPeerAuthenticated;
   bool get isPeerConnected => _isPeerConnected;
   bool get isPeerSubscribed => _isPeerSubscribed;
+  String get multisigAddress => _multisigAddress;
 
   Future<void> initLog() async {
     api.initLogger();
@@ -226,7 +228,7 @@ class CEVPeerProvider with ChangeNotifier {
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
 
-    // decode did document data
+    // decode random data
     List<int> docRawData = List<int>.from(decodedRes["data"]);
     String docCharCode = String.fromCharCodes(docRawData);
 
@@ -244,6 +246,27 @@ class CEVPeerProvider with ChangeNotifier {
     var decodedRes = json.decode(utf8Res);
 
     if (decodedRes["error"]) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> creatMultisigAddress(String provider, String consumer) async {
+    print("creatMultisigAddress hitts");
+
+    var data =
+        await api.createMultisigAddress(provider: provider, consumer: consumer);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (!decodedRes["error"]) {
+      // decode address data
+      List<int> docRawData = List<int>.from(decodedRes["data"]);
+      String addr = String.fromCharCodes(docRawData);
+      _multisigAddress = addr;
+      notifyListeners();
       return false;
     }
 
