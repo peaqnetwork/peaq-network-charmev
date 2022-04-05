@@ -5,10 +5,14 @@ import 'dart:ffi';
 import 'dart:async';
 
 import 'package:charmev/common/models/detail.dart';
+import 'package:charmev/common/models/rust_data.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
+import 'package:charmev/common/widgets/route.dart';
+import 'package:charmev/screens/charging_session.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/models/enum.dart';
 
+import 'package:charmev/config/navigator.dart';
 import 'package:charmev/common/services/fr_bridge/bridge_generated.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
@@ -54,6 +58,7 @@ class CEVPeerProvider with ChangeNotifier {
 
   String _identityChallengeData = '';
   String _p2pURL = '';
+  String _multisigAddress = '';
   bool _isPeerDidDocVerified = false;
   bool _isPeerAuthenticated = false;
   bool _isPeerConnected = false;
@@ -64,6 +69,7 @@ class CEVPeerProvider with ChangeNotifier {
   bool get isPeerAuthenticated => _isPeerAuthenticated;
   bool get isPeerConnected => _isPeerConnected;
   bool get isPeerSubscribed => _isPeerSubscribed;
+  String get multisigAddress => _multisigAddress;
 
   Future<void> initLog() async {
     api.initLogger();
@@ -100,12 +106,32 @@ class CEVPeerProvider with ChangeNotifier {
 
       var ev = msg.Event();
       ev.mergeFromBuffer(docOutputAsUint8List);
-      print("getEvent EVENT ev $ev");
+      print("getEvent EVENT ev ${ev.toProto3Json()}");
 
       switch (ev.eventId) {
         case msg.EventType.PEER_CONNECTED:
           {
             _isPeerConnected = true;
+            break;
+          }
+        case msg.EventType.SERVICE_REQUEST_ACK:
+          {
+            if (!ev.serviceAckData.resp.error) {
+              appProvider.chargeProvider
+                  .setStatus(LoadingStatus.idle, message: "");
+              await Future.delayed(const Duration(milliseconds: 300));
+              appProvider.chargeProvider.chargingStatus =
+                  LoadingStatus.charging;
+
+              CEVNavigator.pushRoute(CEVFadeRoute(
+                builder: (context) => const CharginSessionScreen(),
+                duration: const Duration(milliseconds: 600),
+              ));
+            } else {
+              appProvider.chargeProvider.setStatus(LoadingStatus.error,
+                  message: "Provider Refused the service");
+            }
+
             break;
           }
         case msg.EventType.PEER_CONNECTION_FAILED:
@@ -203,14 +229,66 @@ class CEVPeerProvider with ChangeNotifier {
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
 
-    // decode did document data
+    // decode random data
     List<int> docRawData = List<int>.from(decodedRes["data"]);
     String docCharCode = String.fromCharCodes(docRawData);
 
     _identityChallengeData = docCharCode;
     print("RANDOM DATA:: $_identityChallengeData");
+  }
 
-    return;
+  Future<bool> sendServiceRequestedEvent(
+      String provider, String consumer, String tokenDeposited) async {
+    print("sendServiceRequestedEvent hitts");
+    var data = await api.sendServiceRequestedEvent(
+        provider: provider, consumer: consumer, tokenDeposited: tokenDeposited);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (decodedRes["error"]) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> creatMultisigAddress(String provider, String consumer) async {
+    print("creatMultisigAddress hitts");
+
+    var data =
+        await api.createMultisigAddress(provider: provider, consumer: consumer);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (!decodedRes["error"]) {
+      // decode address data
+      List<int> docRawData = List<int>.from(decodedRes["data"]);
+      String addr = String.fromCharCodes(docRawData);
+      _multisigAddress = addr;
+      notifyListeners();
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<CEVRustResponse> transferFund(
+      String address, String amount, String seed) async {
+    print("transferFund hitts");
+
+    var data = await api.transferFund(
+        wsUrl: Env.peaqTestnet, address: address, amount: amount, seed: seed);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    print("transferFund decodedRes:: $decodedRes");
+
+    // decode rust data data
+    var rData = CEVRustResponse.fromJson(decodedRes);
+    return rData;
   }
 
   Future<doc.Document> fetchDidDocument(String publicKey) async {

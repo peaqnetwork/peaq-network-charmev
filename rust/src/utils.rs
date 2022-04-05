@@ -1,7 +1,13 @@
+use codec::{Decode, Encode};
 // use keyring::sr25519;
 use keyring::ed25519;
 use keyring::sr25519;
+use sp_core::blake2_256;
 use sp_runtime::traits::Verify;
+pub use sp_runtime::{
+    generic::SignedBlock as SignedBlockG, traits::IdentifyAccount, AccountId32 as AccountId,
+    MultiSignature, MultiSigner,
+};
 use std::str::FromStr;
 
 use peaq_p2p_proto_message::did_document_format as doc;
@@ -12,6 +18,20 @@ pub fn generate_random_data() -> String {
     let hex_string = hex::encode(data);
     // trace!("\nRANDOM CHALLENG DATA:: {:?}\n", &hex_string);
     hex_string
+}
+
+pub fn create_multisig_account(consumer: &str, provider: &str) -> String {
+    let who = &mut [consumer.as_bytes().to_vec(), provider.as_bytes().to_vec()];
+    // &who.sort();
+
+    let entropy = (b"modlpy/utilisuba", &who[..], 2).using_encoded(blake2_256);
+    println!("entropy:: {:?}", &entropy);
+
+    let multi = AccountId::decode(&mut &entropy[..]).unwrap_or_default();
+
+    println!("MULTI:: {}", &multi);
+
+    multi.to_string()
 }
 
 pub fn verify_peer_did_signature(provider_pk: String, signature: doc::Signature) -> bool {

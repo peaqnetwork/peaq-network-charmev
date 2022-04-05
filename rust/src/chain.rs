@@ -1,8 +1,10 @@
 use codec::{Decode, Encode};
+use keyring::sr25519::sr25519;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
-use sp_core::sr25519;
+use sp_runtime::{AccountId32 as AccountId, MultiAddress};
 use std::{error::Error, str::FromStr};
+use subclient::{Balance, Pair};
 use substrate_api_client::{self as subclient, rpc as subclient_rpc};
 
 use scale_info::TypeInfo;
@@ -31,6 +33,56 @@ pub struct Attribute<BlockNumber, Moment> {
     pub value: Vec<u8>,
     pub validity: BlockNumber,
     pub created: Moment,
+}
+
+pub enum ChainError {
+    Error(String),
+    None,
+}
+
+pub fn transfer(
+    ws_url: String,
+    address: String,
+    amount: Balance,
+    seed: String,
+) -> Option<ChainError> {
+    // initialize api and set the signer (sender) that is used to sign the extrinsics
+    let from = sr25519::Pair::from_string(&seed, None).unwrap();
+    let client = subclient_rpc::WsRpcClient::new(&ws_url);
+    let api = subclient::Api::new(client)
+        .map(|api| api.set_signer(from.clone()))
+        .unwrap();
+
+    let to = sr25519::Public::from_str(&address.as_str()).unwrap();
+    let to = AccountId::decode(&mut &to.0[..]).unwrap_or_default();
+
+    let mut former_balance: Balance = 0;
+
+    match api.get_account_data(&to).unwrap() {
+        Some(account) => {
+            former_balance = account.free;
+        }
+        None => {
+            return Some(ChainError::Error(
+                "Can't fetch account data from chain".to_string(),
+            ));
+        }
+    }
+    // generate extrinsic
+    let xt = api.balance_transfer(MultiAddress::Id(to.clone()), amount);
+
+    // send and watch extrinsic until finalized
+    api.send_extrinsic(xt.hex_encode(), subclient::XtStatus::InBlock)
+        .unwrap();
+
+    // verify that Account's free Balance increased
+    let account = api.get_account_data(&to).unwrap().unwrap();
+
+    if account.free < former_balance {
+        return Some(ChainError::Error("Transfer failed".to_string()));
+    }
+
+    return Some(ChainError::None);
 }
 
 // fetch did document from the chain storage

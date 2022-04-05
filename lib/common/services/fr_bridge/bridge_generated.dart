@@ -18,6 +18,22 @@ abstract class PeaqCodecApi {
 
   Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
 
+  Future<Uint8List> sendServiceRequestedEvent(
+      {required String provider,
+      required String consumer,
+      required String tokenDeposited,
+      dynamic hint});
+
+  Future<Uint8List> createMultisigAddress(
+      {required String consumer, required String provider, dynamic hint});
+
+  Future<Uint8List> transferFund(
+      {required String wsUrl,
+      required String address,
+      required String amount,
+      required String seed,
+      dynamic hint});
+
   Future<Uint8List> getEvent({dynamic hint});
 
   Future<Uint8List> verifyPeerDidDocument(
@@ -77,6 +93,62 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: [],
         ),
         argValues: [],
+        hint: hint,
+      ));
+
+  Future<Uint8List> sendServiceRequestedEvent(
+          {required String provider,
+          required String consumer,
+          required String tokenDeposited,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_send_service_requested_event(
+            port_,
+            _api2wire_String(provider),
+            _api2wire_String(consumer),
+            _api2wire_String(tokenDeposited)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "send_service_requested_event",
+          argNames: ["provider", "consumer", "tokenDeposited"],
+        ),
+        argValues: [provider, consumer, tokenDeposited],
+        hint: hint,
+      ));
+
+  Future<Uint8List> createMultisigAddress(
+          {required String consumer, required String provider, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_create_multisig_address(
+            port_, _api2wire_String(consumer), _api2wire_String(provider)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "create_multisig_address",
+          argNames: ["consumer", "provider"],
+        ),
+        argValues: [consumer, provider],
+        hint: hint,
+      ));
+
+  Future<Uint8List> transferFund(
+          {required String wsUrl,
+          required String address,
+          required String amount,
+          required String seed,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_transfer_fund(
+            port_,
+            _api2wire_String(wsUrl),
+            _api2wire_String(address),
+            _api2wire_String(amount),
+            _api2wire_String(seed)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "transfer_fund",
+          argNames: ["wsUrl", "address", "amount", "seed"],
+        ),
+        argValues: [wsUrl, address, amount, seed],
         hint: hint,
       ));
 
@@ -246,6 +318,86 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           'wire_send_identity_challenge_event');
   late final _wire_send_identity_challenge_event =
       _wire_send_identity_challenge_eventPtr.asFunction<void Function(int)>();
+
+  void wire_send_service_requested_event(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> provider,
+    ffi.Pointer<wire_uint_8_list> consumer,
+    ffi.Pointer<wire_uint_8_list> token_deposited,
+  ) {
+    return _wire_send_service_requested_event(
+      port_,
+      provider,
+      consumer,
+      token_deposited,
+    );
+  }
+
+  late final _wire_send_service_requested_eventPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Void Function(
+                  ffi.Int64,
+                  ffi.Pointer<wire_uint_8_list>,
+                  ffi.Pointer<wire_uint_8_list>,
+                  ffi.Pointer<wire_uint_8_list>)>>(
+      'wire_send_service_requested_event');
+  late final _wire_send_service_requested_event =
+      _wire_send_service_requested_eventPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_create_multisig_address(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> consumer,
+    ffi.Pointer<wire_uint_8_list> provider,
+  ) {
+    return _wire_create_multisig_address(
+      port_,
+      consumer,
+      provider,
+    );
+  }
+
+  late final _wire_create_multisig_addressPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_create_multisig_address');
+  late final _wire_create_multisig_address =
+      _wire_create_multisig_addressPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_transfer_fund(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> ws_url,
+    ffi.Pointer<wire_uint_8_list> address,
+    ffi.Pointer<wire_uint_8_list> amount,
+    ffi.Pointer<wire_uint_8_list> seed,
+  ) {
+    return _wire_transfer_fund(
+      port_,
+      ws_url,
+      address,
+      amount,
+      seed,
+    );
+  }
+
+  late final _wire_transfer_fundPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_transfer_fund');
+  late final _wire_transfer_fund = _wire_transfer_fundPtr.asFunction<
+      void Function(
+          int,
+          ffi.Pointer<wire_uint_8_list>,
+          ffi.Pointer<wire_uint_8_list>,
+          ffi.Pointer<wire_uint_8_list>,
+          ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_get_event(
     int port_,

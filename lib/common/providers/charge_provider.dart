@@ -194,50 +194,38 @@ class CEVChargeProvider with ChangeNotifier {
 
   generateAndFundMultisigWallet() async {
     setStatus(LoadingStatus.idle);
-    var params = {
-      "addresses": [
-        appProvider.accountProvider.account.address,
-        _station.address
-      ],
-      "owner_index": 0,
-      "threshold": 2
-    };
+    String consumer = appProvider.accountProvider.account.address!;
+    String provider = _station.address!;
 
     setStatus(LoadingStatus.loading, message: Env.creatingMultisigWallet);
 
     var url = Env.multisigURL;
 
-    var res1 =
-        await _dio.post(url, data: json.encode(params)).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.creatingMultisigWalletFailed);
-      print("Err:: $err");
-      return err;
-    });
+    bool walletCreated =
+        await appProvider.peerProvider.creatMultisigAddress(provider, consumer);
 
-    print("generateAndFundMultisigWallet res1  data:: ${res1}");
-    print("generateAndFundMultisigWallet res1 data:: ${res1.data}");
+    String multisigAddress = appProvider.peerProvider.multisigAddress;
+
+    if (!walletCreated || multisigAddress.isEmpty) {
+      setStatus(LoadingStatus.error, message: Env.creatingMultisigWalletFailed);
+    }
+
+    // print("generateAndFundMultisigWallet  multisigAddress:: $multisigAddress");
 
     var token = (10 * pow(10, 19));
-
-    params = {
-      "address": res1.data["multisig_address"],
-      "amount": "$token",
-      "signer_seed": appProvider.accountProvider.account.seed ?? ""
-    };
-
-    print("Transfer param:: $params");
+    var seed = appProvider.accountProvider.account.seed!;
 
     url = Env.transferURL;
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
 
-    var res2 = await _dio.post(url, data: params).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.fundingMultisigWalletFailed);
-      print("Err:: $err");
-      return err;
-    });
+    var resp = await appProvider.peerProvider
+        .transferFund(multisigAddress, "$token", seed);
+    // print("generateAndFundMultisigWallet resp data:: ${resp.toJson()}");
 
-    print("generateAndFundMultisigWallet res2 data:: ${res2.data}");
+    if (resp.error!) {
+      setStatus(LoadingStatus.error, message: resp.message!);
+    }
 
     await Future.delayed(const Duration(seconds: 3));
 
@@ -246,21 +234,19 @@ class CEVChargeProvider with ChangeNotifier {
 
   _startCharge(String token) async {
     setStatus(LoadingStatus.idle);
-    var params = {
-      "signer_seed": appProvider.accountProvider.account.seed ?? "",
-      "provider_address": _station.address,
-      "amount": token,
-    };
 
     setStatus(LoadingStatus.loading, message: Env.requestingService);
 
-    var url = Env.transactionURL;
+    String consumer = appProvider.accountProvider.account.address!;
+    String provider = _station.address!;
 
-    var res = await _dio.post(url, data: params).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.serviceRequestFailed);
-      print("_startCharge Err:: $err");
-      return err;
-    });
+    var res = await appProvider.peerProvider
+        .sendServiceRequestedEvent(provider, consumer, token);
+
+    if (!res) {
+      setStatus(LoadingStatus.loading, message: Env.serviceRequestFailed);
+      return;
+    }
 
     setStatus(LoadingStatus.loading, message: Env.serviceRequested);
 
