@@ -482,8 +482,8 @@ packages:
     dependency: "direct main"
     description:
       path: dart
-      ref: "0567eeb20e2709a4da5c870f61ed46ae466d0634"
-      resolved-ref: "0567eeb20e2709a4da5c870f61ed46ae466d0634"
+      ref: dev
+      resolved-ref: dbc42ef455480bc4049e09d572f51c465c1e71d5
       url: "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git"
     source: git
     version: "0.1.0"

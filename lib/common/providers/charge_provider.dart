@@ -208,9 +208,8 @@ class CEVChargeProvider with ChangeNotifier {
 
     if (!walletCreated || multisigAddress.isEmpty) {
       setStatus(LoadingStatus.error, message: Env.creatingMultisigWalletFailed);
+      return;
     }
-
-    // print("generateAndFundMultisigWallet  multisigAddress:: $multisigAddress");
 
     var token = (10 * pow(10, 19));
     var seed = appProvider.accountProvider.account.seed!;
@@ -225,6 +224,7 @@ class CEVChargeProvider with ChangeNotifier {
 
     if (resp.error!) {
       setStatus(LoadingStatus.error, message: resp.message!);
+      return;
     }
 
     await Future.delayed(const Duration(seconds: 3));

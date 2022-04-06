@@ -1,5 +1,6 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
+import 'package:charmev/common/providers/peer_provider.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/keys.dart';
@@ -111,6 +112,9 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   Widget _buildScreen(BuildContext context, CEVChargeProvider chargeProvider) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
+    CEVPeerProvider peerProvider = CEVPeerProvider.of(context);
+
+    print("charge progress:: ${peerProvider.chargeProgress}");
 
     return SizedBox(
         height: double.infinity,
@@ -122,32 +126,12 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      chargeProvider.chargingStatus == LoadingStatus.charging
-                          ? CEVCountdown(
-                              maxCount: chargeProvider.totalTimeInSeconds,
-                              onTimeout: () async {
-                                var stopUrlSet = false;
-                                if (stopUrlSet) {
-                                  chargeProvider.stopCharge();
-                                }
-                              },
-                              displayChild: (counter) {
-                                counter = (chargeProvider.counter + 1);
-                                chargeProvider.updateTimer(counter);
-
-                                return CEVProgressCard(
-                                  progress: chargeProvider.progress,
-                                  child: _buildPump(context),
-                                  size: 172,
-                                  margin: const EdgeInsets.all(32),
-                                );
-                              })
-                          : CEVProgressCard(
-                              progress: chargeProvider.progress,
-                              child: _buildPump(context),
-                              size: 172,
-                              margin: const EdgeInsets.all(32),
-                            ),
+                      CEVProgressCard(
+                        progress: peerProvider.chargeProgress,
+                        child: _buildPump(context),
+                        size: 172,
+                        margin: const EdgeInsets.all(32),
+                      ),
                       _buildDetails(boxW, chargeProvider),
                       const SizedBox(
                         height: 50.0,
