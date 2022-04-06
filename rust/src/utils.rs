@@ -2,6 +2,7 @@ use codec::{Decode, Encode};
 // use keyring::sr25519;
 use keyring::ed25519;
 use keyring::sr25519;
+use log::trace;
 use sp_core::blake2_256;
 use sp_runtime::traits::Verify;
 pub use sp_runtime::{
@@ -24,12 +25,12 @@ pub fn create_multisig_account(consumer: &str, provider: &str) -> String {
     let who = &mut [consumer.as_bytes().to_vec(), provider.as_bytes().to_vec()];
     // &who.sort();
 
-    let entropy = (b"modlpy/utilisuba", &who[..], 2).using_encoded(blake2_256);
-    println!("entropy:: {:?}", &entropy);
+    let entropy = (b"modlpy/utilisuba", &who[..].sort(), 2).using_encoded(blake2_256);
+    trace!("entropy:: {:?}", &entropy);
 
     let multi = AccountId::decode(&mut &entropy[..]).unwrap_or_default();
 
-    println!("MULTI:: {}", &multi);
+    trace!("MULTI:: {}", &multi);
 
     multi.to_string()
 }

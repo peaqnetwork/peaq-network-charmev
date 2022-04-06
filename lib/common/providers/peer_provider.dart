@@ -34,7 +34,7 @@ late final dylib =
 late final api = PeaqCodecApiImpl(dylib);
 
 void runPeriodically(void Function() callback) =>
-    Timer.periodic(const Duration(milliseconds: 3000), (timer) => callback());
+    Timer.periodic(const Duration(milliseconds: 1000), (timer) => callback());
 
 class CEVPeerProvider with ChangeNotifier {
   CEVPeerProvider({
@@ -52,6 +52,7 @@ class CEVPeerProvider with ChangeNotifier {
   LoadingStatus _status = LoadingStatus.idle;
   String _error = '';
   String _statusMessage = '';
+  double _chargeProgress = 0;
   bool _isLoggedIn = false;
   bool _showNodeDropdown = false;
   List<Detail> _details = [];
@@ -70,6 +71,7 @@ class CEVPeerProvider with ChangeNotifier {
   bool get isPeerConnected => _isPeerConnected;
   bool get isPeerSubscribed => _isPeerSubscribed;
   String get multisigAddress => _multisigAddress;
+  double get chargeProgress => _chargeProgress;
 
   Future<void> initLog() async {
     api.initLogger();
@@ -98,7 +100,10 @@ class CEVPeerProvider with ChangeNotifier {
 
     print("getEvent EVENT decodedRes $decodedRes");
 
-    if (!decodedRes["error"]) {
+    // decode rust data data
+    var rData = CEVRustResponse.fromJson(decodedRes);
+
+    if (!rData.error!) {
       // decode event data
       List<int> docRawData = List<int>.from(decodedRes["data"]);
       String docCharCode = String.fromCharCodes(docRawData);
@@ -106,6 +111,7 @@ class CEVPeerProvider with ChangeNotifier {
 
       var ev = msg.Event();
       ev.mergeFromBuffer(docOutputAsUint8List);
+      print("getEvent EVENT_ID ${ev.eventId.toString()}");
       print("getEvent EVENT ev ${ev.toProto3Json()}");
 
       switch (ev.eventId) {
@@ -157,6 +163,12 @@ class CEVPeerProvider with ChangeNotifier {
         case msg.EventType.IDENTITY_RESPONSE:
           {
             _authenticatePeer(ev.identityResponseData);
+            break;
+          }
+        case msg.EventType.CHARGING_STATUS:
+          {
+            _chargeProgress = ev.chargingStatusData.progress / 100;
+            notifyListeners();
             break;
           }
         default:
@@ -262,16 +274,19 @@ class CEVPeerProvider with ChangeNotifier {
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
 
-    if (!decodedRes["error"]) {
+    // decode rust data data
+    var rData = CEVRustResponse.fromJson(decodedRes);
+
+    if (!rData.error!) {
       // decode address data
       List<int> docRawData = List<int>.from(decodedRes["data"]);
       String addr = String.fromCharCodes(docRawData);
       _multisigAddress = addr;
       notifyListeners();
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   Future<CEVRustResponse> transferFund(

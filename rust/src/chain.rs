@@ -55,12 +55,19 @@ pub fn transfer(
 
     let to = sr25519::Public::from_str(&address.as_str()).unwrap();
     let to = AccountId::decode(&mut &to.0[..]).unwrap_or_default();
+    let from_account = AccountId::decode(&mut &from.public().0[..]).unwrap_or_default();
 
     let mut former_balance: Balance = 0;
 
-    match api.get_account_data(&to).unwrap() {
+    if let Some(account) = api.get_account_data(&to).unwrap() {
+        former_balance = account.free;
+    }
+
+    match api.get_account_data(&from_account).unwrap() {
         Some(account) => {
-            former_balance = account.free;
+            if account.free < amount {
+                return Some(ChainError::Error("Insufficient Funds".to_string()));
+            }
         }
         None => {
             return Some(ChainError::Error(
