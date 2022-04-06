@@ -114,8 +114,6 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
     final boxW = MediaQuery.of(context).size.width / 1.2;
     CEVPeerProvider peerProvider = CEVPeerProvider.of(context);
 
-    print("charge progress:: ${peerProvider.chargeProgress}");
-
     return SizedBox(
         height: double.infinity,
         child: SingleChildScrollView(

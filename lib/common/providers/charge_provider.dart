@@ -100,9 +100,6 @@ class CEVChargeProvider with ChangeNotifier {
   generateDetails({bool notify = false}) {
     List<Detail> _newDetails = [];
 
-    print("_station:: $_station");
-    print("_station::did  ${_station.did}");
-
     if (_station != null) {
       _newDetails.addAll([
         Detail("Identity", _station.did ?? ""),
@@ -245,8 +242,6 @@ class CEVChargeProvider with ChangeNotifier {
     }
 
     setStatus(LoadingStatus.loading, message: Env.serviceRequested);
-
-    print("_startCharge res data:: ${res}");
   }
 
   stopCharge() async {
@@ -266,8 +261,6 @@ class CEVChargeProvider with ChangeNotifier {
   }
 
   approveTransactions() async {
-    print("approveTransactions:: ${json.encode(_txInfo)}");
-
     if (_txInfo.isEmpty) {
       setStatus(LoadingStatus.error, message: "Empty transactions");
       return;

@@ -37,6 +37,8 @@ class Env {
       "Connection unreacheable. Please try check URL.";
   static const String stoppingChargeSent =
       "Stop Requested. Waiting for station to send fees...";
+  static const String stationStoppedCharging =
+      "Station stopped charging. Waiting for fees...";
   static const String creatingTransaction = "Creating transactions...";
   static const String approvingRefundTransaction =
       "Approving Refund transactions...";
@@ -59,6 +61,12 @@ class Env {
   static const String connectingToPeer = "Connecting to Provider Peer...";
   static const String verifyingDidDocument =
       "Verifying Provider DID Document...";
+  static const String invalidP2PUrl = "Invalid P2P URL found";
+  static const String providerPeerAuthFailed =
+      "Provider Peer Authenticate failed";
+  static const String providerRejectService = "Provider reject the service";
+  static const String unableToConnectToPeer =
+      "Unable to Connect to Provider Peer. Please check the p2p URL on DID document is correct.";
 
   static const String stopUrlNotSet =
       "Station charge Stop URL not set. You won't be able to stop a charging session.";

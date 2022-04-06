@@ -83,7 +83,7 @@ class CEVPeerProvider with ChangeNotifier {
 
     if (splitURL.length != 7) {
       appProvider.chargeProvider
-          .setStatus(LoadingStatus.error, message: "Invalid P2P URL found");
+          .setStatus(LoadingStatus.error, message: Env.invalidP2PUrl);
     }
 
     api.connectP2P(url: _p2pURL);
@@ -91,14 +91,14 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<void> getEvent() async {
-    print("getEvent hitts");
+    // print("getEvent hitts");
 
     var data = await api.getEvent();
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
 
-    print("getEvent EVENT decodedRes $decodedRes");
+    // print("getEvent EVENT decodedRes $decodedRes");
 
     // decode rust data data
     var rData = CEVRustResponse.fromJson(decodedRes);
@@ -135,7 +135,7 @@ class CEVPeerProvider with ChangeNotifier {
               ));
             } else {
               appProvider.chargeProvider.setStatus(LoadingStatus.error,
-                  message: "Provider Refused the service");
+                  message: Env.providerRejectService);
             }
 
             break;
@@ -144,14 +144,13 @@ class CEVPeerProvider with ChangeNotifier {
           {
             _isPeerConnected = false;
             appProvider.chargeProvider.setStatus(LoadingStatus.error,
-                message:
-                    "Unable to Connect to Provider Peer. Please check the p2p URL on DID document is correct.");
+                message: Env.unableToConnectToPeer);
             break;
           }
         case msg.EventType.PEER_SUBSCRIBED:
           {
             _isPeerSubscribed = true;
-            // Authenticate peer is it's connected and subscribed
+            // Authenticate peer if it's connected and subscribed
             if (_isPeerConnected) {
               appProvider.chargeProvider.setStatus(LoadingStatus.loading,
                   message: Env.authenticatingProvider);
@@ -171,6 +170,14 @@ class CEVPeerProvider with ChangeNotifier {
             notifyListeners();
             break;
           }
+        case msg.EventType.STOP_CHARGE_RESPONSE:
+          {
+            appProvider.chargeProvider.chargingStatus = LoadingStatus.waiting;
+            appProvider.chargeProvider.setStatus(LoadingStatus.loading,
+                message: Env.stationStoppedCharging);
+            notifyListeners();
+            break;
+          }
         default:
           {}
       }
@@ -178,7 +185,7 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   verifyPeerDidDocument() async {
-    print("verifyPeerDidDocument hitts");
+    // print("verifyPeerDidDocument hitts");
 
     var sig = _providerDidDoc.signature.writeToBuffer();
     var providerPK = _providerDidDoc.id.split(":")[2];
@@ -197,7 +204,7 @@ class CEVPeerProvider with ChangeNotifier {
 
   _verifyPeerIdentity(
       String providerPK, String plainData, doc.Signature signature) async {
-    print("verifyPeerIdentity hitts");
+    // print("verifyPeerIdentity hitts");
 
     var sig = signature.writeToBuffer();
 
@@ -206,7 +213,7 @@ class CEVPeerProvider with ChangeNotifier {
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
-    print("verifyPeerIdentity decodedRes:: $decodedRes");
+    // print("verifyPeerIdentity decodedRes:: $decodedRes");
 
     if (!decodedRes["error"]) {
       _isPeerAuthenticated = true;
@@ -229,13 +236,13 @@ class CEVPeerProvider with ChangeNotifier {
       // await appProvider.accountProvider
       //     .simulateServiceRequestedAndDeliveredEvents();
     } else {
-      appProvider.chargeProvider.setStatus(LoadingStatus.error,
-          message: "Unable to Authenticate Prover Peer...");
+      appProvider.chargeProvider
+          .setStatus(LoadingStatus.error, message: Env.providerPeerAuthFailed);
     }
   }
 
   Future<void> _sendIdentityChallengeEvent() async {
-    print("sendIdentityChallengeEvent hitts");
+    // print("sendIdentityChallengeEvent hitts");
     var data = await api.sendIdentityChallengeEvent();
 
     var utf8Res = utf8.decode(data);
@@ -246,12 +253,12 @@ class CEVPeerProvider with ChangeNotifier {
     String docCharCode = String.fromCharCodes(docRawData);
 
     _identityChallengeData = docCharCode;
-    print("RANDOM DATA:: $_identityChallengeData");
+    // print("RANDOM DATA:: $_identityChallengeData");
   }
 
   Future<bool> sendServiceRequestedEvent(
       String provider, String consumer, String tokenDeposited) async {
-    print("sendServiceRequestedEvent hitts");
+    // print("sendServiceRequestedEvent hitts");
     var data = await api.sendServiceRequestedEvent(
         provider: provider, consumer: consumer, tokenDeposited: tokenDeposited);
 
@@ -266,7 +273,7 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<bool> sendStopChargeEvent() async {
-    print("sendStopChargeEvent hitts");
+    // print("sendStopChargeEvent hitts");
 
     var data = await api.sendStopChargeEvent();
 
@@ -284,7 +291,7 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<bool> creatMultisigAddress(String provider, String consumer) async {
-    print("creatMultisigAddress hitts");
+    // print("creatMultisigAddress hitts");
 
     var data =
         await api.createMultisigAddress(provider: provider, consumer: consumer);
@@ -309,7 +316,7 @@ class CEVPeerProvider with ChangeNotifier {
 
   Future<CEVRustResponse> transferFund(
       String address, String amount, String seed) async {
-    print("transferFund hitts");
+    // print("transferFund hitts");
 
     var data = await api.transferFund(
         wsUrl: Env.peaqTestnet, address: address, amount: amount, seed: seed);
@@ -317,7 +324,7 @@ class CEVPeerProvider with ChangeNotifier {
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
 
-    print("transferFund decodedRes:: $decodedRes");
+    // print("transferFund decodedRes:: $decodedRes");
 
     // decode rust data data
     var rData = CEVRustResponse.fromJson(decodedRes);
