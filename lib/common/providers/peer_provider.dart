@@ -265,6 +265,24 @@ class CEVPeerProvider with ChangeNotifier {
     return true;
   }
 
+  Future<bool> sendStopChargeEvent() async {
+    print("sendStopChargeEvent hitts");
+
+    var data = await api.sendStopChargeEvent();
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    // decode rust data data
+    var rData = CEVRustResponse.fromJson(decodedRes);
+
+    if (!rData.error!) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<bool> creatMultisigAddress(String provider, String consumer) async {
     print("creatMultisigAddress hitts");
 

@@ -136,6 +136,36 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
     }
 }
 
+pub fn send_stop_charge_event() -> Result<Vec<u8>> {
+    trace!("\n\n RUST - send_service_requested_event hitts");
+    let mut stop_data = msg::StopChargeData::new();
+    stop_data.success = true;
+    let data = msg::event::Data::stop_charge_data(stop_data);
+
+    let ev_res = event::send_event(msg::EventType::STOP_CHARGE, data);
+
+    let mut res = ResponseData {
+        error: false,
+        message: "Event Sent".to_string(),
+        data: vec![],
+    };
+
+    match ev_res {
+        CoreOk(()) => {
+            // return the random data if event is sent succesfully
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+        Err(_) => {
+            // return the random data if event is sent succesfully
+            res.error = true;
+            res.message = "Error Occurred While sending event".to_string();
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+    }
+}
+
 pub fn send_service_requested_event(
     provider: String,
     consumer: String,

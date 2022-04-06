@@ -53,6 +53,18 @@ pub extern "C" fn wire_send_identity_challenge_event(port_: i64) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_send_stop_charge_event(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "send_stop_charge_event",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| send_stop_charge_event(),
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_send_service_requested_event(
     port_: i64,
     provider: *mut wire_uint_8_list,

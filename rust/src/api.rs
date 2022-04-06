@@ -28,6 +28,12 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
     Ok(res)
 }
 
+// Send Stop charge event to provider peer
+pub fn send_stop_charge_event() -> Result<Vec<u8>> {
+    let res = request::send_stop_charge_event().unwrap();
+    Ok(res)
+}
+
 // Send Service Requested event to provider peer
 pub fn send_service_requested_event(
     provider: String,

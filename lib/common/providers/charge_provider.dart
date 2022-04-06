@@ -199,8 +199,6 @@ class CEVChargeProvider with ChangeNotifier {
 
     setStatus(LoadingStatus.loading, message: Env.creatingMultisigWallet);
 
-    var url = Env.multisigURL;
-
     bool walletCreated =
         await appProvider.peerProvider.creatMultisigAddress(provider, consumer);
 
@@ -213,8 +211,6 @@ class CEVChargeProvider with ChangeNotifier {
 
     var token = (10 * pow(10, 19));
     var seed = appProvider.accountProvider.account.seed!;
-
-    url = Env.transferURL;
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
 
@@ -256,30 +252,17 @@ class CEVChargeProvider with ChangeNotifier {
   stopCharge() async {
     setStatus(LoadingStatus.loading, message: Env.stoppingCharge);
 
-    // var url = _station.stopUrl ?? "";
-    var url = "";
+    bool chargeStopEventSent =
+        await appProvider.peerProvider.sendStopChargeEvent();
 
-    if (url.isEmpty) {
-      setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
+    if (!chargeStopEventSent) {
+      setStatus(LoadingStatus.error, message: Env.stoppingChargeFailed);
       return;
     }
-
-    var params = {
-      "success": true,
-    };
-
-    print("stopCharge URL:: $url");
-    var res = await _dio.post(url, data: params).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.stoppingChargeFailed);
-      print("stopCharge Err:: $err");
-      return err;
-    });
 
     _chargingStatus = LoadingStatus.waiting;
 
     setStatus(LoadingStatus.loading, message: Env.stoppingChargeSent);
-
-    print("stopCharge res data:: ${res}");
   }
 
   approveTransactions() async {

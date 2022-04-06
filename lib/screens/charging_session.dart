@@ -213,17 +213,14 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   Widget _buildStopButton(BuildContext ctx, CEVChargeProvider chargeProvider) {
     var isCharging = chargeProvider.chargingStatus == LoadingStatus.charging;
-    var stopUrlSet = false; //chargeProvider.station!.stopUrl != null;
     return CEVRaisedButton(
       text: isCharging ? Env.stopCharging : Env.charged,
-      bgColor: isCharging && stopUrlSet
-          ? Theme.of(ctx).primaryColor
-          : CEVTheme.dialogBgColor,
-      textColor: isCharging && stopUrlSet ? Colors.white : CEVTheme.greyColor,
+      bgColor: isCharging ? Theme.of(ctx).primaryColor : CEVTheme.dialogBgColor,
+      textColor: isCharging ? Colors.white : CEVTheme.greyColor,
       radius: 10,
       isTextBold: true,
       onPressed: () async {
-        if (isCharging && stopUrlSet) {
+        if (isCharging) {
           chargeProvider.stopCharge();
         }
         // chargeProvider.simulateStopCharge(true);
