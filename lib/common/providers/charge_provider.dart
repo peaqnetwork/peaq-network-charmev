@@ -100,9 +100,6 @@ class CEVChargeProvider with ChangeNotifier {
   generateDetails({bool notify = false}) {
     List<Detail> _newDetails = [];
 
-    print("_station:: $_station");
-    print("_station::did  ${_station.did}");
-
     if (_station != null) {
       _newDetails.addAll([
         Detail("Identity", _station.did ?? ""),
@@ -199,8 +196,6 @@ class CEVChargeProvider with ChangeNotifier {
 
     setStatus(LoadingStatus.loading, message: Env.creatingMultisigWallet);
 
-    var url = Env.multisigURL;
-
     bool walletCreated =
         await appProvider.peerProvider.creatMultisigAddress(provider, consumer);
 
@@ -213,8 +208,6 @@ class CEVChargeProvider with ChangeNotifier {
 
     var token = (10 * pow(10, 19));
     var seed = appProvider.accountProvider.account.seed!;
-
-    url = Env.transferURL;
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
 
@@ -249,42 +242,25 @@ class CEVChargeProvider with ChangeNotifier {
     }
 
     setStatus(LoadingStatus.loading, message: Env.serviceRequested);
-
-    print("_startCharge res data:: ${res}");
   }
 
   stopCharge() async {
     setStatus(LoadingStatus.loading, message: Env.stoppingCharge);
 
-    // var url = _station.stopUrl ?? "";
-    var url = "";
+    bool chargeStopEventSent =
+        await appProvider.peerProvider.sendStopChargeEvent();
 
-    if (url.isEmpty) {
-      setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
+    if (!chargeStopEventSent) {
+      setStatus(LoadingStatus.error, message: Env.stoppingChargeFailed);
       return;
     }
-
-    var params = {
-      "success": true,
-    };
-
-    print("stopCharge URL:: $url");
-    var res = await _dio.post(url, data: params).catchError((err) async {
-      setStatus(LoadingStatus.error, message: Env.stoppingChargeFailed);
-      print("stopCharge Err:: $err");
-      return err;
-    });
 
     _chargingStatus = LoadingStatus.waiting;
 
     setStatus(LoadingStatus.loading, message: Env.stoppingChargeSent);
-
-    print("stopCharge res data:: ${res}");
   }
 
   approveTransactions() async {
-    print("approveTransactions:: ${json.encode(_txInfo)}");
-
     if (_txInfo.isEmpty) {
       setStatus(LoadingStatus.error, message: "Empty transactions");
       return;

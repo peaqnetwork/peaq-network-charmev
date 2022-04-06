@@ -18,6 +18,8 @@ abstract class PeaqCodecApi {
 
   Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
 
+  Future<Uint8List> sendStopChargeEvent({dynamic hint});
+
   Future<Uint8List> sendServiceRequestedEvent(
       {required String provider,
       required String consumer,
@@ -90,6 +92,18 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
         parseSuccessData: _wire2api_uint_8_list,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "send_identity_challenge_event",
+          argNames: [],
+        ),
+        argValues: [],
+        hint: hint,
+      ));
+
+  Future<Uint8List> sendStopChargeEvent({dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_send_stop_charge_event(port_),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "send_stop_charge_event",
           argNames: [],
         ),
         argValues: [],
@@ -318,6 +332,20 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           'wire_send_identity_challenge_event');
   late final _wire_send_identity_challenge_event =
       _wire_send_identity_challenge_eventPtr.asFunction<void Function(int)>();
+
+  void wire_send_stop_charge_event(
+    int port_,
+  ) {
+    return _wire_send_stop_charge_event(
+      port_,
+    );
+  }
+
+  late final _wire_send_stop_charge_eventPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_send_stop_charge_event');
+  late final _wire_send_stop_charge_event =
+      _wire_send_stop_charge_eventPtr.asFunction<void Function(int)>();
 
   void wire_send_service_requested_event(
     int port_,
