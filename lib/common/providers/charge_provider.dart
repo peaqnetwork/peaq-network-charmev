@@ -312,24 +312,4 @@ class CEVChargeProvider with ChangeNotifier {
     _chargingStatus = LoadingStatus.success;
     setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
   }
-
-// Dev Only
-  approveTest() async {
-    var _seed = appProvider.accountProvider.account.seed ?? "";
-
-    bool approveRefund = await appProvider.peerProvider.approveMultisigTransaction(
-        threshold: 2,
-        otherSignatories: [_station.address!],
-        timepointHeight: 6719,
-        timepointIndex: 2,
-        callHash:
-            "0x4b076673cca54f7bf62dc8297357f0f8c351e404c2d5f9b55416506ca115ccba",
-        seed: _seed);
-
-    if (!approveRefund) {
-      setStatus(LoadingStatus.error,
-          message: Env.approvingRefundTransactionFailed);
-      return;
-    }
-  }
 }

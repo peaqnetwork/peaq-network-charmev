@@ -1,7 +1,6 @@
 use codec::{Decode, Encode};
 use keyring::sr25519::sr25519;
 use log::trace;
-use peaq_node_runtime::Header;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
 use sp_runtime::{AccountId32 as AccountId, MultiAddress};
@@ -72,12 +71,7 @@ pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
         call_hash,
         max_weight: 1000000000,
     });
-    trace!("\n Composed Call: {:?}\n", multi_param);
-
-    // Information for Era for mortal transactions
-    let head = api.get_finalized_head().unwrap().unwrap();
-    let h: Header = api.get_header(Some(head)).unwrap().unwrap();
-    let period = 64;
+    // trace!("\n Composed Call: {:?}\n", multi_param);
 
     let nonce = api.get_nonce().unwrap();
     // compose the extrinsic with all the element
@@ -93,11 +87,11 @@ pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
         api.runtime_version.transaction_version
     );
 
-    trace!("\n Composed Extrinsic: {:?}\n", xt);
+    // trace!("\n Composed Extrinsic: {:?}\n", xt);
 
     let xt_hash = xt.hex_encode(); //.strip_prefix("0x").unwrap().to_string();
 
-    trace!("\n Composed Extrinsic: {:?}\n", &xt_hash,);
+    // trace!("\n Composed Extrinsic: {:?}\n", &xt_hash,);
 
     // send and watch extrinsic until InBlock
     let res = api.send_extrinsic(xt_hash.clone(), XtStatus::Finalized);

@@ -38,9 +38,8 @@ libp2p = { version = "0.43.0", features = ["tcp-tokio"] }
 futures = "0.3.1"
 tokio = { version = "1.15", features = ["io-util", "io-std", "macros", "rt", "rt-multi-thread", "fs", "time", "sync"] }
 
-peaq-node-runtime = { version = "3.0.0-polkadot-v0.9.16", git = "https://github.com/peaqnetwork/peaq-network-node", branch = "dev" }
-#peaq-p2p-proto-message = { git = "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git" }
-peaq-p2p-proto-message = { path = "../../../proto/peaq-network-ev-charging-message-format/rust" }
+peaq-node-runtime = { version = "3.0.0-polkadot-v0.9.16", git = "https://github.com/peaqnetwork/peaq-network-node", rev = "4fa456a20e2e60d433b1e37dcbd7775f02c97602" }
+peaq-p2p-proto-message = { git = "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git", rev = "8632fb0395125a8b155cbefb8d5e634a9b6e780b" }
 
 [dependencies.sp-core]
 default-features = false

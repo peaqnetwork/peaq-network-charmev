@@ -1177,7 +1177,7 @@ dependencies = [
 [[package]]
 name = "evm-tracing-events"
 version = "0.1.0"
-source = "git+https://github.com/peaqnetwork/peaq-network-node?branch=dev#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
+source = "git+https://github.com/peaqnetwork/peaq-network-node?rev=4fa456a20e2e60d433b1e37dcbd7775f02c97602#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
 dependencies = [
  "environmental",
  "ethereum",
@@ -3873,7 +3873,7 @@ dependencies = [
 [[package]]
 name = "peaq-evm-tracer"
 version = "0.1.0"
-source = "git+https://github.com/peaqnetwork/peaq-network-node?branch=dev#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
+source = "git+https://github.com/peaqnetwork/peaq-network-node?rev=4fa456a20e2e60d433b1e37dcbd7775f02c97602#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
 dependencies = [
  "ethereum-types",
  "evm",
@@ -3893,7 +3893,7 @@ dependencies = [
 [[package]]
 name = "peaq-node-runtime"
 version = "3.0.0-polkadot-v0.9.16"
-source = "git+https://github.com/peaqnetwork/peaq-network-node?branch=dev#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
+source = "git+https://github.com/peaqnetwork/peaq-network-node?rev=4fa456a20e2e60d433b1e37dcbd7775f02c97602#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
 dependencies = [
  "evm-tracing-events",
  "fp-evm",
@@ -3951,6 +3951,7 @@ dependencies = [
 [[package]]
 name = "peaq-p2p-proto-message"
 version = "0.1.0"
+source = "git+https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git?rev=8632fb0395125a8b155cbefb8d5e634a9b6e780b#8632fb0395125a8b155cbefb8d5e634a9b6e780b"
 dependencies = [
  "protobuf",
 ]
@@ -3991,7 +3992,7 @@ dependencies = [
 [[package]]
 name = "peaq-primitives-ext"
 version = "0.1.0"
-source = "git+https://github.com/peaqnetwork/peaq-network-node?branch=dev#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
+source = "git+https://github.com/peaqnetwork/peaq-network-node?rev=4fa456a20e2e60d433b1e37dcbd7775f02c97602#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
 dependencies = [
  "ethereum-types",
  "evm-tracing-events",
@@ -4004,7 +4005,7 @@ dependencies = [
 [[package]]
 name = "peaq-rpc-primitives-debug"
 version = "0.1.0"
-source = "git+https://github.com/peaqnetwork/peaq-network-node?branch=dev#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
+source = "git+https://github.com/peaqnetwork/peaq-network-node?rev=4fa456a20e2e60d433b1e37dcbd7775f02c97602#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
 dependencies = [
  "environmental",
  "ethereum",
@@ -4023,7 +4024,7 @@ dependencies = [
 [[package]]
 name = "peaq-rpc-primitives-txpool"
 version = "0.6.0"
-source = "git+https://github.com/peaqnetwork/peaq-network-node?branch=dev#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
+source = "git+https://github.com/peaqnetwork/peaq-network-node?rev=4fa456a20e2e60d433b1e37dcbd7775f02c97602#4fa456a20e2e60d433b1e37dcbd7775f02c97602"
 dependencies = [
  "ethereum",
  "parity-scale-codec",
