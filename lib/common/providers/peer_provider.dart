@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/rust_data.dart';
+import 'package:charmev/common/models/tx_info.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/screens/charging_session.dart';
@@ -122,21 +123,21 @@ class CEVPeerProvider with ChangeNotifier {
           }
         case msg.EventType.SERVICE_REQUEST_ACK:
           {
-            if (!ev.serviceAckData.resp.error) {
-              appProvider.chargeProvider
-                  .setStatus(LoadingStatus.idle, message: "");
-              await Future.delayed(const Duration(milliseconds: 300));
-              appProvider.chargeProvider.chargingStatus =
-                  LoadingStatus.charging;
-
-              CEVNavigator.pushRoute(CEVFadeRoute(
-                builder: (context) => const CharginSessionScreen(),
-                duration: const Duration(milliseconds: 600),
-              ));
+            bool err = ev.serviceRequestedAckData.resp.error;
+            if (!err) {
+              _processServiceRequestedAckEvent();
             } else {
               appProvider.chargeProvider.setStatus(LoadingStatus.error,
-                  message: Env.providerRejectService);
+                  message: Env.providerRejectService +
+                      ": " +
+                      ev.serviceRequestedAckData.resp.message);
             }
+
+            break;
+          }
+        case msg.EventType.SERVICE_DELIVERED:
+          {
+            _processServiceDeliveredEvent(ev.serviceDeliveredData);
 
             break;
           }
@@ -199,6 +200,29 @@ class CEVPeerProvider with ChangeNotifier {
     if (!decodedRes["error"]) {
       _isPeerDidDocVerified = true;
       notifyListeners();
+    }
+  }
+
+  _processServiceRequestedAckEvent() async {
+    appProvider.chargeProvider.setStatus(LoadingStatus.idle, message: "");
+    await Future.delayed(const Duration(milliseconds: 300));
+    appProvider.chargeProvider.chargingStatus = LoadingStatus.charging;
+
+    CEVNavigator.pushRoute(CEVFadeRoute(
+      builder: (context) => const CharginSessionScreen(),
+      duration: const Duration(milliseconds: 600),
+    ));
+  }
+
+  _processServiceDeliveredEvent(msg.ServiceDeliveredData data) async {
+    if (appProvider.chargeProvider.chargingStatus == LoadingStatus.charging ||
+        appProvider.chargeProvider.chargingStatus == LoadingStatus.waiting) {
+      appProvider.chargeProvider.setStatus(LoadingStatus.idle, message: "");
+
+      appProvider.chargeProvider.refundInfo = data.refundInfo;
+      appProvider.chargeProvider.spentInfo = data.spentInfo;
+      appProvider.chargeProvider.generateTransactions(notify: true);
+      appProvider.chargeProvider.chargingStatus = LoadingStatus.authorize;
     }
   }
 
@@ -339,7 +363,7 @@ class CEVPeerProvider with ChangeNotifier {
     required String callHash,
     required String seed,
   }) async {
-    // print("sendServiceRequestedEvent hitts");
+    // print("approveMultisigTransaction hitts");
     var data = await api.approveMultisig(
         wsUrl: Env.peaqTestnet,
         threshold: threshold,

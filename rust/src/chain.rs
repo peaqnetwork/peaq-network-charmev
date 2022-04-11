@@ -72,6 +72,7 @@ pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
         call_hash,
         max_weight: 1000000000,
     });
+    trace!("\n Composed Call: {:?}\n", multi_param);
 
     // Information for Era for mortal transactions
     let head = api.get_finalized_head().unwrap().unwrap();
@@ -85,21 +86,21 @@ pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
         api.clone().signer.unwrap(),
         multi_param.clone(),
         nonce,
-        Era::mortal(period, h.number.into()),
+        Era::Immortal,
         api.genesis_hash,
         api.genesis_hash,
         api.runtime_version.spec_version,
         api.runtime_version.transaction_version
     );
 
-    println!("[+] Composed Extrinsic:\n {:?}\n", xt);
+    trace!("\n Composed Extrinsic: {:?}\n", xt);
 
     let xt_hash = xt.hex_encode(); //.strip_prefix("0x").unwrap().to_string();
 
-    println!("[+] Composed Extrinsic:\n {:?}\n", &xt_hash,);
+    trace!("\n Composed Extrinsic: {:?}\n", &xt_hash,);
 
     // send and watch extrinsic until InBlock
-    let res = api.send_extrinsic(xt_hash.clone(), XtStatus::InBlock);
+    let res = api.send_extrinsic(xt_hash.clone(), XtStatus::Finalized);
 
     match res {
         Ok(hash) => {

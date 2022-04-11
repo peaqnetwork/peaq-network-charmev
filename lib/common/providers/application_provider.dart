@@ -86,10 +86,8 @@ class CEVApplicationProvider extends ChangeNotifier {
 
     if (authenticated) {
       _log.fine("navigating to home screen");
-      accountProvider.connectNode();
+      // use to initiate rust log in lib
       peerProvider.initLog();
-      // initiate the p2p connection
-      // peerProvider.connectP2P();
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         builder: (context) => const HomeScreen(),
         duration: const Duration(milliseconds: 600),

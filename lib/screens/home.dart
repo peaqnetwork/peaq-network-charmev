@@ -55,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen>
     CEVAccountProvider _accountProvider = CEVAccountProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
-          _accountProvider.closeNodeConnection();
           return true;
         },
         child: Material(color: Colors.white, child: _buildMain(context)));
@@ -106,7 +105,6 @@ class _HomeScreenState extends State<HomeScreen>
                 _accountProvider.showNodeDropdown =
                     !_accountProvider.showNodeDropdown;
                 _accountProvider.selectedNode = item;
-                _accountProvider.connectNode();
               }),
         ),
         Visibility(

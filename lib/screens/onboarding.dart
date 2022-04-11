@@ -275,7 +275,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             }
             accountProvider.selectedNode = node;
             accountProvider.addNode(node);
-            accountProvider.connectNode();
           }
         });
   }
