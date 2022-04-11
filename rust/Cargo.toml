@@ -12,6 +12,10 @@ members = [
 name = "peaq_codec_api"
 crate-type = ["cdylib"]
 
+[patch.crates-io]
+ethereum = { git = "https://github.com/peaqnetwork/ethereum", branch = "tgm-0.11.1-typeinfo-patch" }
+
+
 [dependencies]
 anyhow = { version = "1.0.53", features = ["backtrace"] }
 flutter_rust_bridge = { version = "1.23.0" }
@@ -25,19 +29,30 @@ protobuf = "3.0.0-alpha.8"
 once_cell = "1.10.0"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 serde_json = { version = "1.0"}
+
 codec = { package = 'parity-scale-codec', version = "2.0.0", default-features = false,  features = ['derive']}
-keyring = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "master", package = "sp-keyring" }
-sp-runtime = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "master" }
+keyring = { version = "4.1.0-dev", package = "sp-keyring", git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.16" }
+sp-runtime = { version = "4.1.0-dev", default-features = false, git = "https://github.com/peaqnetwork/substrate", branch = "peaq-polkadot-v0.9.16" }
 
 libp2p = { version = "0.43.0", features = ["tcp-tokio"] }
 futures = "0.3.1"
 tokio = { version = "1.15", features = ["io-util", "io-std", "macros", "rt", "rt-multi-thread", "fs", "time", "sync"] }
-peaq-p2p-proto-message = { git = "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git" }
+
+peaq-node-runtime = { version = "3.0.0-polkadot-v0.9.16", git = "https://github.com/peaqnetwork/peaq-network-node", branch = "dev" }
+#peaq-p2p-proto-message = { git = "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git" }
+peaq-p2p-proto-message = { path = "../../../proto/peaq-network-ev-charging-message-format/rust" }
 
 [dependencies.sp-core]
 default-features = false
-git = 'https://github.com/paritytech/substrate.git'
-tag = 'monthly-2021-10'
+git = 'https://github.com/peaqnetwork/substrate'
+branch = "peaq-polkadot-v0.9.16"
+version = '4.1.0-dev'
+
+[dependencies.pallet-multisig]
+default-features = false
+#path = "../substrate/frame/multisig"
+git = 'https://github.com/peaqnetwork/substrate'
+branch = 'peaq-polkadot-v0.9.16'
 version = '4.0.0-dev'
 
 [dependencies.scale-info]
@@ -46,15 +61,13 @@ features = ['derive']
 version = '1.0'
 
 [dependencies.frame-metadata] 
-version = "14.0.0"
-git = "https://github.com/paritytech/frame-metadata.git" 
-branch = "main"
+version = "14.2.0"
 features = ["v14"] 
 
 [dependencies.substrate-api-client] 
 version = "0.6.0"
 git = "https://github.com/irediaes/substrate-api-client.git"
-rev = "66fa708d3f94748c59ef1e6c81deb34eddea59c2"
+rev = "93d8d67296f0c55096ebf33d09f96b2e5a345d2f"
 
 
 [features]
@@ -67,4 +80,6 @@ std = [
     'sp-core/std',
     "scale-info/std",
 	"sp-runtime/std",
+    "pallet-multisig/std",
+    "peaq-node-runtime/std",
 ]

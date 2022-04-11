@@ -50,6 +50,29 @@ pub fn create_multisig_address(consumer: String, provider: String) -> Result<Vec
     Ok(res)
 }
 
+// approve a multi signature transaction
+pub fn approve_multisig(
+    ws_url: String,
+    threshold: u16,
+    other_signatories: Vec<String>,
+    timepoint_height: u32,
+    timepoint_index: u32,
+    call_hash: String,
+    seed: String,
+) -> Result<Vec<u8>> {
+    let res = request::approve_multisig(
+        ws_url,
+        threshold,
+        other_signatories,
+        timepoint_height,
+        timepoint_index,
+        call_hash,
+        seed,
+    )
+    .unwrap();
+    Ok(res)
+}
+
 // Transfer fund to a wallet address
 pub fn transfer_fund(
     ws_url: String,
