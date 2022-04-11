@@ -273,47 +273,38 @@ class CEVChargeProvider with ChangeNotifier {
 
     var _seed = appProvider.accountProvider.account.seed ?? "";
 
-    var refundParams = {
-      "call_hash": _txInfo[0].callHash,
-      "timepoint": refundTimePoint.toJson(),
-      "threshold": 2,
-      "other_sig": [_station.address],
-      "signer_seed": _seed
-    };
-
-    var spentParams = {
-      "call_hash": _txInfo[1].callHash,
-      "timepoint": spentTimePoint.toJson(),
-      "threshold": 2,
-      "other_sig": [_station.address],
-      "signer_seed": _seed
-    };
-
     setStatus(LoadingStatus.loading, message: Env.approvingRefundTransaction);
 
-    var url = Env.multisigURL;
+    bool approveRefund = await appProvider.peerProvider
+        .approveMultisigTransaction(
+            threshold: 2,
+            otherSignatories: [_station.address!],
+            timepointHeight: int.parse(refundTimePoint.height),
+            timepointIndex: int.parse(refundTimePoint.index),
+            callHash: _txInfo[0].callHash,
+            seed: _seed);
 
-    var refundRes =
-        await _dio.patch(url, data: refundParams).catchError((err) async {
+    if (!approveRefund) {
       setStatus(LoadingStatus.error,
           message: Env.approvingRefundTransactionFailed);
-      print("Refund Err:: $err");
-      return err;
-    });
-
-    print("refundRes data:: ${refundRes.data}");
-    await Future.delayed(const Duration(seconds: 7));
-
+      return;
+    }
     setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
 
-    var spentRes =
-        await _dio.patch(url, data: spentParams).catchError((err) async {
+    bool approveSpent = await appProvider.peerProvider
+        .approveMultisigTransaction(
+            threshold: 2,
+            otherSignatories: [_station.address!],
+            timepointHeight: int.parse(spentTimePoint.height),
+            timepointIndex: int.parse(spentTimePoint.index),
+            callHash: _txInfo[1].callHash,
+            seed: _seed);
+
+    if (!approveSpent) {
       setStatus(LoadingStatus.error,
           message: Env.approvingSpentTransactionFailed);
-      print("spent Err:: $err");
-      return err;
-    });
-    print("spentRes data:: ${spentRes.data}");
+      return;
+    }
 
     _chargingStatus = LoadingStatus.success;
     setStatus(LoadingStatus.idle, message: Env.transactionCompleted);

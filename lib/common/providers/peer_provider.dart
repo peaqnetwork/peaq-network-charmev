@@ -331,6 +331,37 @@ class CEVPeerProvider with ChangeNotifier {
     return rData;
   }
 
+  Future<bool> approveMultisigTransaction({
+    required int threshold,
+    required List<String> otherSignatories,
+    required int timepointHeight,
+    required int timepointIndex,
+    required String callHash,
+    required String seed,
+  }) async {
+    // print("sendServiceRequestedEvent hitts");
+    var data = await api.approveMultisig(
+        wsUrl: Env.peaqTestnet,
+        threshold: threshold,
+        otherSignatories: otherSignatories,
+        timepointHeight: timepointHeight,
+        timepointIndex: timepointIndex,
+        seed: seed,
+        callHash: callHash);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+    var rData = CEVRustResponse.fromJson(decodedRes);
+
+    if (rData.error!) {
+      appProvider.chargeProvider
+          .setStatus(LoadingStatus.error, message: rData.message!);
+      return false;
+    }
+
+    return true;
+  }
+
   Future<doc.Document> fetchDidDocument(String publicKey) async {
     var data = await api.fetchDidDocument(
         wsUrl: Env.peaqTestnet,
