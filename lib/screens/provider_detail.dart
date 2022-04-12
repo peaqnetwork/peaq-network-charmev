@@ -10,13 +10,11 @@ import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:charmev/common/models/detail.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 import 'package:charmev/common/widgets/border_box.dart';
-import 'package:provider/provider.dart' as provider;
 
 class ProviderDetailScreen extends StatefulWidget {
   const ProviderDetailScreen({this.page, Key? key}) : super(key: key);

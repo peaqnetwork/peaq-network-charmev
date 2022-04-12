@@ -4,7 +4,6 @@ import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:scan/scan.dart';
 
 import 'package:charmev/config/env.dart';

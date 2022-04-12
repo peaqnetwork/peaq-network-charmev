@@ -11,13 +11,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:charmev/common/widgets/buttons.dart';
 import 'package:charmev/common/widgets/progress_card.dart';
 import 'package:charmev/common/widgets/border_box.dart';
-import 'package:charmev/common/widgets/bottom_sheet.dart';
-import 'package:charmev/common/widgets/keyboard_padding.dart';
-import 'package:charmev/common/widgets/countdown.dart';
-import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
-import 'package:provider/provider.dart' as provider;
 
 class CharginSessionScreen extends StatefulWidget {
   const CharginSessionScreen({Key? key}) : super(key: key);
