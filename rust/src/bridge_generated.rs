@@ -109,6 +109,46 @@ pub extern "C" fn wire_create_multisig_address(
 }
 
 #[no_mangle]
+pub extern "C" fn wire_approve_multisig(
+    port_: i64,
+    ws_url: *mut wire_uint_8_list,
+    threshold: u16,
+    other_signatories: *mut wire_StringList,
+    timepoint_height: u32,
+    timepoint_index: u32,
+    call_hash: *mut wire_uint_8_list,
+    seed: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "approve_multisig",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_ws_url = ws_url.wire2api();
+            let api_threshold = threshold.wire2api();
+            let api_other_signatories = other_signatories.wire2api();
+            let api_timepoint_height = timepoint_height.wire2api();
+            let api_timepoint_index = timepoint_index.wire2api();
+            let api_call_hash = call_hash.wire2api();
+            let api_seed = seed.wire2api();
+            move |task_callback| {
+                approve_multisig(
+                    api_ws_url,
+                    api_threshold,
+                    api_other_signatories,
+                    api_timepoint_height,
+                    api_timepoint_index,
+                    api_call_hash,
+                    api_seed,
+                )
+            }
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_transfer_fund(
     port_: i64,
     ws_url: *mut wire_uint_8_list,
@@ -214,6 +254,13 @@ pub extern "C" fn wire_fetch_did_document(
 
 #[repr(C)]
 #[derive(Clone)]
+pub struct wire_StringList {
+    ptr: *mut *mut wire_uint_8_list,
+    len: i32,
+}
+
+#[repr(C)]
+#[derive(Clone)]
 pub struct wire_uint_8_list {
     ptr: *mut u8,
     len: i32,
@@ -222,6 +269,15 @@ pub struct wire_uint_8_list {
 // Section: wire enums
 
 // Section: allocate functions
+
+#[no_mangle]
+pub extern "C" fn new_StringList(len: i32) -> *mut wire_StringList {
+    let wrap = wire_StringList {
+        ptr: support::new_leak_vec_ptr(<*mut wire_uint_8_list>::new_with_null_ptr(), len),
+        len,
+    };
+    support::new_leak_box_ptr(wrap)
+}
 
 #[no_mangle]
 pub extern "C" fn new_uint_8_list(len: i32) -> *mut wire_uint_8_list {
@@ -255,6 +311,28 @@ impl Wire2Api<String> for *mut wire_uint_8_list {
     fn wire2api(self) -> String {
         let vec: Vec<u8> = self.wire2api();
         String::from_utf8_lossy(&vec).into_owned()
+    }
+}
+
+impl Wire2Api<Vec<String>> for *mut wire_StringList {
+    fn wire2api(self) -> Vec<String> {
+        let vec = unsafe {
+            let wrap = support::box_from_leak_ptr(self);
+            support::vec_from_leak_ptr(wrap.ptr, wrap.len)
+        };
+        vec.into_iter().map(Wire2Api::wire2api).collect()
+    }
+}
+
+impl Wire2Api<u16> for u16 {
+    fn wire2api(self) -> u16 {
+        self
+    }
+}
+
+impl Wire2Api<u32> for u32 {
+    fn wire2api(self) -> u32 {
+        self
     }
 }
 

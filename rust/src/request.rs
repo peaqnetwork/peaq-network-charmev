@@ -1,5 +1,6 @@
 use anyhow::*;
 use log::trace;
+use sp_runtime::AccountId32 as AccountId;
 use substrate_api_client::Balance;
 
 use core::result::Result::Ok as CoreOk;
@@ -69,6 +70,57 @@ pub fn create_multisig_wallet(consumer: String, provider: String) -> Result<Vec<
     Ok(res_data)
 }
 
+pub fn approve_multisig(
+    ws_url: String,
+    threshold: u16,
+    other_signatories: Vec<String>,
+    timepoint_height: u32,
+    timepoint_index: u32,
+    call_hash: String,
+    seed: String,
+) -> Result<Vec<u8>> {
+    trace!("\n\n RUST - transfer_fund hitts");
+
+    let other_signatories: Vec<AccountId> = other_signatories
+        .iter()
+        .map(|si| utils::parse_signatories(si.as_str()))
+        .collect();
+
+    let timepoint = pallet_multisig::Timepoint::new(timepoint_height, timepoint_index);
+
+    let params = chain::ApproveMultisigParams {
+        ws_url,
+        threshold,
+        timepoint,
+        max_weight: 1000000000,
+        other_signatories,
+        call_hash,
+        seed,
+    };
+
+    let ev_res = chain::approve_multisig(params).unwrap();
+
+    let mut res = ResponseData {
+        error: false,
+        message: "Transaction Approved".to_string(),
+        data: vec![],
+    };
+
+    match ev_res {
+        chain::ChainError::Error(err) => {
+            // return the error data if transfer error occurred
+            res.error = true;
+            res.message = err;
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+        _ => {
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+    }
+}
+
 pub fn transfer_fund(
     ws_url: String,
     address: String,
@@ -109,7 +161,7 @@ pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
 
     let mut challenge_data = msg::IdentityChallengeData::new();
     challenge_data.plain_data = random_data.clone();
-    let data = msg::event::Data::identity_challenge_data(challenge_data);
+    let data = msg::event::Data::IdentityChallengeData(challenge_data);
 
     let ev_res = event::send_event(msg::EventType::IDENTITY_CHALLENGE, data);
 
@@ -140,7 +192,7 @@ pub fn send_stop_charge_event() -> Result<Vec<u8>> {
     trace!("\n\n RUST - send_service_requested_event hitts");
     let mut stop_data = msg::StopChargeData::new();
     stop_data.success = true;
-    let data = msg::event::Data::stop_charge_data(stop_data);
+    let data = msg::event::Data::StopChargeData(stop_data);
 
     let ev_res = event::send_event(msg::EventType::STOP_CHARGE, data);
 
@@ -179,7 +231,7 @@ pub fn send_service_requested_event(
     service_data.provider = provider;
     service_data.consumer = consumer;
     service_data.token_deposited = token_deposited;
-    let data = msg::event::Data::service_requested_data(service_data);
+    let data = msg::event::Data::ServiceRequestedData(service_data);
 
     let ev_res = event::send_event(msg::EventType::SERVICE_REQUESTED, data);
 

@@ -21,6 +21,12 @@ pub fn generate_random_data() -> String {
     hex_string
 }
 
+pub fn parse_signatories(address: &str) -> AccountId {
+    let to = sr25519::sr25519::Public::from_str(&address).unwrap();
+    let to = AccountId::decode(&mut &to.0[..]).unwrap_or_default();
+    to
+}
+
 pub fn create_multisig_account(consumer: &str, provider: &str) -> String {
     let who = &mut [consumer.as_bytes().to_vec(), provider.as_bytes().to_vec()];
     // &who.sort();

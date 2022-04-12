@@ -20,6 +20,8 @@ import 'package:substrate_sign_flutter/substrate_sign_flutter.dart' as subsign;
 import 'package:scan/scan.dart';
 import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart';
 import 'package:peaq_network_ev_charging_message_format/did_document_format.pbenum.dart';
+import 'package:peaq_network_ev_charging_message_format/p2p_message_format.pb.dart'
+    as msg;
 
 class CEVChargeProvider with ChangeNotifier {
   CEVChargeProvider({
@@ -40,12 +42,12 @@ class CEVChargeProvider with ChangeNotifier {
   LoadingStatus _chargingStatus = LoadingStatus.idle;
   String _statusMessage = '';
   String _providerDid = "";
-  double _totalTimeInSeconds = 120;
   double _counter = 0;
   double _progress = 1;
   CEVStation _station = CEVStation();
   List<Detail> _transactions = [];
-  List<CEVTxInfo> _txInfo = [];
+  msg.TransactionValue _refundInfo = msg.TransactionValue();
+  msg.TransactionValue _spentInfo = msg.TransactionValue();
   List<Detail> _details = [];
   BigInt _atto = BigInt.parse("10000000000000000000");
   final Dio _dio = Dio()..options = BaseOptions(baseUrl: Env.scaleCodecBaseURL);
@@ -55,9 +57,9 @@ class CEVChargeProvider with ChangeNotifier {
   List<Detail> get details => _details;
   LoadingStatus get status => _status;
   LoadingStatus get chargingStatus => _chargingStatus;
-  double get totalTimeInSeconds => _totalTimeInSeconds;
   List<Detail> get transactions => _transactions;
-  List<CEVTxInfo> get txInfo => _txInfo;
+  msg.TransactionValue get refundInfo => _refundInfo;
+  msg.TransactionValue get spentInfo => _spentInfo;
   double get progress => _progress;
   double get counter => _counter;
   String get statusMessage => _statusMessage;
@@ -67,8 +69,13 @@ class CEVChargeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  set txInfo(List<CEVTxInfo> info) {
-    _txInfo = info;
+  set refundInfo(msg.TransactionValue info) {
+    _refundInfo = info;
+    notifyListeners();
+  }
+
+  set spentInfo(msg.TransactionValue info) {
+    _spentInfo = info;
     notifyListeners();
   }
 
@@ -87,13 +94,6 @@ class CEVChargeProvider with ChangeNotifier {
     _status = LoadingStatus.idle;
     _statusMessage = "";
     notifyListeners();
-  }
-
-  updateTimer(double count) async {
-    var percent = _counter / _totalTimeInSeconds;
-    double progress = (percent <= 1) ? percent : 1;
-    _progress = progress;
-    _counter = count;
   }
 
   // generate provider account details
@@ -118,11 +118,13 @@ class CEVChargeProvider with ChangeNotifier {
   generateTransactions({bool notify = false}) {
     List<Detail> _newtx = [];
 
-    print("generateTransactions :: _txInfo:: ${json.encode(_txInfo)}");
+    print(
+        "generateTransactions :: _refundInfo:: ${_refundInfo.toProto3Json()}");
+    print("generateTransactions :: _spentInfo:: ${_spentInfo.toProto3Json()}");
 
-    if (_txInfo.isNotEmpty) {
-      var refundRawToken = _txInfo[0].token;
-      var spentRawToken = _txInfo[1].token;
+    if (_refundInfo.tokenNum.isNotEmpty && _spentInfo.tokenNum.isNotEmpty) {
+      var refundRawToken = _refundInfo.tokenNum;
+      var spentRawToken = _spentInfo.tokenNum;
       var refundToken = (BigInt.parse(refundRawToken) / _atto);
       print("refundToken:: $refundToken");
       var refundTokenString = refundToken.toStringAsFixed(4);
@@ -261,90 +263,53 @@ class CEVChargeProvider with ChangeNotifier {
   }
 
   approveTransactions() async {
-    if (_txInfo.isEmpty) {
+    if (_refundInfo.tokenNum.isEmpty || _spentInfo.tokenNum.isEmpty) {
       setStatus(LoadingStatus.error, message: "Empty transactions");
       return;
     }
 
     setStatus(LoadingStatus.loading);
 
-    var refundTimePoint = _txInfo[0].timePoint;
-    var spentTimePoint = _txInfo[1].timePoint;
+    var refundTimePoint = _refundInfo.timePoint;
+    var spentTimePoint = _spentInfo.timePoint;
+    var otherSignatories = [_station.address!];
 
     var _seed = appProvider.accountProvider.account.seed ?? "";
 
-    var refundParams = {
-      "call_hash": _txInfo[0].callHash,
-      "timepoint": refundTimePoint.toJson(),
-      "threshold": 2,
-      "other_sig": [_station.address],
-      "signer_seed": _seed
-    };
-
-    var spentParams = {
-      "call_hash": _txInfo[1].callHash,
-      "timepoint": spentTimePoint.toJson(),
-      "threshold": 2,
-      "other_sig": [_station.address],
-      "signer_seed": _seed
-    };
-
     setStatus(LoadingStatus.loading, message: Env.approvingRefundTransaction);
 
-    var url = Env.multisigURL;
+    bool approveRefund = await appProvider.peerProvider
+        .approveMultisigTransaction(
+            threshold: 2,
+            otherSignatories: otherSignatories,
+            timepointHeight: refundTimePoint.height.toInt(),
+            timepointIndex: refundTimePoint.index.toInt(),
+            callHash: _refundInfo.callHash,
+            seed: _seed);
 
-    var refundRes =
-        await _dio.patch(url, data: refundParams).catchError((err) async {
+    if (!approveRefund) {
       setStatus(LoadingStatus.error,
           message: Env.approvingRefundTransactionFailed);
-      print("Refund Err:: $err");
-      return err;
-    });
-
-    print("refundRes data:: ${refundRes.data}");
-    await Future.delayed(const Duration(seconds: 7));
-
-    setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
-
-    var spentRes =
-        await _dio.patch(url, data: spentParams).catchError((err) async {
-      setStatus(LoadingStatus.error,
-          message: Env.approvingSpentTransactionFailed);
-      print("spent Err:: $err");
-      return err;
-    });
-    print("spentRes data:: ${spentRes.data}");
-
-    _chargingStatus = LoadingStatus.success;
-    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
-  }
-
-  /// FOR DEV ONLY
-  simulateApproveTransactions() async {
-    setStatus(LoadingStatus.loading, message: Env.approvingRefundTransaction);
-    await Future.delayed(const Duration(seconds: 3));
-    setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
-    await Future.delayed(const Duration(seconds: 3));
-
-    _chargingStatus = LoadingStatus.success;
-    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
-  }
-
-  /// FOR DEV ONLY
-  simulateStopCharge(bool urlExist) async {
-    setStatus(LoadingStatus.loading, message: Env.stoppingCharge);
-
-    if (!urlExist) {
-      setStatus(LoadingStatus.error, message: Env.stopUrlNotSet);
       return;
     }
-    await Future.delayed(const Duration(seconds: 3));
+    setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
 
-    _chargingStatus = LoadingStatus.waiting;
+    bool approveSpent = await appProvider.peerProvider
+        .approveMultisigTransaction(
+            threshold: 2,
+            otherSignatories: otherSignatories,
+            timepointHeight: spentTimePoint.height.toInt(),
+            timepointIndex: spentTimePoint.index.toInt(),
+            callHash: _spentInfo.callHash,
+            seed: _seed);
 
-    setStatus(LoadingStatus.loading, message: Env.stoppingChargeSent);
-    await Future.delayed(const Duration(seconds: 3));
+    if (!approveSpent) {
+      setStatus(LoadingStatus.error,
+          message: Env.approvingSpentTransactionFailed);
+      return;
+    }
 
-    appProvider.accountProvider.simulateDeliveredEvent();
+    _chargingStatus = LoadingStatus.success;
+    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
   }
 }

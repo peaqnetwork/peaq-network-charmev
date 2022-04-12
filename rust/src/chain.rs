@@ -1,10 +1,11 @@
 use codec::{Decode, Encode};
 use keyring::sr25519::sr25519;
+use log::trace;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
 use sp_runtime::{AccountId32 as AccountId, MultiAddress};
 use std::{error::Error, str::FromStr};
-use subclient::{Balance, Pair};
+use subclient::{compose_extrinsic_offline, Balance, Pair, UncheckedExtrinsicV4, XtStatus};
 use substrate_api_client::{self as subclient, rpc as subclient_rpc};
 
 use scale_info::TypeInfo;
@@ -35,9 +36,80 @@ pub struct Attribute<BlockNumber, Moment> {
     pub created: Moment,
 }
 
+pub struct ApproveMultisigParams {
+    pub ws_url: String,
+    pub threshold: u16,
+    pub max_weight: u64,
+    pub other_signatories: Vec<AccountId>,
+    pub timepoint: pallet_multisig::Timepoint<BlockNumber>,
+    pub call_hash: String,
+    pub seed: String,
+}
+
 pub enum ChainError {
     Error(String),
     None,
+}
+
+pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
+    // initialize api and set the signer (sender) that is used to sign the extrinsics
+    let from = sr25519::Pair::from_string(&params.seed, None).unwrap();
+    let client = subclient_rpc::WsRpcClient::new(&params.ws_url);
+    let api = subclient::Api::new(client)
+        .map(|api| api.set_signer(from.clone()))
+        .unwrap();
+
+    let call_hash = params.call_hash.strip_prefix("0x").unwrap();
+
+    let call_hash_data = hex::decode(call_hash).unwrap();
+    let call_hash: [u8; 32] = call_hash_data[..].try_into().unwrap();
+
+    let multi_param = peaq_node_runtime::Call::MultiSig(pallet_multisig::Call::approve_as_multi {
+        threshold: params.threshold,
+        other_signatories: params.other_signatories,
+        maybe_timepoint: Some(params.timepoint),
+        call_hash,
+        max_weight: 1000000000,
+    });
+    // trace!("\n Composed Call: {:?}\n", multi_param);
+
+    let nonce = api.get_nonce().unwrap();
+    // compose the extrinsic with all the element
+    #[allow(clippy::redundant_clone)]
+    let xt: UncheckedExtrinsicV4<_> = compose_extrinsic_offline!(
+        api.clone().signer.unwrap(),
+        multi_param.clone(),
+        nonce,
+        Era::Immortal,
+        api.genesis_hash,
+        api.genesis_hash,
+        api.runtime_version.spec_version,
+        api.runtime_version.transaction_version
+    );
+
+    // trace!("\n Composed Extrinsic: {:?}\n", xt);
+
+    let xt_hash = xt.hex_encode(); //.strip_prefix("0x").unwrap().to_string();
+
+    // trace!("\n Composed Extrinsic: {:?}\n", &xt_hash,);
+
+    // send and watch extrinsic until InBlock
+    let res = api.send_extrinsic(xt_hash.clone(), XtStatus::Finalized);
+
+    match res {
+        Ok(hash) => {
+            if let Some(tx_hash) = hash {
+                trace!("Multisig Transaction got included. Hash: {:?}", tx_hash);
+                return Some(ChainError::None);
+            }
+            return Some(ChainError::Error("Transaction Approval Failed".to_string()));
+        }
+        Err(e) => {
+            trace!("Multisig Transaction failed: Err: {:?}", e.to_string());
+
+            return Some(ChainError::Error("Transaction Approval Failed".to_string()));
+        }
+    }
 }
 
 pub fn transfer(

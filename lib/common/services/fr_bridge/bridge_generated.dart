@@ -29,6 +29,16 @@ abstract class PeaqCodecApi {
   Future<Uint8List> createMultisigAddress(
       {required String consumer, required String provider, dynamic hint});
 
+  Future<Uint8List> approveMultisig(
+      {required String wsUrl,
+      required int threshold,
+      required List<String> otherSignatories,
+      required int timepointHeight,
+      required int timepointIndex,
+      required String callHash,
+      required String seed,
+      dynamic hint});
+
   Future<Uint8List> transferFund(
       {required String wsUrl,
       required String address,
@@ -144,6 +154,50 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
         hint: hint,
       ));
 
+  Future<Uint8List> approveMultisig(
+          {required String wsUrl,
+          required int threshold,
+          required List<String> otherSignatories,
+          required int timepointHeight,
+          required int timepointIndex,
+          required String callHash,
+          required String seed,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_approve_multisig(
+            port_,
+            _api2wire_String(wsUrl),
+            _api2wire_u16(threshold),
+            _api2wire_StringList(otherSignatories),
+            _api2wire_u32(timepointHeight),
+            _api2wire_u32(timepointIndex),
+            _api2wire_String(callHash),
+            _api2wire_String(seed)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "approve_multisig",
+          argNames: [
+            "wsUrl",
+            "threshold",
+            "otherSignatories",
+            "timepointHeight",
+            "timepointIndex",
+            "callHash",
+            "seed"
+          ],
+        ),
+        argValues: [
+          wsUrl,
+          threshold,
+          otherSignatories,
+          timepointHeight,
+          timepointIndex,
+          callHash,
+          seed
+        ],
+        hint: hint,
+      ));
+
   Future<Uint8List> transferFund(
           {required String wsUrl,
           required String address,
@@ -237,6 +291,22 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
+  }
+
+  ffi.Pointer<wire_StringList> _api2wire_StringList(List<String> raw) {
+    final ans = inner.new_StringList(raw.length);
+    for (var i = 0; i < raw.length; i++) {
+      ans.ref.ptr[i] = _api2wire_String(raw[i]);
+    }
+    return ans;
+  }
+
+  int _api2wire_u16(int raw) {
+    return raw;
+  }
+
+  int _api2wire_u32(int raw) {
+    return raw;
   }
 
   int _api2wire_u8(int raw) {
@@ -395,6 +465,50 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           void Function(int, ffi.Pointer<wire_uint_8_list>,
               ffi.Pointer<wire_uint_8_list>)>();
 
+  void wire_approve_multisig(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> ws_url,
+    int threshold,
+    ffi.Pointer<wire_StringList> other_signatories,
+    int timepoint_height,
+    int timepoint_index,
+    ffi.Pointer<wire_uint_8_list> call_hash,
+    ffi.Pointer<wire_uint_8_list> seed,
+  ) {
+    return _wire_approve_multisig(
+      port_,
+      ws_url,
+      threshold,
+      other_signatories,
+      timepoint_height,
+      timepoint_index,
+      call_hash,
+      seed,
+    );
+  }
+
+  late final _wire_approve_multisigPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Uint16,
+              ffi.Pointer<wire_StringList>,
+              ffi.Uint32,
+              ffi.Uint32,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_approve_multisig');
+  late final _wire_approve_multisig = _wire_approve_multisigPtr.asFunction<
+      void Function(
+          int,
+          ffi.Pointer<wire_uint_8_list>,
+          int,
+          ffi.Pointer<wire_StringList>,
+          int,
+          int,
+          ffi.Pointer<wire_uint_8_list>,
+          ffi.Pointer<wire_uint_8_list>)>();
+
   void wire_transfer_fund(
     int port_,
     ffi.Pointer<wire_uint_8_list> ws_url,
@@ -513,6 +627,20 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
       void Function(int, ffi.Pointer<wire_uint_8_list>,
           ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 
+  ffi.Pointer<wire_StringList> new_StringList(
+    int len,
+  ) {
+    return _new_StringList(
+      len,
+    );
+  }
+
+  late final _new_StringListPtr = _lookup<
+          ffi.NativeFunction<ffi.Pointer<wire_StringList> Function(ffi.Int32)>>(
+      'new_StringList');
+  late final _new_StringList = _new_StringListPtr
+      .asFunction<ffi.Pointer<wire_StringList> Function(int)>();
+
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,
   ) {
@@ -559,6 +687,13 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
 
 class wire_uint_8_list extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> ptr;
+
+  @ffi.Int32()
+  external int len;
+}
+
+class wire_StringList extends ffi.Struct {
+  external ffi.Pointer<ffi.Pointer<wire_uint_8_list>> ptr;
 
   @ffi.Int32()
   external int len;
