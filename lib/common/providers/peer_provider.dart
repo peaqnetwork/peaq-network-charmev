@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/rust_data.dart';
-import 'package:charmev/common/models/tx_info.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/screens/charging_session.dart';

@@ -86,7 +86,10 @@ pub fn approve_multisig(
         .map(|si| utils::parse_signatories(si.as_str()))
         .collect();
 
-    let timepoint = pallet_multisig::Timepoint::new(timepoint_height, timepoint_index);
+    let timepoint = chain::Timepoint {
+        height: timepoint_height,
+        index: timepoint_index,
+    };
 
     let params = chain::ApproveMultisigParams {
         ws_url,

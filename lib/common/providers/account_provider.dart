@@ -1,5 +1,4 @@
 import 'package:charmev/common/models/detail.dart';
-import 'package:charmev/common/models/tx_info.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/env.dart';
@@ -52,7 +51,6 @@ class CEVAccountProvider with ChangeNotifier {
 
   rpc.Client? _rpcClient;
   WebSocketChannel? _socket;
-  final Dio _dio = Dio()..options = BaseOptions(baseUrl: Env.scaleCodecBaseURL);
 
   List<String> _events = [];
   List<String> _nodes = [Env.peaqTestnet];
