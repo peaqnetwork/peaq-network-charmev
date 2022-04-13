@@ -45,8 +45,8 @@ pub fn send_service_requested_event(
 }
 
 // Creates a multi signature wallet address
-pub fn create_multisig_address(consumer: String, provider: String) -> Result<Vec<u8>> {
-    let res = request::create_multisig_wallet(consumer, provider).unwrap();
+pub fn create_multisig_address(signatories: Vec<String>, threshold: u16) -> Result<Vec<u8>> {
+    let res = request::create_multisig_wallet(signatories, threshold).unwrap();
     Ok(res)
 }
 

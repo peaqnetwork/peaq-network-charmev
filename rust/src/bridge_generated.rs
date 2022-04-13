@@ -91,8 +91,8 @@ pub extern "C" fn wire_send_service_requested_event(
 #[no_mangle]
 pub extern "C" fn wire_create_multisig_address(
     port_: i64,
-    consumer: *mut wire_uint_8_list,
-    provider: *mut wire_uint_8_list,
+    signatories: *mut wire_StringList,
+    threshold: u16,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -101,9 +101,9 @@ pub extern "C" fn wire_create_multisig_address(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_consumer = consumer.wire2api();
-            let api_provider = provider.wire2api();
-            move |task_callback| create_multisig_address(api_consumer, api_provider)
+            let api_signatories = signatories.wire2api();
+            let api_threshold = threshold.wire2api();
+            move |task_callback| create_multisig_address(api_signatories, api_threshold)
         },
     )
 }

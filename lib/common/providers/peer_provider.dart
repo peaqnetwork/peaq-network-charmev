@@ -316,8 +316,8 @@ class CEVPeerProvider with ChangeNotifier {
   Future<bool> creatMultisigAddress(String provider, String consumer) async {
     // print("creatMultisigAddress hitts");
 
-    var data =
-        await api.createMultisigAddress(provider: provider, consumer: consumer);
+    var data = await api
+        .createMultisigAddress(signatories: [provider, consumer], threshold: 2);
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
