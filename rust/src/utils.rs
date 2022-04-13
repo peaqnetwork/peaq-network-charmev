@@ -1,3 +1,4 @@
+use codec::Compact;
 use codec::{Decode, Encode};
 // use keyring::sr25519;
 use keyring::ed25519;
@@ -27,11 +28,13 @@ pub fn parse_signatories(address: &str) -> AccountId {
     to
 }
 
-pub fn create_multisig_account(consumer: &str, provider: &str) -> String {
-    let who = &mut [consumer.as_bytes().to_vec(), provider.as_bytes().to_vec()];
-    // &who.sort();
+pub fn create_multisig_account(signatories: Vec<String>, threshold: u16) -> String {
+    let mut signatories: Vec<AccountId> = signatories.iter().map(|si| parse_signatories(si)).collect();
 
-    let entropy = (b"modlpy/utilisuba", &who[..].sort(), 2).using_encoded(blake2_256);
+    let _ = &signatories.sort();
+    let prefix = b"modlpy/utilisuba";
+
+    let entropy = (prefix, signatories, threshold).using_encoded(blake2_256);
     trace!("entropy:: {:?}", &entropy);
 
     let multi = AccountId::decode(&mut &entropy[..]).unwrap_or_default();

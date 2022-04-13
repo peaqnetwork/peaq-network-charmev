@@ -52,7 +52,7 @@ pub fn get_event() -> Result<Vec<u8>> {
 }
 
 // create multisig account
-pub fn create_multisig_wallet(consumer: String, provider: String) -> Result<Vec<u8>> {
+pub fn create_multisig_wallet(signatories: Vec<String>, threshold: u16) -> Result<Vec<u8>> {
     trace!("\n\n RUST - get_event  hitts");
 
     let mut res = ResponseData {
@@ -61,7 +61,7 @@ pub fn create_multisig_wallet(consumer: String, provider: String) -> Result<Vec<
         data: vec![],
     };
 
-    let address = utils::create_multisig_account(consumer.as_str(), &provider.as_str());
+    let address = utils::create_multisig_account(signatories, threshold);
     res.error = false;
     res.message = "Event Found".to_string();
     res.data = address.as_bytes().to_vec();

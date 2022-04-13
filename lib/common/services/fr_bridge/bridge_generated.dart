@@ -27,7 +27,9 @@ abstract class PeaqCodecApi {
       dynamic hint});
 
   Future<Uint8List> createMultisigAddress(
-      {required String consumer, required String provider, dynamic hint});
+      {required List<String> signatories,
+      required int threshold,
+      dynamic hint});
 
   Future<Uint8List> approveMultisig(
       {required String wsUrl,
@@ -141,16 +143,18 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
       ));
 
   Future<Uint8List> createMultisigAddress(
-          {required String consumer, required String provider, dynamic hint}) =>
+          {required List<String> signatories,
+          required int threshold,
+          dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
         callFfi: (port_) => inner.wire_create_multisig_address(
-            port_, _api2wire_String(consumer), _api2wire_String(provider)),
+            port_, _api2wire_StringList(signatories), _api2wire_u16(threshold)),
         parseSuccessData: _wire2api_uint_8_list,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "create_multisig_address",
-          argNames: ["consumer", "provider"],
+          argNames: ["signatories", "threshold"],
         ),
-        argValues: [consumer, provider],
+        argValues: [signatories, threshold],
         hint: hint,
       ));
 
@@ -446,24 +450,22 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
 
   void wire_create_multisig_address(
     int port_,
-    ffi.Pointer<wire_uint_8_list> consumer,
-    ffi.Pointer<wire_uint_8_list> provider,
+    ffi.Pointer<wire_StringList> signatories,
+    int threshold,
   ) {
     return _wire_create_multisig_address(
       port_,
-      consumer,
-      provider,
+      signatories,
+      threshold,
     );
   }
 
   late final _wire_create_multisig_addressPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
-              ffi.Pointer<wire_uint_8_list>)>>('wire_create_multisig_address');
-  late final _wire_create_multisig_address =
-      _wire_create_multisig_addressPtr.asFunction<
-          void Function(int, ffi.Pointer<wire_uint_8_list>,
-              ffi.Pointer<wire_uint_8_list>)>();
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_StringList>,
+              ffi.Uint16)>>('wire_create_multisig_address');
+  late final _wire_create_multisig_address = _wire_create_multisig_addressPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_StringList>, int)>();
 
   void wire_approve_multisig(
     int port_,
