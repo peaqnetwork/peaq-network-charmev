@@ -1,17 +1,12 @@
 import 'package:charmev/common/providers/account_provider.dart';
-import 'package:charmev/screens/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:charmev/config/app.dart';
 import 'package:charmev/config/navigator.dart';
-import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:charmev/common/models/detail.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
-import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/assets.dart';
 import 'package:charmev/common/widgets/border_box.dart';

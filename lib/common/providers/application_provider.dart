@@ -1,7 +1,5 @@
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/widgets/route.dart';
-import 'package:charmev/screens/charging_session.dart';
-import 'package:charmev/screens/provider_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/utils/logger.dart';

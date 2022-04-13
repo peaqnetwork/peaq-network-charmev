@@ -1,6 +1,5 @@
 import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/common/providers/peer_provider.dart';
-import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/common/providers/service_provider.dart';

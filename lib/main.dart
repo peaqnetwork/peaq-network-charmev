@@ -2,7 +2,6 @@ import 'package:charmev/common/providers/providers_wrapper.dart';
 import 'package:charmev/common/widgets/service_container.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:charmev/config/env.dart';
-import 'package:charmev/screens/entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluro/fluro.dart';

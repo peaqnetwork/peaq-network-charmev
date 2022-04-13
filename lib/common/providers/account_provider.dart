@@ -1,26 +1,14 @@
 import 'package:charmev/common/models/detail.dart';
-import 'package:charmev/common/models/tx_info.dart';
-import 'package:charmev/common/widgets/route.dart';
-import 'package:charmev/config/app.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
-import 'package:charmev/config/navigator.dart';
-import 'package:charmev/config/routes.dart';
-import 'package:charmev/screens/charging_session.dart';
-import 'package:fluro/fluro.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/models/account.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:dio/dio.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:substrate_sign_flutter/substrate_sign_flutter.dart' as subsign;
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:charmev/theme.dart';
 
@@ -49,10 +37,6 @@ class CEVAccountProvider with ChangeNotifier {
   // ignore: todo
   // TODO:: change to PEAQ SS58 registry prefix when it's set
   final int _ss58 = 42;
-
-  rpc.Client? _rpcClient;
-  WebSocketChannel? _socket;
-  final Dio _dio = Dio()..options = BaseOptions(baseUrl: Env.scaleCodecBaseURL);
 
   List<String> _events = [];
   List<String> _nodes = [Env.peaqTestnet];

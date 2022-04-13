@@ -1,22 +1,14 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/models/station.dart';
-import 'package:charmev/common/models/tx_info.dart';
 import 'package:charmev/config/env.dart';
 import 'package:charmev/theme.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:flutter/widgets.dart';
-import 'package:cryptography/cryptography.dart';
-import 'package:schnorr/schnorr.dart' as scn;
-import 'package:elliptic/elliptic.dart' as ec;
-import 'package:substrate_sign_flutter/substrate_sign_flutter.dart' as subsign;
 import 'package:scan/scan.dart';
 import 'package:peaq_network_ev_charging_message_format/did_document_format.pb.dart';
 import 'package:peaq_network_ev_charging_message_format/did_document_format.pbenum.dart';
@@ -50,7 +42,6 @@ class CEVChargeProvider with ChangeNotifier {
   msg.TransactionValue _spentInfo = msg.TransactionValue();
   List<Detail> _details = [];
   BigInt _atto = BigInt.parse("10000000000000000000");
-  final Dio _dio = Dio()..options = BaseOptions(baseUrl: Env.scaleCodecBaseURL);
 
   String get providerDid => _providerDid;
   CEVStation? get station => _station;

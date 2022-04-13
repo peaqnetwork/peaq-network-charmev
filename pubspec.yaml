@@ -42,12 +42,6 @@ dependencies:
   logging: ^1.0.1 
   shared_preferences: ^2.0.11
   intl: ^0.17.0
-  json_rpc_2: ^3.0.1
-  web_socket_channel: ^2.1.0
-  dio: ^4.0.4
-  cryptography: ^2.0.5
-  schnorr: ^0.0.2
-  elliptic: ^0.3.5
   json_annotation: ^4.4.0 
   substrate_sign_flutter:
     git:

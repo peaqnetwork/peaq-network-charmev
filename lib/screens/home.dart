@@ -10,14 +10,11 @@ import 'package:charmev/config/routes.dart';
 import 'package:charmev/theme.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:scan/scan.dart';
 
 import 'package:charmev/common/widgets/buttons.dart';
-import 'package:charmev/common/widgets/dialog.dart';
 import 'package:charmev/common/widgets/custom_shapes.dart';
 import 'package:charmev/config/env.dart';
-import 'package:charmev/assets.dart';
 import 'package:provider/provider.dart' as provider;
 
 class HomeScreen extends StatefulWidget {
