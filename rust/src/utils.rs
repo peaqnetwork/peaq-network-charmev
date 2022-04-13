@@ -29,27 +29,12 @@ pub fn parse_signatories(address: &str) -> AccountId {
 }
 
 pub fn create_multisig_account(signatories: Vec<String>, threshold: u16) -> String {
-    // Get the len of the signatories into u8
-    let sig_len = &signatories.len().to_le_bytes();
-    let sig_len: u8 = sig_len[0];
+    let mut signatories: Vec<AccountId> = signatories.iter().map(|si| parse_signatories(si)).collect();
 
-    let mut who: Vec<Vec<u8>> = signatories
-        .iter()
-        .map(|si| {
-            let to = sr25519::sr25519::Public::from_str(&si).unwrap();
-            to.0[..].to_vec()
-        })
-        .collect();
-
-    let _ = &who.sort();
+    let _ = &signatories.sort();
     let prefix = b"modlpy/utilisuba";
-    let threshold = threshold.to_le_bytes();
-    // compact encoded length of signatories
-    let len = Compact(sig_len).encode();
 
-    let concat_data = [&prefix[..], &len[..], &who.concat(), &threshold[..]].concat();
-
-    let entropy = blake2_256(&concat_data);
+    let entropy = (prefix, signatories, threshold).using_encoded(blake2_256);
     trace!("entropy:: {:?}", &entropy);
 
     let multi = AccountId::decode(&mut &entropy[..]).unwrap_or_default();
