@@ -4,6 +4,7 @@ use log::trace;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
 use serde_json::json;
+use sp_core::crypto;
 use sp_runtime::{AccountId32 as AccountId, MultiAddress};
 use std::{error::Error, str::FromStr};
 use subclient::{Pair, RpcClient};
@@ -12,6 +13,8 @@ use substrate_api_client::{self as subclient, rpc as subclient_rpc};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
+
+use crate::utils;
 
 type BlockNumber = u32;
 type Moment = u64;
@@ -138,7 +141,7 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
 
     match api_res {
         Ok(api) => {
-            let id = AccountId::decode(&mut &pair.public().0[..]).unwrap_or_default();
+            let id = AccountId::decode(&mut &pair.public().0[..]).unwrap();
 
             let account_info = api.get_account_data(&id);
             match account_info {
@@ -161,7 +164,8 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
 
 pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
     // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from = sr25519::Pair::from_string(&params.seed, None).unwrap();
+    let from: sr25519::Pair = utils::generate_pair(&params.seed.as_str());
+
     let client = subclient_rpc::WsRpcClient::new(&params.ws_url);
     let api = subclient::Api::new(client)
         .map(|api| api.set_signer(from.clone()))
@@ -222,15 +226,16 @@ pub fn transfer(
     seed: String,
 ) -> Option<ChainError> {
     // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from = sr25519::Pair::from_string(&seed, None).unwrap();
+    let from: sr25519::Pair = utils::generate_pair(&seed.as_str());
+
     let client = subclient_rpc::WsRpcClient::new(&ws_url);
     let api = subclient::Api::new(client)
         .map(|api| api.set_signer(from.clone()))
         .unwrap();
 
     let to = sr25519::Public::from_str(&address.as_str()).unwrap();
-    let to = AccountId::decode(&mut &to.0[..]).unwrap_or_default();
-    let from_account = AccountId::decode(&mut &from.public().0[..]).unwrap_or_default();
+    let to = AccountId::decode(&mut &to.0[..]).unwrap();
+    let from_account = AccountId::decode(&mut &from.public().0[..]).unwrap();
 
     let mut former_balance: subclient::Balance = 0;
 

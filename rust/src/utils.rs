@@ -1,10 +1,9 @@
-use codec::Compact;
 use codec::{Decode, Encode};
 // use keyring::sr25519;
 use keyring::ed25519;
 use keyring::sr25519;
 use log::trace;
-use sp_core::blake2_256;
+use sp_core::{blake2_256, crypto};
 use sp_runtime::traits::Verify;
 pub use sp_runtime::{
     generic::SignedBlock as SignedBlockG, traits::IdentifyAccount, AccountId32 as AccountId,
@@ -13,6 +12,15 @@ pub use sp_runtime::{
 use std::str::FromStr;
 
 use peaq_p2p_proto_message::did_document_format as doc;
+
+pub fn generate_pair<TPair>(seed: &str) -> TPair
+where
+    TPair: crypto::Pair<Seed = [u8; 32]>,
+{
+    let seed = hex::decode(seed).unwrap();
+    let seed: [u8; 32] = seed[..].try_into().unwrap();
+    TPair::from_seed(&seed)
+}
 
 pub fn generate_random_data() -> String {
     let data = rand::random::<[u8; 32]>();
@@ -24,12 +32,13 @@ pub fn generate_random_data() -> String {
 
 pub fn parse_signatories(address: &str) -> AccountId {
     let to = sr25519::sr25519::Public::from_str(&address).unwrap();
-    let to = AccountId::decode(&mut &to.0[..]).unwrap_or_default();
+    let to = AccountId::decode(&mut &to.0[..]).unwrap();
     to
 }
 
 pub fn create_multisig_account(signatories: Vec<String>, threshold: u16) -> String {
-    let mut signatories: Vec<AccountId> = signatories.iter().map(|si| parse_signatories(si)).collect();
+    let mut signatories: Vec<AccountId> =
+        signatories.iter().map(|si| parse_signatories(si)).collect();
 
     let _ = &signatories.sort();
     let prefix = b"modlpy/utilisuba";
@@ -37,7 +46,7 @@ pub fn create_multisig_account(signatories: Vec<String>, threshold: u16) -> Stri
     let entropy = (prefix, signatories, threshold).using_encoded(blake2_256);
     trace!("entropy:: {:?}", &entropy);
 
-    let multi = AccountId::decode(&mut &entropy[..]).unwrap_or_default();
+    let multi = AccountId::decode(&mut &entropy[..]).unwrap();
 
     trace!("MULTI:: {}", &multi);
 
