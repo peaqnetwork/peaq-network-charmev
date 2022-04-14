@@ -44,6 +44,11 @@ pub fn send_service_requested_event(
     Ok(res)
 }
 
+pub fn generate_account(ws_url: String, secret_phrase: String) -> Result<Vec<u8>> {
+    let res = request::generate_account(ws_url, secret_phrase).unwrap();
+    Ok(res)
+}
+
 // Creates a multi signature wallet address
 pub fn create_multisig_address(signatories: Vec<String>, threshold: u16) -> Result<Vec<u8>> {
     let res = request::create_multisig_wallet(signatories, threshold).unwrap();

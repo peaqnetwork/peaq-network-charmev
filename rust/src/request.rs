@@ -51,6 +51,34 @@ pub fn get_event() -> Result<Vec<u8>> {
     Ok(res_data)
 }
 
+pub fn generate_account(ws_url: String, secret_phrase: String) -> Result<Vec<u8>> {
+    trace!("\n\n RUST - generate_account hitts");
+
+    let ev_res = chain::generate_account(&ws_url.as_str(), &secret_phrase.as_str()).unwrap();
+
+    let mut res = ResponseData {
+        error: false,
+        message: "Account Generated".to_string(),
+        data: vec![],
+    };
+
+    match ev_res {
+        chain::AccountResult::Error(err) => {
+            // return the error data if account error occurred
+            res.error = true;
+            res.message = err;
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+        chain::AccountResult::Success(account) => {
+            res.data =
+                serde_json::to_vec(&account).expect("Failed to convert account data to bytes");
+            let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+            Ok(res_data)
+        }
+    }
+}
+
 // create multisig account
 pub fn create_multisig_wallet(signatories: Vec<String>, threshold: u16) -> Result<Vec<u8>> {
     trace!("\n\n RUST - get_event  hitts");

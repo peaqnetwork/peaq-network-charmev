@@ -9,7 +9,7 @@ use subclient::Pair;
 use substrate_api_client::{self as subclient, rpc as subclient_rpc};
 
 use scale_info::TypeInfo;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
 
 type BlockNumber = u32;
@@ -67,6 +67,63 @@ pub struct ApproveMultisigParams {
 pub enum ChainError {
     Error(String),
     None,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Account {
+    pub address: String,
+    pub sk: String,
+    pub balance: String,
+}
+
+pub enum AccountResult {
+    Error(String),
+    Success(Account),
+}
+
+pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResult> {
+    let split_words: Vec<String> = secret_phrase
+        .split(" ")
+        .into_iter()
+        .map(|w| w.to_string())
+        .collect();
+
+    if split_words.len() != 12 {
+        return Some(AccountResult::Error(
+            "Invalid secret phrase: must be 12 words".to_string(),
+        ));
+    }
+
+    let (pair, seed) = sr25519::Pair::from_phrase(&secret_phrase, None).unwrap();
+    let pub_key = pair.public().to_string();
+
+    let mut account = Account {
+        address: pub_key,
+        sk: hex::encode(seed),
+        balance: "0".to_string(),
+    };
+
+    let client = subclient_rpc::WsRpcClient::new(&ws_url);
+    let api_res = subclient::Api::new(client).map(|api| api.set_signer(pair.clone()));
+
+    match api_res {
+        Ok(api) => {
+            let id = AccountId::decode(&mut &pair.public().0[..]).unwrap_or_default();
+
+            let account_info = api.get_account_data(&id);
+            match account_info {
+                Ok(info) => {
+                    if let Some(acc) = info {
+                        account.balance = acc.free.to_string();
+                    }
+                }
+                _ => (),
+            }
+        }
+        _ => (),
+    }
+
+    Some(AccountResult::Success(account))
 }
 
 pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
