@@ -76,9 +76,9 @@ pub struct Account {
     pub did: String,
     pub pub_key: String,
     pub address: String,
-    pub balance: u128,
+    pub balance: String,
     pub token_symbol: String,
-    pub token_decimals: u128,
+    pub token_decimals: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -114,8 +114,8 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
         pub_key,
         address,
         seed: hex::encode(seed),
-        balance: 0,
-        token_decimals: 18,
+        balance: "0".to_string(),
+        token_decimals: "18".to_string(),
         token_symbol: "PEAQ".to_string(),
     };
 
@@ -133,8 +133,8 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
     let res = client.clone().get_request(req).unwrap();
     let props: NodeProps = serde_json::from_str(&res.as_str()).unwrap();
 
-    account.token_decimals = props.tokenDecimals;
-    account.token_symbol = props.tokenSymbol;
+    account.token_decimals = props.tokenDecimals.to_string();
+    account.token_symbol = props.tokenSymbol.to_string();
 
     match api_res {
         Ok(api) => {
@@ -144,7 +144,10 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
             match account_info {
                 Ok(info) => {
                     if let Some(acc) = info {
-                        account.balance = acc.free;
+                        let pow = u128::pow(10, props.tokenDecimals.try_into().unwrap());
+                        if acc.free > 0 {
+                            account.balance = (acc.free / pow).to_string();
+                        }
                     }
                 }
                 _ => (),
