@@ -75,7 +75,7 @@ class Env {
   static const String extrinsicSuccessEvent = "ExtrinsicSuccess";
   static const String extrinsicFailedEvent = "ExtrinsicFailed";
   static const String approved = "Approved";
-  // static const String peaqTestnet = "wss://wss.agung.peaq.network";
-  static const String peaqTestnet = "ws://10.0.2.2:9944";
+  static const String peaqTestnet = "wss://wss.agung.peaq.network";
+  // static const String peaqTestnet = "ws://10.0.2.2:9944";
   static const String didDocAttributeName = "v2";
 }
