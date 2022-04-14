@@ -3,9 +3,10 @@ use keyring::sr25519::sr25519;
 use log::trace;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
+use serde_json::json;
 use sp_runtime::{AccountId32 as AccountId, MultiAddress};
 use std::{error::Error, str::FromStr};
-use subclient::Pair;
+use subclient::{Pair, RpcClient};
 use substrate_api_client::{self as subclient, rpc as subclient_rpc};
 
 use scale_info::TypeInfo;
@@ -71,9 +72,19 @@ pub enum ChainError {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Account {
+    pub seed: String,
+    pub did: String,
+    pub pub_key: String,
     pub address: String,
-    pub sk: String,
-    pub balance: String,
+    pub balance: u128,
+    pub token_symbol: String,
+    pub token_decimals: u128,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct NodeProps {
+    tokenDecimals: u128,
+    tokenSymbol: String,
 }
 
 pub enum AccountResult {
@@ -95,16 +106,35 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
     }
 
     let (pair, seed) = sr25519::Pair::from_phrase(&secret_phrase, None).unwrap();
-    let pub_key = pair.public().to_string();
+    let address = pair.public().to_string();
+    let pub_key = hex::encode(pair.public().0);
 
     let mut account = Account {
-        address: pub_key,
-        sk: hex::encode(seed),
-        balance: "0".to_string(),
+        did: format!("did:peaq:{}", address),
+        pub_key,
+        address,
+        seed: hex::encode(seed),
+        balance: 0,
+        token_decimals: 18,
+        token_symbol: "PEAQ".to_string(),
     };
 
     let client = subclient_rpc::WsRpcClient::new(&ws_url);
-    let api_res = subclient::Api::new(client).map(|api| api.set_signer(pair.clone()));
+    let api_res = subclient::Api::new(client.clone()).map(|api| api.set_signer(pair.clone()));
+
+    // fetch system properties
+    let req = json!({
+        "method": "system_properties",
+        "params": [],
+        "jsonrpc": "2.0",
+        "id": "4",
+    });
+
+    let res = client.clone().get_request(req).unwrap();
+    let props: NodeProps = serde_json::from_str(&res.as_str()).unwrap();
+
+    account.token_decimals = props.tokenDecimals;
+    account.token_symbol = props.tokenSymbol;
 
     match api_res {
         Ok(api) => {
@@ -114,7 +144,7 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
             match account_info {
                 Ok(info) => {
                     if let Some(acc) = info {
-                        account.balance = acc.free.to_string();
+                        account.balance = acc.free;
                     }
                 }
                 _ => (),
