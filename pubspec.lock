@@ -447,8 +447,8 @@ packages:
     dependency: "direct main"
     description:
       path: dart
-      ref: dev
-      resolved-ref: dbc42ef455480bc4049e09d572f51c465c1e71d5
+      ref: "84c8070b71122bc4997877186b1281d2b862093f"
+      resolved-ref: "84c8070b71122bc4997877186b1281d2b862093f"
       url: "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git"
     source: git
     version: "0.1.0"
@@ -653,15 +653,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-  substrate_sign_flutter:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: aef4d83092ed253c0bf56328d64af01a77d6d26e
-      url: "https://github.com/irediaes/substrate_sign_flutter.git"
-    source: git
-    version: "0.2.1"
   term_glyph:
     dependency: transitive
     description:

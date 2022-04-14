@@ -43,15 +43,12 @@ dependencies:
   shared_preferences: ^2.0.11
   intl: ^0.17.0
   json_annotation: ^4.4.0 
-  substrate_sign_flutter:
-    git:
-      url: https://github.com/irediaes/substrate_sign_flutter.git
   flutter_rust_bridge: ^1.23.0
   peaq_network_ev_charging_message_format:
     git: 
       url: https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git
       path: dart
-      ref: dev
+      ref: 84c8070b71122bc4997877186b1281d2b862093f
 
 dev_dependencies:
   flutter_test:
