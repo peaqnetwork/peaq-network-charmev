@@ -260,7 +260,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           var node = _nodeAddressFieldController.text;
           var secretPhrase = _secretPhraseFieldController.text;
           if (node.isNotEmpty && secretPhrase.isNotEmpty) {
-            await accountProvider.generateConsumerKeys(secretPhrase);
+            await accountProvider.generateAccount(secretPhrase);
             if (accountProvider.isLoggedIn) {
               CEVNavigator.pushReplacementRoute(CEVFadeRoute(
                 builder: (context) => const HomeScreen(),

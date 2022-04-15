@@ -26,6 +26,9 @@ abstract class PeaqCodecApi {
       required String tokenDeposited,
       dynamic hint});
 
+  Future<Uint8List> generateAccount(
+      {required String wsUrl, required String secretPhrase, dynamic hint});
+
   Future<Uint8List> createMultisigAddress(
       {required List<String> signatories,
       required int threshold,
@@ -139,6 +142,22 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: ["provider", "consumer", "tokenDeposited"],
         ),
         argValues: [provider, consumer, tokenDeposited],
+        hint: hint,
+      ));
+
+  Future<Uint8List> generateAccount(
+          {required String wsUrl,
+          required String secretPhrase,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_generate_account(
+            port_, _api2wire_String(wsUrl), _api2wire_String(secretPhrase)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "generate_account",
+          argNames: ["wsUrl", "secretPhrase"],
+        ),
+        argValues: [wsUrl, secretPhrase],
         hint: hint,
       ));
 
@@ -447,6 +466,26 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
       _wire_send_service_requested_eventPtr.asFunction<
           void Function(int, ffi.Pointer<wire_uint_8_list>,
               ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_generate_account(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> ws_url,
+    ffi.Pointer<wire_uint_8_list> secret_phrase,
+  ) {
+    return _wire_generate_account(
+      port_,
+      ws_url,
+      secret_phrase,
+    );
+  }
+
+  late final _wire_generate_accountPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_generate_account');
+  late final _wire_generate_account = _wire_generate_accountPtr.asFunction<
+      void Function(
+          int, ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_create_multisig_address(
     int port_,

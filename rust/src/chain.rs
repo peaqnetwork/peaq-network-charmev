@@ -3,14 +3,18 @@ use keyring::sr25519::sr25519;
 use log::trace;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
+use serde_json::json;
+use sp_core::crypto;
 use sp_runtime::{AccountId32 as AccountId, MultiAddress};
 use std::{error::Error, str::FromStr};
-use subclient::Pair;
+use subclient::{Pair, RpcClient};
 use substrate_api_client::{self as subclient, rpc as subclient_rpc};
 
 use scale_info::TypeInfo;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
+
+use crate::utils;
 
 type BlockNumber = u32;
 type Moment = u64;
@@ -69,9 +73,99 @@ pub enum ChainError {
     None,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Account {
+    pub seed: String,
+    pub did: String,
+    pub pub_key: String,
+    pub address: String,
+    pub balance: String,
+    pub token_symbol: String,
+    pub token_decimals: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct NodeProps {
+    tokenDecimals: u128,
+    tokenSymbol: String,
+}
+
+pub enum AccountResult {
+    Error(String),
+    Success(Account),
+}
+
+pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResult> {
+    let split_words: Vec<String> = secret_phrase
+        .split(" ")
+        .into_iter()
+        .map(|w| w.to_string())
+        .collect();
+
+    if split_words.len() != 12 {
+        return Some(AccountResult::Error(
+            "Invalid secret phrase: must be 12 words".to_string(),
+        ));
+    }
+
+    let (pair, seed) = sr25519::Pair::from_phrase(&secret_phrase, None).unwrap();
+    let address = pair.public().to_string();
+    let pub_key = hex::encode(pair.public().0);
+
+    let mut account = Account {
+        did: format!("did:peaq:{}", address),
+        pub_key,
+        address,
+        seed: hex::encode(seed),
+        balance: "0".to_string(),
+        token_decimals: "18".to_string(),
+        token_symbol: "PEAQ".to_string(),
+    };
+
+    let client = subclient_rpc::WsRpcClient::new(&ws_url);
+    let api_res = subclient::Api::new(client.clone()).map(|api| api.set_signer(pair.clone()));
+
+    // fetch system properties
+    let req = json!({
+        "method": "system_properties",
+        "params": [],
+        "jsonrpc": "2.0",
+        "id": "4",
+    });
+
+    let res = client.clone().get_request(req).unwrap();
+    let props: NodeProps = serde_json::from_str(&res.as_str()).unwrap();
+
+    account.token_decimals = props.tokenDecimals.to_string();
+    account.token_symbol = props.tokenSymbol.to_string();
+
+    match api_res {
+        Ok(api) => {
+            let id = AccountId::decode(&mut &pair.public().0[..]).unwrap();
+
+            let account_info = api.get_account_data(&id);
+            match account_info {
+                Ok(info) => {
+                    if let Some(acc) = info {
+                        let pow = u128::pow(10, props.tokenDecimals.try_into().unwrap());
+                        if acc.free > 0 {
+                            account.balance = (acc.free / pow).to_string();
+                        }
+                    }
+                }
+                _ => (),
+            }
+        }
+        _ => (),
+    }
+
+    Some(AccountResult::Success(account))
+}
+
 pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
     // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from = sr25519::Pair::from_string(&params.seed, None).unwrap();
+    let from: sr25519::Pair = utils::generate_pair(&params.seed.as_str());
+
     let client = subclient_rpc::WsRpcClient::new(&params.ws_url);
     let api = subclient::Api::new(client)
         .map(|api| api.set_signer(from.clone()))
@@ -132,15 +226,16 @@ pub fn transfer(
     seed: String,
 ) -> Option<ChainError> {
     // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from = sr25519::Pair::from_string(&seed, None).unwrap();
+    let from: sr25519::Pair = utils::generate_pair(&seed.as_str());
+
     let client = subclient_rpc::WsRpcClient::new(&ws_url);
     let api = subclient::Api::new(client)
         .map(|api| api.set_signer(from.clone()))
         .unwrap();
 
     let to = sr25519::Public::from_str(&address.as_str()).unwrap();
-    let to = AccountId::decode(&mut &to.0[..]).unwrap_or_default();
-    let from_account = AccountId::decode(&mut &from.public().0[..]).unwrap_or_default();
+    let to = AccountId::decode(&mut &to.0[..]).unwrap();
+    let from_account = AccountId::decode(&mut &from.public().0[..]).unwrap();
 
     let mut former_balance: subclient::Balance = 0;
 

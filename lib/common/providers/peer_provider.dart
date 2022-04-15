@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ffi';
 import 'dart:async';
 
+import 'package:charmev/common/models/account.dart';
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/rust_data.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
@@ -420,5 +421,29 @@ class CEVPeerProvider with ChangeNotifier {
         break;
       }
     }
+  }
+
+  Future<CEVAccount> generate_account(String secretPhrase) async {
+    CEVAccount account = CEVAccount();
+    var data = await api.generateAccount(
+        wsUrl: Env.peaqTestnet, secretPhrase: secretPhrase);
+
+    String s = String.fromCharCodes(data);
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    if (!decodedRes["error"]) {
+      // decode account data
+      var accData = decodedRes["data"];
+      List<int> docRawData = List<int>.from(accData);
+      var utf8ResData = utf8.decode(docRawData);
+      print("Account utf8ResData:: $utf8ResData");
+      var decodedResData = json.decode(utf8ResData);
+
+      print("Account data:: $decodedResData");
+
+      account = accountFromJson(json.encode(decodedResData));
+    }
+    return account;
   }
 }
