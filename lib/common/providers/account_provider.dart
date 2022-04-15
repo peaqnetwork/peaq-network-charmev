@@ -100,7 +100,7 @@ class CEVAccountProvider with ChangeNotifier {
     }
 
     _newDetails.add(
-      Detail("Balance", "${_account!.balance} PEAQ",
+      Detail("Balance", "${_account!.balance} ${_account!.tokenSymbol}",
           color: CEVTheme.accentColor),
     );
     _details = _newDetails;
