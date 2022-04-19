@@ -13,9 +13,11 @@ use libp2p::{
     tcp::TokioTcpConfig,
     yamux, Multiaddr, NetworkBehaviour, PeerId, Transport,
 };
+use log::trace;
 use peaq_p2p_proto_message::p2p_message_format as msg;
 use protobuf::Message;
-use std::{collections::VecDeque, error::Error, time::Duration};
+use sp_runtime::PerU16;
+use std::{collections::VecDeque, error::Error, str::FromStr, time::Duration};
 
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
@@ -61,7 +63,7 @@ pub(crate) static mut EVENT_BEHAVIOUR: Lazy<Mutex<Swarm<EventBehaviour>>> = Lazy
     // Create a random PeerId
     let local_key = identity::Keypair::generate_ed25519();
     let local_peer_id = PeerId::from(local_key.public());
-    println!("Local peer id: {:?}", local_peer_id);
+    trace!("Local peer id: {:?}", local_peer_id);
 
     // Create a keypair for authenticated encryption of the transport.
     let noise_keys = noise::Keypair::<noise::X25519Spec>::new()
@@ -118,12 +120,12 @@ pub async fn connect(peer_url: String) -> Result<(), Box<dyn Error>> {
         match swarm.dial(address.clone()) {
             Ok(_) => {
                 event::add_event_to_global(msg::EventType::PEER_CONNECTED);
-                println!("Dialed {:?}", address);
+                trace!("Dialed {:?}", address);
             }
             Err(e) => {
                 event::add_event_to_global(msg::EventType::PEER_CONNECTION_FAILED);
 
-                println!("Dial {:?} failed: {:?}", address, e);
+                trace!("Dial {:?} failed: {:?}", address, e);
             }
         };
     }
@@ -135,13 +137,37 @@ pub async fn connect(peer_url: String) -> Result<(), Box<dyn Error>> {
                 // listening to swarm events
                 event = swarm.select_next_some() => match event {
                     SwarmEvent::NewListenAddr { address, .. } => {
-                        println!("Listening on {:?}", address);
+                        trace!("Listening on {:?}", address);
+                    },
+                    SwarmEvent::ConnectionClosed {..} => {
+                        trace!("P2P Connection closed!");
+                        break;
                     }
                     _ => {}
                 }
 
         }
     }
+    Ok(())
+}
+
+pub fn disconnect(peer_id: String) -> Result<(), Box<dyn Error>> {
+    let peer_id = PeerId::from_str(&peer_id).expect("unable to parse peer_id");
+
+    let swarm;
+    let topic;
+
+    unsafe {
+        swarm = EVENT_BEHAVIOUR.get_mut().unwrap();
+        topic = EVENT_TOPIC.get_mut().unwrap().clone();
+    }
+
+    if let Some(top) = topic {
+        swarm.behaviour_mut().gossip.unsubscribe(&top).unwrap();
+    }
+
+    swarm.disconnect_peer_id(peer_id).unwrap();
+    Ok(())
 }
 
 // We create a custom network behaviour.
@@ -157,11 +183,11 @@ pub(crate) struct EventBehaviour {
 impl NetworkBehaviourEventProcess<GossipsubEvent> for EventBehaviour {
     // Called when `gossip` produces an event.
     fn inject_event(&mut self, event: GossipsubEvent) {
-        println!("MSG: {:?}", event);
+        trace!("MSG: {:?}", event);
         match event {
             GossipsubEvent::Subscribed { peer_id, topic } => {
                 event::add_event_to_global(msg::EventType::PEER_SUBSCRIBED);
-                println!("Subscribed:: peer: {} topic/channel: {}", peer_id, topic)
+                trace!("Subscribed:: peer: {} topic/channel: {}", peer_id, topic)
             }
             GossipsubEvent::Message {
                 propagation_source: peer_id,
@@ -170,8 +196,8 @@ impl NetworkBehaviourEventProcess<GossipsubEvent> for EventBehaviour {
             } => {
                 let ev = msg::Event::parse_from_bytes(&message.data).unwrap();
 
-                println!("\nev-parse:: {:?}\n", &ev);
-                println!(
+                trace!("\nev-parse:: {:?}\n", &ev);
+                trace!(
                     "Got message: {} with id: {} from peer: {:?}",
                     String::from_utf8_lossy(&message.data),
                     id,
