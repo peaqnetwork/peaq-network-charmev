@@ -20,7 +20,7 @@ class CEVAccount {
   String? address;
   String? did;
   String? seed;
-  BigInt? balance;
+  double? balance;
   BigInt? tokenDecimals;
   String? tokenSymbol;
 }

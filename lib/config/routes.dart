@@ -8,7 +8,6 @@ class CEVRoutes {
   static const chargingSession = "/charging-session";
   static const home = "/home";
   static const account = "/account";
-  static const eventExplorer = "/event-explorer";
   static const entry = "/";
 
   static void configureRoutes(FluroRouter router) {
@@ -27,8 +26,6 @@ class CEVRoutes {
     router.define(chargingSession, handler: chargingSessionHandler);
     // Add account screen route handler
     router.define(account, handler: accountHandler);
-    // Add event explorer screen route handler
-    router.define(eventExplorer, handler: eventExplorerHandler);
     router.define(entry, handler: entryHandler);
   }
 }

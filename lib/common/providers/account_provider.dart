@@ -114,7 +114,7 @@ class CEVAccountProvider with ChangeNotifier {
   /// Save the account details in shared preference for further retrival
   generateAccount(String secretPhrase) async {
     CEVAccount account =
-        await appProvider.peerProvider.generate_account(secretPhrase);
+        await appProvider.peerProvider.generateAccount(secretPhrase);
     print("account: ${accountToJson(account)}");
 
     await cevSharedPref.prefs
@@ -127,6 +127,26 @@ class CEVAccountProvider with ChangeNotifier {
     await Future.wait([
       initBeforeOnboardingPage(),
     ]);
+
+    notifyListeners();
+
+    return;
+  }
+
+  getAccountBalance() async {
+    String balance = await appProvider.peerProvider
+        .getAccountBalance(_account!.tokenDecimals.toString(), _account!.seed!);
+    print("balance: $balance");
+
+    _account?.balance = double.parse(balance);
+    print("new account: ${accountToJson(_account!)}");
+
+    await cevSharedPref.prefs
+        .setString(Env.accountPrefKey, accountToJson(account));
+
+    _account = account;
+
+    generateDetails();
 
     notifyListeners();
 

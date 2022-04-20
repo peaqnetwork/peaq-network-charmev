@@ -51,6 +51,16 @@ pub fn send_service_requested_event(
     Ok(res)
 }
 
+// get balance of an account
+pub fn get_account_balance(
+    ws_url: String,
+    token_decimals: String,
+    seed: String,
+) -> Result<Vec<u8>> {
+    let res = request::get_account_balance(ws_url, token_decimals, seed).unwrap();
+    Ok(res)
+}
+
 pub fn generate_account(ws_url: String, secret_phrase: String) -> Result<Vec<u8>> {
     let res = request::generate_account(ws_url, secret_phrase).unwrap();
     Ok(res)

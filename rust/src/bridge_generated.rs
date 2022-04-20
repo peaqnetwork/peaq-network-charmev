@@ -104,6 +104,28 @@ pub extern "C" fn wire_send_service_requested_event(
 }
 
 #[no_mangle]
+pub extern "C" fn wire_get_account_balance(
+    port_: i64,
+    ws_url: *mut wire_uint_8_list,
+    token_decimals: *mut wire_uint_8_list,
+    seed: *mut wire_uint_8_list,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "get_account_balance",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_ws_url = ws_url.wire2api();
+            let api_token_decimals = token_decimals.wire2api();
+            let api_seed = seed.wire2api();
+            move |task_callback| get_account_balance(api_ws_url, api_token_decimals, api_seed)
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_generate_account(
     port_: i64,
     ws_url: *mut wire_uint_8_list,

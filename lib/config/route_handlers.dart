@@ -1,7 +1,6 @@
 import 'package:charmev/screens/account.dart';
 import 'package:charmev/screens/charging_session.dart';
 import 'package:charmev/screens/entry.dart';
-import 'package:charmev/screens/event_explorer.dart';
 import 'package:charmev/screens/provider_detail.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +31,6 @@ var chargingSessionHandler = Handler(
 var accountHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const AccountScreen();
-});
-
-var eventExplorerHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return const EventExplorerScreen();
 });
 
 var entryHandler = Handler(

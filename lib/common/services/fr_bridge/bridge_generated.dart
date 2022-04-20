@@ -28,6 +28,12 @@ abstract class PeaqCodecApi {
       required String tokenDeposited,
       dynamic hint});
 
+  Future<Uint8List> getAccountBalance(
+      {required String wsUrl,
+      required String tokenDecimals,
+      required String seed,
+      dynamic hint});
+
   Future<Uint8List> generateAccount(
       {required String wsUrl, required String secretPhrase, dynamic hint});
 
@@ -157,6 +163,26 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: ["provider", "consumer", "tokenDeposited"],
         ),
         argValues: [provider, consumer, tokenDeposited],
+        hint: hint,
+      ));
+
+  Future<Uint8List> getAccountBalance(
+          {required String wsUrl,
+          required String tokenDecimals,
+          required String seed,
+          dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_get_account_balance(
+            port_,
+            _api2wire_String(wsUrl),
+            _api2wire_String(tokenDecimals),
+            _api2wire_String(seed)),
+        parseSuccessData: _wire2api_uint_8_list,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "get_account_balance",
+          argNames: ["wsUrl", "tokenDecimals", "seed"],
+        ),
+        argValues: [wsUrl, tokenDecimals, seed],
         hint: hint,
       ));
 
@@ -496,6 +522,32 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
       'wire_send_service_requested_event');
   late final _wire_send_service_requested_event =
       _wire_send_service_requested_eventPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_get_account_balance(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> ws_url,
+    ffi.Pointer<wire_uint_8_list> token_decimals,
+    ffi.Pointer<wire_uint_8_list> seed,
+  ) {
+    return _wire_get_account_balance(
+      port_,
+      ws_url,
+      token_decimals,
+      seed,
+    );
+  }
+
+  late final _wire_get_account_balancePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_get_account_balance');
+  late final _wire_get_account_balance =
+      _wire_get_account_balancePtr.asFunction<
           void Function(int, ffi.Pointer<wire_uint_8_list>,
               ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_uint_8_list>)>();
 

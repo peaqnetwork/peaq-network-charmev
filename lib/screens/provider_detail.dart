@@ -74,9 +74,11 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
             actions: [
               IconButton(
                 icon: const Icon(Icons.person),
-                onPressed: () => CEVApp.router.navigateTo(
-                    context, CEVRoutes.account,
-                    transition: TransitionType.inFromRight),
+                onPressed: () {
+                  model.appProvider.accountProvider.getAccountBalance();
+                  CEVApp.router.navigateTo(context, CEVRoutes.account,
+                      transition: TransitionType.inFromRight);
+                },
               )
             ],
           ),

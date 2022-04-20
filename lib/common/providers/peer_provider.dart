@@ -423,18 +423,7 @@ class CEVPeerProvider with ChangeNotifier {
     return didDoc;
   }
 
-  _setP2PURL(List<doc.Service> services) {
-    for (var i = 0; i < services.length; i++) {
-      var service = services[i];
-
-      if (service.type == doc.ServiceType.p2p) {
-        _p2pURL = service.stringData;
-        break;
-      }
-    }
-  }
-
-  Future<CEVAccount> generate_account(String secretPhrase) async {
+  Future<CEVAccount> generateAccount(String secretPhrase) async {
     CEVAccount account = CEVAccount();
     var data = await api.generateAccount(
         wsUrl: Env.peaqTestnet, secretPhrase: secretPhrase);
@@ -448,13 +437,38 @@ class CEVPeerProvider with ChangeNotifier {
       var accData = decodedRes["data"];
       List<int> docRawData = List<int>.from(accData);
       var utf8ResData = utf8.decode(docRawData);
-      print("Account utf8ResData:: $utf8ResData");
+      // print("Account utf8ResData:: $utf8ResData");
       var decodedResData = json.decode(utf8ResData);
 
-      print("Account data:: $decodedResData");
+      // print("Account data:: $decodedResData");
 
       account = accountFromJson(json.encode(decodedResData));
     }
     return account;
+  }
+
+  Future<String> getAccountBalance(String tokenDecimals, String seed) async {
+    var data = await api.getAccountBalance(
+        wsUrl: Env.peaqTestnet, tokenDecimals: tokenDecimals, seed: seed);
+
+    var utf8Res = utf8.decode(data);
+    var decodedRes = json.decode(utf8Res);
+
+    var accData = decodedRes["data"];
+    List<int> docRawData = List<int>.from(accData);
+    var utf8ResData = utf8.decode(docRawData);
+
+    return utf8ResData;
+  }
+
+  _setP2PURL(List<doc.Service> services) {
+    for (var i = 0; i < services.length; i++) {
+      var service = services[i];
+
+      if (service.type == doc.ServiceType.p2p) {
+        _p2pURL = service.stringData;
+        break;
+      }
+    }
   }
 }
