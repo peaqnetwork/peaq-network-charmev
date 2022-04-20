@@ -16,6 +16,8 @@ abstract class PeaqCodecApi {
 
   Future<void> connectP2P({required String url, dynamic hint});
 
+  Future<void> disconnectP2P({required String peerId, dynamic hint});
+
   Future<Uint8List> sendIdentityChallengeEvent({dynamic hint});
 
   Future<Uint8List> sendStopChargeEvent({dynamic hint});
@@ -98,6 +100,19 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
           argNames: ["url"],
         ),
         argValues: [url],
+        hint: hint,
+      ));
+
+  Future<void> disconnectP2P({required String peerId, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) =>
+            inner.wire_disconnect_p2p(port_, _api2wire_String(peerId)),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "disconnect_p2p",
+          argNames: ["peerId"],
+        ),
+        argValues: [peerId],
         hint: hint,
       ));
 
@@ -410,6 +425,23 @@ class PeaqCodecApiWire implements FlutterRustBridgeWireBase {
           ffi.Void Function(
               ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_connect_p2p');
   late final _wire_connect_p2p = _wire_connect_p2pPtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_disconnect_p2p(
+    int port_,
+    ffi.Pointer<wire_uint_8_list> peer_id,
+  ) {
+    return _wire_disconnect_p2p(
+      port_,
+      peer_id,
+    );
+  }
+
+  late final _wire_disconnect_p2pPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>)>>('wire_disconnect_p2p');
+  late final _wire_disconnect_p2p = _wire_disconnect_p2pPtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_send_identity_challenge_event(

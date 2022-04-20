@@ -41,6 +41,21 @@ pub extern "C" fn wire_connect_p2p(port_: i64, url: *mut wire_uint_8_list) {
 }
 
 #[no_mangle]
+pub extern "C" fn wire_disconnect_p2p(port_: i64, peer_id: *mut wire_uint_8_list) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "disconnect_p2p",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_peer_id = peer_id.wire2api();
+            move |task_callback| disconnect_p2p(api_peer_id)
+        },
+    )
+}
+
+#[no_mangle]
 pub extern "C" fn wire_send_identity_challenge_event(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {

@@ -22,6 +22,13 @@ pub fn connect_p2p(url: String) -> Result<()> {
     Ok(())
 }
 
+// unsubscribe and disconnect from a p2p peer connection
+pub fn disconnect_p2p(peer_id: String) -> Result<()> {
+    trace!("\n\n P2P PEEER ID ON RUST {}", peer_id);
+    request::disconnect_p2p(peer_id).unwrap();
+    Ok(())
+}
+
 // Send Identity Challenge event to provider peer
 pub fn send_identity_challenge_event() -> Result<Vec<u8>> {
     let res = request::send_identity_challenge_event().unwrap();

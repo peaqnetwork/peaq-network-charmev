@@ -302,5 +302,7 @@ class CEVChargeProvider with ChangeNotifier {
 
     _chargingStatus = LoadingStatus.success;
     setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
+
+    appProvider.peerProvider.disconnectP2P();
   }
 }

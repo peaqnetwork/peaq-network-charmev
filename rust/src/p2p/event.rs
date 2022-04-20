@@ -46,8 +46,10 @@ pub fn send_event(
     }
     // trace!("send_identity_challenge_event topic:: {:?}", &topic);
 
-    if let Some(top) = topic {
-        swarm.behaviour_mut().gossip.publish(top, &*v).unwrap();
+    if let Some(swm) = swarm {
+        if let Some(top) = topic {
+            swm.behaviour_mut().gossip.publish(top, &*v).unwrap();
+        }
     }
 
     Ok(())

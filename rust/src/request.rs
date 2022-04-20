@@ -31,6 +31,14 @@ pub fn connect_p2p(url: String) -> Result<()> {
     Ok(())
 }
 
+pub fn disconnect_p2p(peer_id: String) -> Result<()> {
+    trace!("\n\n disconnect_p2p RUST hitts:: p2p peer_id = {}", peer_id);
+
+    behaviour::disconnect(peer_id).expect("p2p disconnection failed");
+
+    Ok(())
+}
+
 // get events from the the global variable
 pub fn get_event() -> Result<Vec<u8>> {
     trace!("\n\n RUST - get_event  hitts");
