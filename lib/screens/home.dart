@@ -71,13 +71,6 @@ class _HomeScreenState extends State<HomeScreen>
               centerTitle: true,
               automaticallyImplyLeading: false,
               backgroundColor: CEVTheme.appBarBgColor,
-              leading: IconButton(
-                  icon: const Icon(Icons.explore),
-                  onPressed: () {
-                    _dumbChargeProvider!.qrController.pause();
-                    CEVApp.router.navigateTo(context, CEVRoutes.eventExplorer,
-                        transition: TransitionType.inFromRight);
-                  }),
               iconTheme: const IconThemeData(color: CEVTheme.textFadeColor),
               actions: [
                 IconButton(
@@ -171,8 +164,8 @@ class _HomeScreenState extends State<HomeScreen>
                                         scanAreaScale: 1,
                                         scanLineColor: CEVTheme.dialogBgColor,
                                         onCapture: (data) async {
-                                          print("Sacnned:: $data");
-                                          print("Sacnned len:: ${data.length}");
+                                          // print("Sacnned:: $data");
+                                          // print("Sacnned len:: ${data.length}");
                                           if (data.length > 64) {
                                             _chargeProvider.setStatus(
                                                 LoadingStatus.error,
@@ -200,9 +193,6 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       const SizedBox(
                         height: 24.0,
-                      ),
-                      const Text(
-                        Env.scanQRCode,
                       ),
                       // _buildImportButton(),
                     ]))));
