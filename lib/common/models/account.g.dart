@@ -8,9 +8,7 @@ part of 'account.dart';
 
 CEVAccount _$CEVAccountFromJson(Map<String, dynamic> json) => CEVAccount(
       pubKey: json['pub_key'] as String?,
-      balance: json['balance'] == null
-          ? null
-          : BigInt.parse(json['balance'] as String),
+      balance: (json['balance'] as num?)?.toDouble(),
       address: json['address'] as String?,
       did: json['did'] as String?,
       seed: json['seed'] as String?,
@@ -26,7 +24,7 @@ Map<String, dynamic> _$CEVAccountToJson(CEVAccount instance) =>
       'address': instance.address,
       'did': instance.did,
       'seed': instance.seed,
-      'balance': instance.balance?.toString(),
+      'balance': instance.balance,
       'token_decimals': instance.tokenDecimals?.toString(),
       'token_symbol': instance.tokenSymbol,
     };

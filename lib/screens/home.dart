@@ -84,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
                     icon: const Icon(Icons.person),
                     onPressed: () {
                       // qrController.pause();
+                      model.getAccountBalance();
                       CEVApp.router.navigateTo(context, CEVRoutes.account,
                           transition: TransitionType.inFromRight);
                     })
