@@ -79,7 +79,7 @@ pub struct Account {
     pub did: String,
     pub pub_key: String,
     pub address: String,
-    pub balance: String,
+    pub balance: f64,
     pub token_symbol: String,
     pub token_decimals: String,
 }
@@ -117,7 +117,7 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
         pub_key,
         address,
         seed: hex::encode(seed),
-        balance: "0".to_string(),
+        balance: 0.0,
         token_decimals: "18".to_string(),
         token_symbol: "PEAQ".to_string(),
     };
@@ -142,24 +142,25 @@ pub fn generate_account(ws_url: &str, secret_phrase: &str) -> Option<AccountResu
     match api_res {
         Ok(api) => {
             let id = AccountId::decode(&mut &pair.public().0[..]).unwrap();
-
-            let account_info = api.get_account_data(&id);
-            match account_info {
-                Ok(info) => {
-                    if let Some(acc) = info {
-                        let pow = u128::pow(10, props.tokenDecimals.try_into().unwrap());
-                        if acc.free > 0 {
-                            account.balance = (acc.free / pow).to_string();
-                        }
-                    }
-                }
-                _ => (),
-            }
+            account.balance = get_balance(api.clone(), id, props.tokenDecimals)
         }
         _ => (),
     }
 
     Some(AccountResult::Success(account))
+}
+
+pub fn get_account_balance(ws_url: String, token_decimals: u128, seed: String) -> f64 {
+    // initialize api and set the signer (sender) that is used to sign the extrinsics
+    let pair: sr25519::Pair = utils::generate_pair(&seed.as_str());
+
+    let client = subclient_rpc::WsRpcClient::new(&ws_url);
+    let api = subclient::Api::new(client)
+        .map(|api| api.set_signer(pair.clone()))
+        .unwrap();
+
+    let id = AccountId::decode(&mut &pair.public().0[..]).unwrap();
+    get_balance(api.clone(), id, token_decimals)
 }
 
 pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
@@ -348,4 +349,31 @@ fn get_hashed_key_for_attr(did_account: &sr25519::Public, name: &[u8]) -> [u8; 3
     let mut bytes_to_hash: Vec<u8> = did_account.encode().as_slice().to_vec();
     bytes_to_hash.append(&mut bytes_in_name);
     sp_core::blake2_256(&bytes_to_hash[..])
+}
+
+fn get_balance<TPair>(
+    api: subclient::Api<TPair, subclient_rpc::WsRpcClient>,
+    account_id: AccountId,
+    token_decimals: u128,
+) -> f64
+where
+    TPair: Pair,
+{
+    let mut balance = 0.0;
+    let account_info = api.get_account_data(&account_id);
+    match account_info {
+        Ok(info) => {
+            if let Some(acc) = info {
+                let pow = u128::pow(10, token_decimals.try_into().unwrap());
+                if acc.free > 0 {
+                    let bal = acc.free as f64 / pow as f64;
+                    let bal_string = format! {"{:.4}", bal};
+                    balance = f64::from_str(&bal_string).unwrap();
+                }
+            }
+        }
+        _ => (),
+    }
+
+    balance
 }

@@ -59,6 +59,29 @@ pub fn get_event() -> Result<Vec<u8>> {
     Ok(res_data)
 }
 
+// get balance of an account
+pub fn get_account_balance(
+    ws_url: String,
+    token_decimals: String,
+    seed: String,
+) -> Result<Vec<u8>> {
+    trace!("\n\n RUST - get_account_balance  hitts");
+
+    let mut res = ResponseData {
+        error: false,
+        message: "".to_string(),
+        data: vec![],
+    };
+
+    let token_decimals = u128::from_str(&token_decimals).expect("failed to fetch account balance");
+
+    let bal = chain::get_account_balance(ws_url, token_decimals, seed);
+    res.data = bal.to_string().as_bytes().to_vec();
+
+    let res_data = serde_json::to_vec(&res).expect("Failed to write result data to byte");
+    Ok(res_data)
+}
+
 pub fn generate_account(ws_url: String, secret_phrase: String) -> Result<Vec<u8>> {
     trace!("\n\n RUST - generate_account hitts");
 
