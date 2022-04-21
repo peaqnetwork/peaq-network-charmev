@@ -29,7 +29,7 @@ class CEVAccountProvider with ChangeNotifier {
   String _statusMessage = '';
   bool _isLoggedIn = false;
   bool _showNodeDropdown = false;
-  CEVAccount? _account = CEVAccount();
+  CEVAccount? _account;
   List<Detail> _details = [];
   // set the SS58 registry prefix
   // currently set to Substrate which is 42
