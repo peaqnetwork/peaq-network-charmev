@@ -83,3 +83,4 @@ Each compiled `.os` library files are saved in their respective arch dir inside 
 ### Note:
 iOS intergration coming soon
 
+[Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
