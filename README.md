@@ -26,6 +26,7 @@ see flutter [documentation](https://docs.flutter.dev/deployment/android#sidenav-
 
 ### Note:
 iOS intergration coming soon
+
 ## License
 
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
