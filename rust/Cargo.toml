@@ -53,8 +53,8 @@ features = ["v14"]
 
 [dependencies.substrate-api-client] 
 version = "0.6.0"
-git = "https://github.com/scs/substrate-api-client.git"
-rev = "98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23"
+git = "https://github.com/irediaes/substrate-api-client.git"
+rev = "b1bf3fd70a7443518edc4fd13395935fa7272047"
 
 
 [features]
