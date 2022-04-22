@@ -81,11 +81,11 @@ class CEVApplicationProvider extends ChangeNotifier {
   /// to the next screen.
   Future<void> _onInitialized(BuildContext context) async {
     _log.fine("on initialized");
+    peerProvider.initLog();
 
     if (authenticated) {
       _log.fine("navigating to home screen");
       // use to initiate rust log in lib
-      peerProvider.initLog();
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         builder: (context) => const HomeScreen(),
         duration: const Duration(milliseconds: 600),
