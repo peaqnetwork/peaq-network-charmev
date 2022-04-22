@@ -15,7 +15,7 @@ dependencies = [
 [[package]]
 name = "ac-compose-macros"
 version = "0.1.0"
-source = "git+https://github.com/scs/substrate-api-client.git?rev=98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23#98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23"
+source = "git+https://github.com/irediaes/substrate-api-client.git?rev=b1bf3fd70a7443518edc4fd13395935fa7272047#b1bf3fd70a7443518edc4fd13395935fa7272047"
 dependencies = [
  "ac-primitives",
  "log",
@@ -27,7 +27,7 @@ dependencies = [
 [[package]]
 name = "ac-node-api"
 version = "0.1.0"
-source = "git+https://github.com/scs/substrate-api-client.git?rev=98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23#98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23"
+source = "git+https://github.com/irediaes/substrate-api-client.git?rev=b1bf3fd70a7443518edc4fd13395935fa7272047#b1bf3fd70a7443518edc4fd13395935fa7272047"
 dependencies = [
  "ac-primitives",
  "frame-metadata 14.2.0 (git+https://github.com/paritytech/frame-metadata.git?branch=main)",
@@ -47,7 +47,7 @@ dependencies = [
 [[package]]
 name = "ac-primitives"
 version = "0.1.0"
-source = "git+https://github.com/scs/substrate-api-client.git?rev=98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23#98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23"
+source = "git+https://github.com/irediaes/substrate-api-client.git?rev=b1bf3fd70a7443518edc4fd13395935fa7272047#b1bf3fd70a7443518edc4fd13395935fa7272047"
 dependencies = [
  "hex",
  "parity-scale-codec",
@@ -2628,6 +2628,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "native-tls"
+version = "0.2.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd7e2f3618557f980e0b17e8856252eee3c97fa12c54dff0ca290fb6266ca4a9"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "log",
+ "openssl",
+ "openssl-probe",
+ "openssl-sys",
+ "schannel",
+ "security-framework",
+ "security-framework-sys",
+ "tempfile",
+]
+
+[[package]]
 name = "net2"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2850,6 +2868,12 @@ dependencies = [
  "once_cell",
  "openssl-sys",
 ]
+
+[[package]]
+name = "openssl-probe"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
@@ -3689,6 +3713,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "schannel"
+version = "0.1.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f05ba609c234e60bee0d547fe94a4c7e9da733d1c962cf6e59efa4cd9c8bc75"
+dependencies = [
+ "lazy_static",
+ "winapi 0.3.9",
+]
+
+[[package]]
 name = "schnorrkel"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3729,6 +3763,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9bd1c54ea06cfd2f6b63219704de0b9b4f72dcc2b8fdef820be6cd799780e91e"
 dependencies = [
  "zeroize",
+]
+
+[[package]]
+name = "security-framework"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2dc14f172faf8a0194a3aded622712b0de276821addc574fa54fc0a1167e10dc"
+dependencies = [
+ "bitflags",
+ "core-foundation",
+ "core-foundation-sys",
+ "libc",
+ "security-framework-sys",
+]
+
+[[package]]
+name = "security-framework-sys"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0160a13a177a45bfb43ce71c01580998474f556ad854dcbca936dd2841a5c556"
+dependencies = [
+ "core-foundation-sys",
+ "libc",
 ]
 
 [[package]]
@@ -4417,7 +4474,7 @@ dependencies = [
 [[package]]
 name = "substrate-api-client"
 version = "0.6.0"
-source = "git+https://github.com/scs/substrate-api-client.git?rev=98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23#98f4e00ea12cb57dc92d77b6f000ade4ba9d1b23"
+source = "git+https://github.com/irediaes/substrate-api-client.git?rev=b1bf3fd70a7443518edc4fd13395935fa7272047#b1bf3fd70a7443518edc4fd13395935fa7272047"
 dependencies = [
  "ac-compose-macros",
  "ac-node-api",
@@ -5257,7 +5314,7 @@ dependencies = [
  "log",
  "mio 0.6.23",
  "mio-extras",
- "openssl",
+ "native-tls",
  "rand 0.7.3",
  "sha-1 0.8.2",
  "slab",
