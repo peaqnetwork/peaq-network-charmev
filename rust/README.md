@@ -4,10 +4,10 @@
 #### Introduction
 This library handles the core api features of:
 * interacting with the node
-* connecting to provider peer network
+* connecting to provider peer
 * managing and sending p2p events to the app business logic
 * generating consumer keys during onboarding
-* fetching and and parsing DID Document.
+* fetching and parsing DID Document.
 
 This library is currently compiled into android `.so` library files and imported into flutter using the `ffi` library.
 
