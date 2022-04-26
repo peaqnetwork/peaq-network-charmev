@@ -201,7 +201,7 @@ pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
 
     // trace!("\n Composed Extrinsic: {:?}\n", &xt_hash,);
 
-    // send and watch extrinsic until InBlock
+    // send and watch extrinsic until Finalized
     let res = api.send_extrinsic(xt_hash.clone(), subclient::XtStatus::Finalized);
 
     match res {
@@ -260,7 +260,7 @@ pub fn transfer(
     let xt = api.balance_transfer(MultiAddress::Id(to.clone()), amount);
 
     // send and watch extrinsic until finalized
-    api.send_extrinsic(xt.hex_encode(), subclient::XtStatus::InBlock)
+    api.send_extrinsic(xt.hex_encode(), subclient::XtStatus::Finalized)
         .unwrap();
 
     // verify that Account's free Balance increased
@@ -367,8 +367,7 @@ where
                 let pow = u128::pow(10, token_decimals.try_into().unwrap());
                 if acc.free > 0 {
                     let bal = acc.free as f64 / pow as f64;
-                    let bal_string = format! {"{:.4}", bal};
-                    balance = f64::from_str(&bal_string).unwrap();
+                    balance = (bal * 10000.0).floor() / 10000.0; // used 1000 for 4 decimal place 10^4
                 }
             }
         }
