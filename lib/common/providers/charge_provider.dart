@@ -41,7 +41,7 @@ class CEVChargeProvider with ChangeNotifier {
   msg.TransactionValue _refundInfo = msg.TransactionValue();
   msg.TransactionValue _spentInfo = msg.TransactionValue();
   List<Detail> _details = [];
-  BigInt _atto = BigInt.parse("10000000000000000000");
+  BigInt _atto = BigInt.parse("1000000000000000000");
 
   String get providerDid => _providerDid;
   CEVStation? get station => _station;
@@ -108,6 +108,9 @@ class CEVChargeProvider with ChangeNotifier {
 
   generateTransactions({bool notify = false}) {
     List<Detail> _newtx = [];
+
+    var tokenDecimals = appProvider.accountProvider.account.tokenDecimals;
+    _atto = BigInt.from(pow(10, num.parse(tokenDecimals.toString())));
 
     print(
         "generateTransactions :: _refundInfo:: ${_refundInfo.toProto3Json()}");
