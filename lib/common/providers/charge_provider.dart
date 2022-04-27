@@ -110,6 +110,7 @@ class CEVChargeProvider with ChangeNotifier {
     List<Detail> _newtx = [];
 
     var tokenDecimals = appProvider.accountProvider.account.tokenDecimals;
+    var tokenSymbol = appProvider.accountProvider.account.tokenSymbol;
     _atto = BigInt.from(pow(10, num.parse(tokenDecimals.toString())));
 
     print(
@@ -127,9 +128,9 @@ class CEVChargeProvider with ChangeNotifier {
       var spentTokenString = spentToken.toStringAsFixed(4);
       var total = (refundToken + spentToken).toStringAsFixed(4);
       _newtx.addAll([
-        Detail("Pay Station", "$spentTokenString PEAQ"),
-        Detail("Refund", "$refundTokenString PEAQ"),
-        Detail("Total", "$total PEAQ"),
+        Detail("Pay Station", "$spentTokenString $tokenSymbol"),
+        Detail("Refund", "$refundTokenString $tokenSymbol"),
+        Detail("Total", "$total $tokenSymbol"),
       ]);
     }
 

@@ -106,6 +106,8 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
 
   Widget _buildScreen(BuildContext context, CEVChargeProvider chargeProvider) {
     final boxW = MediaQuery.of(context).size.width / 1.2;
+    var tokenSymbol =
+        chargeProvider.appProvider.accountProvider.account.tokenSymbol;
     return SizedBox(
         height: double.infinity,
         child: SingleChildScrollView(
@@ -126,7 +128,7 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
                         child: Column(
                           children: <Widget>[
                             Text(
-                              "0.21 PEAQ/KWh",
+                              "0.21 $tokenSymbol/KWh",
                               style: CEVTheme.titleLabelStyle
                                   .copyWith(color: CEVTheme.accentColor),
                               overflow: TextOverflow.ellipsis,
