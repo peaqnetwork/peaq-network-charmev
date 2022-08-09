@@ -65,6 +65,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
             child: _buildScreen(context, chargeProvider),
           )),
       Visibility(
+          // visible: true,
           visible: chargeProvider.chargingStatus == LoadingStatus.authorize,
           child: _buildAuthorizePaymentTab(context, chargeProvider)),
       Visibility(
@@ -313,7 +314,25 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       children.add(_field);
     }
 
+    final _poweredBy = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "powered by: ",
+          style: CEVTheme.labelStyle.copyWith(fontSize: 10),
+        ),
+        Text(
+          "PeaqPay",
+          style: CEVTheme.titleLabelStyle.copyWith(fontSize: 12),
+        )
+      ],
+    );
+
     children.add(_submitButton);
+    children.add(const SizedBox(
+      height: 8,
+    ));
+    children.add(_poweredBy);
 
     return children;
   }
