@@ -120,7 +120,8 @@ pub fn create_multisig_wallet(signatories: Vec<String>, threshold: u16) -> Resul
         data: vec![],
     };
 
-    let address = utils::create_multisig_account(signatories, threshold);
+    let address = peaq_pay::utils::create_multisig_wallet(signatories, threshold)?;
+    trace!("\n\n PEAQ PAY Multisig: {}", address);
     res.error = false;
     res.message = "Event Found".to_string();
     res.data = address.as_bytes().to_vec();
