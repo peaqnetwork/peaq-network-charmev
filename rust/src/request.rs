@@ -189,7 +189,7 @@ pub fn transfer_fund(
 
     let amount: Balance = u128::from_str(amount.as_str()).unwrap();
 
-    let ev_res = chain::transfer(ws_url, address, amount, seed).unwrap();
+    let ev_res = peaq_pay::chain::fund_multisig_wallet(ws_url, address, amount, seed).unwrap();
 
     let mut res = ResponseData {
         error: false,
@@ -198,7 +198,7 @@ pub fn transfer_fund(
     };
 
     match ev_res {
-        chain::ChainError::Error(err) => {
+        peaq_pay::chain::ChainError::Error(err) => {
             // return the error data if transfer error occurred
             res.error = true;
             res.message = err;

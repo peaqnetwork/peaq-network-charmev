@@ -3,7 +3,7 @@ use keyring::sr25519::sr25519;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
 use serde_json::json;
-use sp_runtime::{AccountId32 as AccountId, MultiAddress};
+use sp_runtime::AccountId32 as AccountId;
 use std::{error::Error, str::FromStr};
 use subclient::{Pair, RpcClient};
 use substrate_api_client::{self as subclient, rpc as subclient_rpc};
@@ -54,11 +54,6 @@ pub struct Attribute<BlockNumber, Moment> {
 pub struct Timepoint<BlockNumber> {
     pub(crate) height: BlockNumber,
     pub(crate) index: u32,
-}
-
-pub enum ChainError {
-    Error(String),
-    None,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -149,59 +144,6 @@ pub fn get_account_balance(ws_url: String, token_decimals: u128, seed: String) -
 
     let id = AccountId::decode(&mut &pair.public().0[..]).unwrap();
     get_balance(api.clone(), id, token_decimals)
-}
-
-pub fn transfer(
-    ws_url: String,
-    address: String,
-    amount: subclient::Balance,
-    seed: String,
-) -> Option<ChainError> {
-    // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from: sr25519::Pair = utils::generate_pair(&seed.as_str());
-
-    let client = subclient_rpc::WsRpcClient::new(&ws_url);
-    let api = subclient::Api::new(client)
-        .map(|api| api.set_signer(from.clone()))
-        .unwrap();
-
-    let to = sr25519::Public::from_str(&address.as_str()).unwrap();
-    let to = AccountId::decode(&mut &to.0[..]).unwrap();
-    let from_account = AccountId::decode(&mut &from.public().0[..]).unwrap();
-
-    let mut former_balance: subclient::Balance = 0;
-
-    if let Some(account) = api.get_account_data(&to).unwrap() {
-        former_balance = account.free;
-    }
-
-    match api.get_account_data(&from_account).unwrap() {
-        Some(account) => {
-            if account.free < amount {
-                return Some(ChainError::Error("Insufficient Funds".to_string()));
-            }
-        }
-        None => {
-            return Some(ChainError::Error(
-                "Can't fetch account data from chain".to_string(),
-            ));
-        }
-    }
-    // generate extrinsic
-    let xt = api.balance_transfer(MultiAddress::Id(to.clone()), amount);
-
-    // send and watch extrinsic until finalized
-    api.send_extrinsic(xt.hex_encode(), subclient::XtStatus::Finalized)
-        .unwrap();
-
-    // verify that Account's free Balance increased
-    let account = api.get_account_data(&to).unwrap().unwrap();
-
-    if account.free < former_balance {
-        return Some(ChainError::Error("Transfer failed".to_string()));
-    }
-
-    return Some(ChainError::None);
 }
 
 // fetch did document from the chain storage
