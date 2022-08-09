@@ -29,12 +29,6 @@ pub fn generate_random_data() -> String {
     hex_string
 }
 
-pub fn parse_signatories(address: &str) -> AccountId {
-    let to = sr25519::sr25519::Public::from_str(&address).unwrap();
-    let to = AccountId::decode(&mut &to.0[..]).unwrap();
-    to
-}
-
 pub fn verify_peer_did_signature(provider_pk: String, signature: doc::Signature) -> bool {
     let vt: doc::VerificationType = signature.field_type.enum_value().unwrap();
     let mut verify = false;

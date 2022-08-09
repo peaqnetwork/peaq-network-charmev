@@ -1,10 +1,8 @@
 use codec::{Decode, Encode};
 use keyring::sr25519::sr25519;
-use log::trace;
 use peaq_p2p_proto_message::did_document_format as doc;
 use protobuf::Message;
 use serde_json::json;
-use sp_core::crypto;
 use sp_runtime::{AccountId32 as AccountId, MultiAddress};
 use std::{error::Error, str::FromStr};
 use subclient::{Pair, RpcClient};
@@ -56,16 +54,6 @@ pub struct Attribute<BlockNumber, Moment> {
 pub struct Timepoint<BlockNumber> {
     pub(crate) height: BlockNumber,
     pub(crate) index: u32,
-}
-
-pub struct ApproveMultisigParams {
-    pub ws_url: String,
-    pub threshold: u16,
-    pub max_weight: u64,
-    pub other_signatories: Vec<AccountId>,
-    pub timepoint: Timepoint<BlockNumber>,
-    pub call_hash: String,
-    pub seed: String,
 }
 
 pub enum ChainError {
@@ -161,63 +149,6 @@ pub fn get_account_balance(ws_url: String, token_decimals: u128, seed: String) -
 
     let id = AccountId::decode(&mut &pair.public().0[..]).unwrap();
     get_balance(api.clone(), id, token_decimals)
-}
-
-pub fn approve_multisig(params: ApproveMultisigParams) -> Option<ChainError> {
-    // initialize api and set the signer (sender) that is used to sign the extrinsics
-    let from: sr25519::Pair = utils::generate_pair(&params.seed.as_str());
-
-    let client = subclient_rpc::WsRpcClient::new(&params.ws_url);
-    let api = subclient::Api::new(client)
-        .map(|api| api.set_signer(from.clone()))
-        .unwrap();
-
-    let call_hash = params.call_hash.strip_prefix("0x").unwrap();
-    let call_hash_data = hex::decode(call_hash).unwrap();
-    let call_hash: [u8; 32] = call_hash_data[..].try_into().unwrap();
-
-    let threshold = params.threshold;
-    let other_signatories = params.other_signatories;
-    let maybe_timepoint = Some(params.timepoint);
-    let max_weight: u64 = 1000000000;
-    // trace!("\n Composed Call: {:?}\n", multi_param);
-
-    // compose the extrinsic with all the element
-    #[allow(clippy::redundant_clone)]
-    let xt: subclient::UncheckedExtrinsicV4<_> = subclient::compose_extrinsic!(
-        api,
-        "MultiSig",
-        "approve_as_multi",
-        threshold,
-        other_signatories,
-        maybe_timepoint,
-        call_hash,
-        max_weight
-    );
-
-    // trace!("\n Composed Extrinsic: {:?}\n", xt);
-
-    let xt_hash = xt.hex_encode(); //.strip_prefix("0x").unwrap().to_string();
-
-    // trace!("\n Composed Extrinsic: {:?}\n", &xt_hash,);
-
-    // send and watch extrinsic until Finalized
-    let res = api.send_extrinsic(xt_hash.clone(), subclient::XtStatus::Finalized);
-
-    match res {
-        Ok(hash) => {
-            if let Some(tx_hash) = hash {
-                trace!("Multisig Transaction got included. Hash: {:?}", tx_hash);
-                return Some(ChainError::None);
-            }
-            return Some(ChainError::Error("Transaction Approval Failed".to_string()));
-        }
-        Err(e) => {
-            trace!("Multisig Transaction failed: Err: {:?}", e.to_string());
-
-            return Some(ChainError::Error("Transaction Approval Failed".to_string()));
-        }
-    }
 }
 
 pub fn transfer(

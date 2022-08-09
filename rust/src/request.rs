@@ -141,17 +141,12 @@ pub fn approve_multisig(
 ) -> Result<Vec<u8>> {
     trace!("\n\n RUST - transfer_fund hitts");
 
-    let other_signatories: Vec<AccountId> = other_signatories
-        .iter()
-        .map(|si| utils::parse_signatories(si.as_str()))
-        .collect();
-
-    let timepoint = chain::Timepoint {
+    let timepoint = peaq_pay::chain::Timepoint {
         height: timepoint_height,
         index: timepoint_index,
     };
 
-    let params = chain::ApproveMultisigParams {
+    let params = peaq_pay::chain::ApproveTransactionParams {
         ws_url,
         threshold,
         timepoint,
@@ -161,7 +156,7 @@ pub fn approve_multisig(
         seed,
     };
 
-    let ev_res = chain::approve_multisig(params).unwrap();
+    let ev_res = peaq_pay::chain::approve_transaction(params).unwrap();
 
     let mut res = ResponseData {
         error: false,
@@ -170,7 +165,7 @@ pub fn approve_multisig(
     };
 
     match ev_res {
-        chain::ChainError::Error(err) => {
+        peaq_pay::chain::ChainError::Error(err) => {
             // return the error data if transfer error occurred
             res.error = true;
             res.message = err;
