@@ -120,7 +120,8 @@ pub fn create_multisig_wallet(signatories: Vec<String>, threshold: u16) -> Resul
         data: vec![],
     };
 
-    let address = utils::create_multisig_account(signatories, threshold);
+    let address = peaq_pay::utils::create_multisig_wallet(signatories, threshold)?;
+    trace!("\n\n PEAQ PAY Multisig: {}", address);
     res.error = false;
     res.message = "Event Found".to_string();
     res.data = address.as_bytes().to_vec();
@@ -140,17 +141,12 @@ pub fn approve_multisig(
 ) -> Result<Vec<u8>> {
     trace!("\n\n RUST - transfer_fund hitts");
 
-    let other_signatories: Vec<AccountId> = other_signatories
-        .iter()
-        .map(|si| utils::parse_signatories(si.as_str()))
-        .collect();
-
-    let timepoint = chain::Timepoint {
+    let timepoint = peaq_pay::chain::Timepoint {
         height: timepoint_height,
         index: timepoint_index,
     };
 
-    let params = chain::ApproveMultisigParams {
+    let params = peaq_pay::chain::ApproveTransactionParams {
         ws_url,
         threshold,
         timepoint,
@@ -160,7 +156,7 @@ pub fn approve_multisig(
         seed,
     };
 
-    let ev_res = chain::approve_multisig(params).unwrap();
+    let ev_res = peaq_pay::chain::approve_transaction(params).unwrap();
 
     let mut res = ResponseData {
         error: false,
@@ -169,7 +165,7 @@ pub fn approve_multisig(
     };
 
     match ev_res {
-        chain::ChainError::Error(err) => {
+        peaq_pay::chain::ChainError::Error(err) => {
             // return the error data if transfer error occurred
             res.error = true;
             res.message = err;
@@ -193,7 +189,7 @@ pub fn transfer_fund(
 
     let amount: Balance = u128::from_str(amount.as_str()).unwrap();
 
-    let ev_res = chain::transfer(ws_url, address, amount, seed).unwrap();
+    let ev_res = peaq_pay::chain::fund_multisig_wallet(ws_url, address, amount, seed).unwrap();
 
     let mut res = ResponseData {
         error: false,
@@ -202,7 +198,7 @@ pub fn transfer_fund(
     };
 
     match ev_res {
-        chain::ChainError::Error(err) => {
+        peaq_pay::chain::ChainError::Error(err) => {
             // return the error data if transfer error occurred
             res.error = true;
             res.message = err;

@@ -33,6 +33,7 @@ libp2p = { version = "0.43.0", features = ["tcp-tokio"] }
 futures = "0.3.1"
 tokio = { version = "1.15", features = ["io-util", "io-std", "macros", "rt", "rt-multi-thread", "fs", "time", "sync"] }
 peaq-p2p-proto-message = { git = "https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git", rev = "84c8070b71122bc4997877186b1281d2b862093f"}
+peaq-pay = { git = "https://github.com/peaqnetwork/peaq-pay.git", branch = "dev"}
 
 [dependencies.sp-core]
 default-features = false

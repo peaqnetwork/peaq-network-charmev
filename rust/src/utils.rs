@@ -1,9 +1,8 @@
-use codec::{Decode, Encode};
+use codec::Decode;
 // use keyring::sr25519;
 use keyring::ed25519;
 use keyring::sr25519;
-use log::trace;
-use sp_core::{blake2_256, crypto};
+use sp_core::crypto;
 use sp_runtime::traits::Verify;
 pub use sp_runtime::{
     generic::SignedBlock as SignedBlockG, traits::IdentifyAccount, AccountId32 as AccountId,
@@ -28,29 +27,6 @@ pub fn generate_random_data() -> String {
     let hex_string = hex::encode(data);
     // trace!("\nRANDOM CHALLENG DATA:: {:?}\n", &hex_string);
     hex_string
-}
-
-pub fn parse_signatories(address: &str) -> AccountId {
-    let to = sr25519::sr25519::Public::from_str(&address).unwrap();
-    let to = AccountId::decode(&mut &to.0[..]).unwrap();
-    to
-}
-
-pub fn create_multisig_account(signatories: Vec<String>, threshold: u16) -> String {
-    let mut signatories: Vec<AccountId> =
-        signatories.iter().map(|si| parse_signatories(si)).collect();
-
-    let _ = &signatories.sort();
-    let prefix = b"modlpy/utilisuba";
-
-    let entropy = (prefix, signatories, threshold).using_encoded(blake2_256);
-    trace!("entropy:: {:?}", &entropy);
-
-    let multi = AccountId::decode(&mut &entropy[..]).unwrap();
-
-    trace!("MULTI:: {}", &multi);
-
-    multi.to_string()
 }
 
 pub fn verify_peer_did_signature(provider_pk: String, signature: doc::Signature) -> bool {
