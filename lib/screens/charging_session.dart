@@ -318,11 +318,11 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "powered by: ",
+          Env.poweredBy,
           style: CEVTheme.labelStyle.copyWith(fontSize: 10),
         ),
         Text(
-          "PeaqPay",
+          Env.peaqPay,
           style: CEVTheme.titleLabelStyle.copyWith(fontSize: 12),
         )
       ],

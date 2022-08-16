@@ -78,4 +78,6 @@ class Env {
   static const String peaqTestnet = "wss://wss.agung.peaq.network";
   // static const String peaqTestnet = "ws://10.0.2.2:9944";
   static const String didDocAttributeName = "v2";
+  static const String poweredBy = "powered by";
+  static const String peaqPay = "peaqPay";
 }
