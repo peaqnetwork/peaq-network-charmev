@@ -122,9 +122,9 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     children: <Widget>[
                       CEVProgressCard(
                         progress: peerProvider.chargeProgress,
-                        child: _buildPump(context),
                         size: 172,
                         margin: const EdgeInsets.all(32),
+                        child: _buildPump(context),
                       ),
                       _buildDetails(boxW, chargeProvider),
                       const SizedBox(
@@ -133,9 +133,9 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                       SizedBox(
                         child: Column(
                           children: <Widget>[
-                            const Text(
-                              "3.21 PEAQ",
-                              style: TextStyle(
+                            Text(
+                              "3.21 ${chargeProvider.appProvider.accountProvider.account.tokenSymbol}",
+                              style: const TextStyle(
                                   fontSize: 18,
                                   height: 1.5,
                                   color: CEVTheme.accentColor,
@@ -257,7 +257,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       BuildContext context, CEVChargeProvider chargeProvider) {
     var children = <Widget>[];
 
-    var _successIcon = const Padding(
+    var successIcon = const Padding(
       padding: EdgeInsets.only(bottom: 3),
       child: Icon(
         Icons.check_circle_outline_outlined,
@@ -266,7 +266,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       ),
     );
 
-    var _submitButton = Padding(
+    var submitButton = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         child: CEVRaisedButton(
           text: Env.authorizePayment,
@@ -280,7 +280,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
           },
         ));
 
-    children.add(_successIcon);
+    children.add(successIcon);
     children.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -305,20 +305,20 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
         overflow: TextOverflow.ellipsis,
       );
 
-      final _field = CEVBorderBox(
+      final field = CEVBorderBox(
           boxMargin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           padding: 0,
           radius: 10,
           child: ListTile(title: title, trailing: suffix));
 
-      children.add(_field);
+      children.add(field);
     }
 
-    final _poweredBy = Row(
+    final poweredBy = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          Env.poweredBy,
+          "${Env.poweredBy}: ",
           style: CEVTheme.labelStyle.copyWith(fontSize: 10),
         ),
         Text(
@@ -328,11 +328,11 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       ],
     );
 
-    children.add(_submitButton);
+    children.add(submitButton);
     children.add(const SizedBox(
       height: 8,
     ));
-    children.add(_poweredBy);
+    children.add(poweredBy);
 
     return children;
   }
