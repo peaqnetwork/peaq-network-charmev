@@ -43,6 +43,8 @@ class CEVChargeProvider with ChangeNotifier {
   List<Detail> _details = [];
   BigInt _atto = BigInt.parse("1000000000000000000");
 
+  num token = (10 * pow(10, 19));
+
   String get providerDid => _providerDid;
   CEVStation? get station => _station;
   List<Detail> get details => _details;
@@ -154,6 +156,8 @@ class CEVChargeProvider with ChangeNotifier {
       setStatus(LoadingStatus.error, message: Env.invalidProviderDid);
     }
 
+    setStatus(LoadingStatus.error, message: Env.fetchingData);
+
     var address = did.split(":")[2];
 
     var doc = await appProvider.peerProvider.fetchDidDocument(address);
@@ -162,9 +166,6 @@ class CEVChargeProvider with ChangeNotifier {
       setStatus(LoadingStatus.error, message: Env.providerDidNotFound);
       notifyListeners();
     }
-
-    _status = LoadingStatus.loading;
-    notifyListeners();
 
     _station.did = _providerDid;
     _station.address = address;
@@ -189,7 +190,9 @@ class CEVChargeProvider with ChangeNotifier {
   generateAndFundMultisigWallet() async {
     setStatus(LoadingStatus.idle);
     String consumer = appProvider.accountProvider.account.address!;
-    String provider = _station.address!;
+    // String provider = _station.address!;
+
+    String provider = _providerDid.split(":")[2];
 
     setStatus(LoadingStatus.loading, message: Env.creatingMultisigWallet);
 
@@ -203,7 +206,6 @@ class CEVChargeProvider with ChangeNotifier {
       return;
     }
 
-    var token = (10 * pow(10, 19));
     var seed = appProvider.accountProvider.account.seed!;
 
     setStatus(LoadingStatus.loading, message: Env.fundingMultisigWallet);
@@ -218,11 +220,9 @@ class CEVChargeProvider with ChangeNotifier {
     }
 
     await Future.delayed(const Duration(seconds: 3));
-
-    _startCharge(token.toString());
   }
 
-  _startCharge(String token) async {
+  startCharge(String token) async {
     setStatus(LoadingStatus.idle);
 
     setStatus(LoadingStatus.loading, message: Env.requestingService);
