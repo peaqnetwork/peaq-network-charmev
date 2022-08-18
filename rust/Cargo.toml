@@ -14,7 +14,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = { version = "1.0.53", features = ["backtrace"] }
-flutter_rust_bridge = { version = "1.23.0" }
+flutter_rust_bridge = { version = "1.41.0" }
 log = "0.4.16"
 async-trait = "0.1.52"
 android_logger = "0.10"

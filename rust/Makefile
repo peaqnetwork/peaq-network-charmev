@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 PROJECTNAME=peaq_codec_api
-LLVM_PATH=/usr/local/homebrew/opt/llvm
+# LLVM_PATH=/usr/local/homebrew/opt/llvm
+LLVM_PATH=/opt/homebrew/opt/llvm
 RUST_INPUT=src/api.rs
 DART_OUTPUT=../lib/common/services/fr_bridge/bridge_generated.dart
 PROJECT_NDK_PATH=${HOME}/ndk
