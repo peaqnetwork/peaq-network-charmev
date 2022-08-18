@@ -88,7 +88,7 @@ jobs:
       - name: Clone Flutter repository with flutter-version 2.5.3
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.5.3'
+          flutter-version: '2.10.5'
 
       - name: Install Linux dependencies
         if: matrix.target == 'Linux'
