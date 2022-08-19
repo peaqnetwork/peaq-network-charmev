@@ -28,6 +28,10 @@ This library is currently compiled into android `.so` library files and imported
   
   `export ANDROID_SDK_HOME=/[PATH]/Android/sdk`
 
+* Export `LLVM_PATH` path 
+  
+  `export LLVM_PATH=/[PATH]/homebrew/opt/llvm`
+
 
 * [Download](https://developer.android.com/ndk/downloads/) `android NDK > v23` 
 * Export `ANDROID_NDK_HOME` path 
@@ -59,6 +63,10 @@ Runs the `flutter-rust-code-gen` command: It generates the equivalent flutter/da
 `make ndk-home`
 
 Checks if the `ANDROID_NDK_HOME` path has been exported.
+
+`make check-llvm`
+
+Checks if the `LLVM_PATH` path has been exported.
 
 `make clean`
 

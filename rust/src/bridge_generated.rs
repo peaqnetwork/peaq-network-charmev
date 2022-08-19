@@ -3,6 +3,8 @@
     unused,
     clippy::redundant_closure,
     clippy::useless_conversion,
+    clippy::unit_arg,
+    clippy::double_parens,
     non_snake_case
 )]
 // AUTO GENERATED FILE, DO NOT EDIT.
@@ -10,6 +12,8 @@
 
 use crate::api::*;
 use flutter_rust_bridge::*;
+
+// Section: imports
 
 // Section: wire functions
 
@@ -323,12 +327,14 @@ pub struct wire_uint_8_list {
     len: i32,
 }
 
-// Section: wire enums
+// Section: wrapper structs
+
+// Section: static checks
 
 // Section: allocate functions
 
 #[no_mangle]
-pub extern "C" fn new_StringList(len: i32) -> *mut wire_StringList {
+pub extern "C" fn new_StringList_0(len: i32) -> *mut wire_StringList {
     let wrap = wire_StringList {
         ptr: support::new_leak_vec_ptr(<*mut wire_uint_8_list>::new_with_null_ptr(), len),
         len,
@@ -337,7 +343,7 @@ pub extern "C" fn new_StringList(len: i32) -> *mut wire_StringList {
 }
 
 #[no_mangle]
-pub extern "C" fn new_uint_8_list(len: i32) -> *mut wire_uint_8_list {
+pub extern "C" fn new_uint_8_list_0(len: i32) -> *mut wire_uint_8_list {
     let ans = wire_uint_8_list {
         ptr: support::new_leak_vec_ptr(Default::default(), len),
         len,
@@ -423,6 +429,7 @@ impl<T> NewWithNullPtr for *mut T {
 // Section: impl IntoDart
 
 // Section: executor
+
 support::lazy_static! {
     pub static ref FLUTTER_RUST_BRIDGE_HANDLER: support::DefaultHandler = Default::default();
 }

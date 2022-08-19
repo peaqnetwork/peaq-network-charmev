@@ -207,6 +207,9 @@ class _ProviderDetailScreenState extends State<ProviderDetailScreen>
               message: Env.verifyingDidDocument);
           await _peerProvider.verifyPeerDidDocument();
           if (_peerProvider.isPeerDidDocVerified) {
+            if (chargeProvider.repeatedSessionCount > 0) {
+              chargeProvider.generateAndFundMultisigWallet();
+            }
             chargeProvider.setStatus(LoadingStatus.loading,
                 message: Env.connectingToPeer);
             _peerProvider.connectP2P();

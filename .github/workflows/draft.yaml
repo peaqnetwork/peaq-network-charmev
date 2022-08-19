@@ -85,10 +85,10 @@ jobs:
     needs: draft-release
     steps:
       # Set up Flutter.
-      - name: Clone Flutter repository with flutter-version 2.5.3
+      - name: Clone Flutter repository with flutter-version 3.0.5
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.5.3'
+          flutter-version: '3.0.5'
 
       - name: Install Linux dependencies
         if: matrix.target == 'Linux'

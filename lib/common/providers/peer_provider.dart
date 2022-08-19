@@ -267,7 +267,8 @@ class CEVPeerProvider with ChangeNotifier {
     }
 
     if (_isPeerAuthenticated) {
-      await appProvider.chargeProvider.generateAndFundMultisigWallet();
+      await appProvider.chargeProvider
+          .startCharge(appProvider.chargeProvider.token.toString());
       // await appProvider.accountProvider
       //     .simulateServiceRequestedAndDeliveredEvents();
     } else {

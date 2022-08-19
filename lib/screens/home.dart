@@ -2,6 +2,7 @@ import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/common/providers/peer_provider.dart';
+import 'package:charmev/common/utils/validation.dart';
 import 'package:charmev/common/widgets/dropdown.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
@@ -166,19 +167,23 @@ class _HomeScreenState extends State<HomeScreen>
                                         onCapture: (data) async {
                                           // print("Sacnned:: $data");
                                           // print("Sacnned len:: ${data.length}");
-                                          if (data.length > 64) {
+                                          String err =
+                                              "${validation.did(data)}";
+                                          if (err.isNotEmpty) {
                                             _chargeProvider.setStatus(
                                                 LoadingStatus.error,
-                                                message:
-                                                    Env.invalidProviderDid);
-
+                                                message: err);
                                             return;
                                           }
                                           _dumbChargeProvider!.qrController
                                               .pause();
                                           _chargeProvider.providerDid = data;
+                                          _chargeProvider
+                                              .generateAndFundMultisigWallet();
+
                                           await _chargeProvider
                                               .fetchProviderDidDocument(data);
+                                          if (!mounted) return;
                                           CEVApp.router.navigateTo(
                                               context, CEVRoutes.providerDetail,
                                               transition:

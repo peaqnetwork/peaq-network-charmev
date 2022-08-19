@@ -1,6 +1,5 @@
 .DEFAULT_GOAL := help
 PROJECTNAME=peaq_codec_api
-LLVM_PATH=/usr/local/homebrew/opt/llvm
 RUST_INPUT=src/api.rs
 DART_OUTPUT=../lib/common/services/fr_bridge/bridge_generated.dart
 PROJECT_NDK_PATH=${HOME}/ndk
@@ -28,7 +27,7 @@ ndk-copy-ar:
 	cp ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/darwin-x86_64/bin/x86_64-linux-android-ar
 
 ## android: for android binaries compilation.
-android: ndk-home ndk-copy-ar clean bridge
+android: ndk-home check-llvm ndk-copy-ar clean bridge
 	cargo +nightly ndk --platform 28 -t arm64-v8a -o ../android/app/src/main/jniLibs build -Zbuild-std --release; \
 	cargo +nightly ndk --platform 28 -t armeabi-v7a -o ../android/app/src/main/jniLibs build -Zbuild-std --release; \
 	cargo +nightly ndk --platform 28 -t x86_64 -o ../android/app/src/main/jniLibs build -Zbuild-std --release;
@@ -46,6 +45,12 @@ bridge:
 ndk-home:
 	@if [ ! -d "${ANDROID_NDK_HOME}" ] ; then \
 		echo "Error: Please, set the ANDROID_NDK_HOME env variable to point to your NDK folder" ; \
+		exit 1 ; \
+	fi
+
+check-llvm:
+	@if [ ! -d "${LLVM_PATH}" ] ; then \
+		echo "Error: Please, set the LLVM_PATH env variable to point to your LLVM folder" ; \
 		exit 1 ; \
 	fi
 
