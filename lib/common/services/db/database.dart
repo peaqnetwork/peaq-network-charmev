@@ -10,9 +10,9 @@ const String idColumn = DbConstant.id;
 const String dataColumn = DbConstant.data;
 const String dateColumn = DbConstant.date;
 
-class DBService {
-  DBService._();
-  static final DBService db = DBService._();
+class CEVDBService {
+  CEVDBService._();
+  static final CEVDBService db = CEVDBService._();
 
   static late Database _database;
 

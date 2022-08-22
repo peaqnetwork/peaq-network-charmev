@@ -35,8 +35,8 @@ class CEVProvidersWrapperState extends State<CEVProvidersWrapper> {
     );
 
     peerProvider = CEVPeerProvider(
-      cevSharedPref: serviceProvider.data.cevSharedPref,
-    );
+        cevSharedPref: serviceProvider.data.cevSharedPref,
+        db: serviceProvider.data.transactionDB);
 
     applicationProvider = CEVApplicationProvider(context,
         cevSharedPrefs: serviceProvider.data.cevSharedPref,

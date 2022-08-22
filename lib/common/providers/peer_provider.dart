@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:charmev/common/models/account.dart';
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/rust_data.dart';
+import 'package:charmev/common/models/transaction.dart';
+import 'package:charmev/common/services/db/transactions.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/screens/charging_session.dart';
@@ -40,9 +42,11 @@ Timer runPeriodically(void Function() callback) =>
 class CEVPeerProvider with ChangeNotifier {
   CEVPeerProvider({
     required this.cevSharedPref,
+    required this.db,
   });
 
   final CEVSharedPref cevSharedPref;
+  final CEVTransactionDB db;
 
   late CEVApplicationProvider appProvider;
 
@@ -234,6 +238,20 @@ class CEVPeerProvider with ChangeNotifier {
       appProvider.chargeProvider.spentInfo = data.spentInfo;
       appProvider.chargeProvider.generateTransactions(notify: true);
       appProvider.chargeProvider.chargingStatus = LoadingStatus.authorize;
+
+      // save transaction on the local db until they are approved
+      CEVTransactionDbModel refundTranx = CEVTransactionDbModel()
+        ..id = data.refundInfo.txHash;
+      refundTranx.data = data.refundInfo.toString();
+      refundTranx.date = DateTime.now().millisecondsSinceEpoch;
+
+      CEVTransactionDbModel spentTranx = CEVTransactionDbModel()
+        ..id = data.spentInfo.txHash;
+      spentTranx.data = data.spentInfo.toString();
+      spentTranx.date = DateTime.now().millisecondsSinceEpoch;
+
+      db.newTransaction(spentTranx);
+      db.newTransaction(refundTranx);
     }
   }
 
