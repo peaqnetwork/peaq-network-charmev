@@ -32,7 +32,7 @@ class CEVTransactionDB {
     return list;
   }
 
-  // / Create new transaction or update if Exists
+  /// Create new transaction or update if Exists
   Future<int> newTransaction(CEVTransactionDbModel transaction) async {
     Database db = await database;
     final transactionExist = await getTransactionById(transaction.id);

@@ -36,6 +36,7 @@ class CEVChargeProvider with ChangeNotifier {
   String _providerDid = "";
   int _repeatedSessionCount = 0;
   double _progress = 0;
+  double _countdown = 3;
   CEVStation _station = CEVStation();
   List<Detail> _transactions = [];
   msg.TransactionValue _refundInfo = msg.TransactionValue();

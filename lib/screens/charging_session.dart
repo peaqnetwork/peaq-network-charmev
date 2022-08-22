@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/common/providers/peer_provider.dart';
+import 'package:charmev/common/widgets/countdown.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/keys.dart';
@@ -328,6 +329,22 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       ],
     );
 
+    const maxCount = 5;
+
+    final countDown = chargeProvider.status == LoadingStatus.idle &&
+            chargeProvider.chargingStatus == LoadingStatus.authorize
+        ? CEVCountdown(
+            displayChild: (count) => Text(
+              "authorize in ${maxCount - count.toInt()} sec",
+              style: CEVTheme.titleLabelStyle
+                  .copyWith(fontSize: 16, color: CEVTheme.accentColor),
+            ),
+            maxCount: maxCount.toDouble(),
+            onTimeout: () => chargeProvider.approveTransactions(),
+          )
+        : const SizedBox();
+
+    children.add(countDown);
     children.add(submitButton);
     children.add(const SizedBox(
       height: 8,
