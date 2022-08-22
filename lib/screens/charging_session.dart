@@ -41,16 +41,20 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   @override
   Widget build(BuildContext context) {
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
-          return true;
+          if (chargeProvider.status == LoadingStatus.idle &&
+              chargeProvider.chargingStatus == LoadingStatus.authorize) {
+            chargeProvider.approveTransactions();
+          }
+          return false;
         },
-        child: Material(color: Colors.white, child: _buildMain(context)));
+        child: Material(
+            color: Colors.white, child: _buildMain(context, chargeProvider)));
   }
 
-  Widget _buildMain(BuildContext context) {
-    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
-
+  Widget _buildMain(BuildContext context, CEVChargeProvider chargeProvider) {
     return Stack(children: <Widget>[
       Scaffold(
           backgroundColor: CEVTheme.bgColor,

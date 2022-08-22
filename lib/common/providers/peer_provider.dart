@@ -80,6 +80,11 @@ class CEVPeerProvider with ChangeNotifier {
   String get multisigAddress => _multisigAddress;
   double get chargeProgress => _chargeProgress;
 
+  set chargeProgress(double progress) {
+    _chargeProgress = progress;
+    notifyListeners();
+  }
+
   Future<void> initLog() async {
     api.initLogger();
   }
