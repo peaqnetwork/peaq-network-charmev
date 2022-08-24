@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/models/transaction.dart';
 import 'package:sqflite/sqflite.dart';
 import 'constant.dart';
@@ -8,23 +9,23 @@ const String transactionTable = DbConstant.transactionTable;
 const String dateColumn = DbConstant.date;
 const String dataColumn = DbConstant.data;
 const String idColumn = DbConstant.id;
+const String transactionTypeColumn = DbConstant.transactionType;
+const String signatoryColumn = DbConstant.signatory;
 
 class CEVTransactionDB {
   CEVTransactionDB(this.database);
 
   final Future<Database> database;
 
-  static const limit = 20;
-
-  Future<List<CEVTransactionDbModel>> getTransactions(int page) async {
+  Future<List<CEVTransactionDbModel>> getTransactions(
+      TransactonType type) async {
     Database db = await database;
-    int perPage = limit;
-    int offset = (perPage * page) - perPage;
+    var txtype = transactionTypeToString(type);
     var res = await db.query(transactionTable,
         distinct: true,
-        orderBy: "$dateColumn ASC",
-        limit: perPage,
-        offset: offset);
+        where: "$transactionTypeColumn = ? ",
+        whereArgs: [txtype],
+        orderBy: "$dateColumn ASC");
 
     List<CEVTransactionDbModel> list = res.isNotEmpty
         ? res.map((c) => CEVTransactionDbModel.fromJson(c)).toList()
@@ -45,6 +46,8 @@ class CEVTransactionDB {
           transactionTable,
           {
             dataColumn: transaction.data,
+            signatoryColumn: transaction.signatory,
+            transactionTypeColumn: transaction.transactionType.toString(),
             dateColumn: transaction.date,
           },
           where: "$idColumn=?",
@@ -57,9 +60,24 @@ class CEVTransactionDB {
     Database db = await database;
     var res = await db.query(transactionTable,
         where: "$idColumn = ?", limit: 1, whereArgs: [id]);
-    // print("RES:: $res");
+
     CEVTransactionDbModel? tranx =
         res.isNotEmpty ? CEVTransactionDbModel.fromJson(res.first) : null;
     return tranx;
+  }
+
+  Future<bool> hasSpentTransaction() async {
+    Database db = await database;
+    var type = transactionTypeToString(TransactonType.spent);
+    var res = await db.query(transactionTable,
+        where: "$transactionTypeColumn = ? ", whereArgs: [type], limit: 1);
+
+    return res.isNotEmpty;
+  }
+
+  Future<int> deleteTransaction(String id) async {
+    Database db = await database;
+    return await db
+        .delete(transactionTable, where: '$idColumn = ?', whereArgs: [id]);
   }
 }

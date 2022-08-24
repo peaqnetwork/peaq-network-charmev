@@ -1,6 +1,7 @@
 class Env {
   Env._();
 
+  static const int perPageLimit = 20;
   static const String importString = 'Import';
   static const String startCharging = 'Start Charging Session';
   static const String stopCharging = 'Stop Charging Session';

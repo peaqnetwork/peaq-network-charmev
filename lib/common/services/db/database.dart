@@ -9,22 +9,29 @@ const String transactionTable = DbConstant.transactionTable;
 const String idColumn = DbConstant.id;
 const String dataColumn = DbConstant.data;
 const String dateColumn = DbConstant.date;
+const String progressColumn = DbConstant.progress;
+const String transactionTypeColumn = DbConstant.transactionType;
+const String signatoryColumn = DbConstant.signatory;
 
 class CEVDBService {
   CEVDBService._();
   static final CEVDBService db = CEVDBService._();
 
   static late Database _database;
+  static bool _isOpen = false;
 
   Future<Database> get database async {
-    if (_database != null) return _database;
+    if (_isOpen) {
+      return _database;
+    }
 
     // if _database is null we initialize it
     _database = await initDB();
+    _isOpen = true;
     return _database;
   }
 
-  initDB() async {
+  Future<Database> initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String dbPath = path.join(documentsDirectory.path, "CharmevDB.db");
     Database odb = await openDatabase(dbPath, version: 1, onOpen: (db) {},
@@ -40,6 +47,6 @@ class CEVDBService {
   _createTableTransactionsV1(Batch batch) {
     batch.execute("DROP TABLE IF EXISTS $transactionTable");
     batch.execute('''CREATE TABLE $transactionTable ( 
-      $idColumn TEXT, $dataColumn TEXT, $dateColumn INTEGER)''');
+      $idColumn TEXT, $progressColumn REAL, $transactionTypeColumn TEXT, $signatoryColumn TEXT, $dataColumn TEXT, $dateColumn INTEGER)''');
   }
 }

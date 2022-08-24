@@ -82,13 +82,18 @@ class CEVApplicationProvider extends ChangeNotifier {
   /// to the next screen.
   Future<void> _onInitialized(BuildContext context) async {
     _log.fine("on initialized");
-    peerProvider.initLog();
+    peerProvider.initLog().then((v) {
+      chargeProvider.processPendingTransactionsFromDB();
+    });
+
+    bool hasTransaction = await chargeProvider.hasPendingTransaction();
 
     if (authenticated) {
       _log.fine("navigating to home screen");
       // use to initiate rust log in lib
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
-        builder: (context) => const HomeScreen(),
+        builder: (context) =>
+            hasTransaction ? const CharginSessionScreen() : const HomeScreen(),
         duration: const Duration(milliseconds: 600),
       ));
     } else {

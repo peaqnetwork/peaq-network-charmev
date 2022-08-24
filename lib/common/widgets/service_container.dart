@@ -34,7 +34,7 @@ class CEVServiceContainerState extends State<CEVServiceContainer> {
     cevSharedPref = CEVSharedPref();
     dbService = CEVDBService.db;
 
-    transactionDB = CEVTransactionDB(dbService.database);
+    transactionDB = CEVTransactionDB(dbService.initDB());
   }
 
   @override

@@ -1,9 +1,15 @@
 import 'dart:math';
+import 'dart:convert';
 
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/models/station.dart';
+import 'package:charmev/common/models/transaction.dart';
+import 'package:charmev/common/services/db/transactions.dart';
+import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/config/env.dart';
+import 'package:charmev/config/navigator.dart';
+import 'package:charmev/screens/home.dart';
 import 'package:charmev/theme.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/providers/application_provider.dart';
@@ -16,11 +22,10 @@ import 'package:peaq_network_ev_charging_message_format/p2p_message_format.pb.da
     as msg;
 
 class CEVChargeProvider with ChangeNotifier {
-  CEVChargeProvider({
-    required this.cevSharedPref,
-  });
+  CEVChargeProvider({required this.cevSharedPref, required this.db});
 
   final CEVSharedPref cevSharedPref;
+  final CEVTransactionDB db;
 
   late CEVApplicationProvider appProvider;
 
@@ -35,7 +40,10 @@ class CEVChargeProvider with ChangeNotifier {
   String _statusMessage = '';
   String _providerDid = "";
   int _repeatedSessionCount = 0;
-  double _progress = 0;
+  int _approvalCount = 0;
+  int _pendingTransactionCount = 0;
+  bool _isFetchAllFromDBRunning = false;
+  double _chargeProgress = 0;
   CEVStation _station = CEVStation();
   List<Detail> _transactions = [];
   msg.TransactionValue _refundInfo = msg.TransactionValue();
@@ -54,8 +62,14 @@ class CEVChargeProvider with ChangeNotifier {
   msg.TransactionValue get refundInfo => _refundInfo;
   msg.TransactionValue get spentInfo => _spentInfo;
   int get repeatedSessionCount => _repeatedSessionCount;
-  double get progress => _progress;
+  double get chargeProgress => _chargeProgress;
   String get statusMessage => _statusMessage;
+  bool get isFetchAllFromDBRunning => _isFetchAllFromDBRunning;
+
+  set chargeProgress(double progress) {
+    _chargeProgress = progress;
+    notifyListeners();
+  }
 
   set chargingStatus(LoadingStatus cstatus) {
     _chargingStatus = cstatus;
@@ -89,6 +103,63 @@ class CEVChargeProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Get all pending transactions from local db
+  Future<void> processPendingTransactionsFromDB() async {
+    try {
+      _isFetchAllFromDBRunning = true;
+      notifyListeners();
+
+      List<CEVTransactionDbModel> pendingSpentTransactions =
+          await _getPendingTransactionsFromDB(TransactonType.spent);
+
+      if (pendingSpentTransactions.isNotEmpty) {
+        _pendingTransactionCount = pendingSpentTransactions.length;
+        await _processPendingTransaction(pendingSpentTransactions);
+      }
+
+      _isFetchAllFromDBRunning = false;
+      notifyListeners();
+
+      CEVNavigator.pushReplacementRoute(CEVFadeRoute(
+        builder: (context) => const HomeScreen(),
+        duration: const Duration(milliseconds: 600),
+      ));
+
+      List<CEVTransactionDbModel> pendingRefundTransactions =
+          await _getPendingTransactionsFromDB(TransactonType.refund);
+
+      if (pendingRefundTransactions.isNotEmpty) {
+        _processPendingTransaction(pendingRefundTransactions);
+      }
+    } catch (e) {}
+  }
+
+  _processPendingTransaction(List<CEVTransactionDbModel> transactions) async {
+    for (var i = 0; i < transactions.length; i++) {
+      var tx = transactions[i];
+      var txval = msg.TransactionValue.fromJson(tx.data);
+
+      var otherSignatories = [tx.signatory];
+      _chargeProgress = tx.progress;
+
+      if (tx.transactionType == TransactonType.spent) {
+        _approvalCount += 1;
+        _spentInfo = txval;
+        await _approveSpentTransaction(otherSignatories);
+      }
+
+      if (tx.transactionType == TransactonType.refund) {
+        _refundInfo = txval;
+        _approveRefundTransaction(otherSignatories);
+      }
+    }
+    _approvalCount = 0;
+    _chargeProgress = 0;
+    _chargingStatus = LoadingStatus.idle;
+    _status = LoadingStatus.idle;
+    notifyListeners();
+  }
+
   // generate provider account details
   generateDetails({bool notify = false}) {
     List<Detail> newDetails = [];
@@ -115,18 +186,14 @@ class CEVChargeProvider with ChangeNotifier {
     var tokenSymbol = appProvider.accountProvider.account.tokenSymbol;
     _atto = BigInt.from(pow(10, num.parse(tokenDecimals.toString())));
 
-    // print(
-    //     "generateTransactions :: _refundInfo:: ${_refundInfo.toProto3Json()}");
-    // print("generateTransactions :: _spentInfo:: ${_spentInfo.toProto3Json()}");
-
     if (_refundInfo.tokenNum.isNotEmpty && _spentInfo.tokenNum.isNotEmpty) {
       var refundRawToken = _refundInfo.tokenNum;
       var spentRawToken = _spentInfo.tokenNum;
       var refundToken = (BigInt.parse(refundRawToken) / _atto);
-      // print("refundToken:: $refundToken");
+
       var refundTokenString = refundToken.toStringAsFixed(4);
       var spentToken = (BigInt.parse(spentRawToken) / _atto);
-      // print("spentToken:: $spentToken");
+
       var spentTokenString = spentToken.toStringAsFixed(4);
       var total = (refundToken + spentToken).toStringAsFixed(4);
       _newtx.addAll([
@@ -213,14 +280,11 @@ class CEVChargeProvider with ChangeNotifier {
 
     var resp = await appProvider.peerProvider
         .transferFund(multisigAddress, "$token", seed);
-    // print("generateAndFundMultisigWallet resp data:: ${resp.toJson()}");
 
     if (resp.error!) {
       setStatus(LoadingStatus.error, message: resp.message!);
       return;
     }
-
-    // await Future.delayed(const Duration(seconds: 3));
   }
 
   startCharge(String token) async {
@@ -264,15 +328,45 @@ class CEVChargeProvider with ChangeNotifier {
       return;
     }
 
-    setStatus(LoadingStatus.loading);
-
-    var refundTimePoint = _refundInfo.timePoint;
-    var spentTimePoint = _spentInfo.timePoint;
     var otherSignatories = [_station.address!];
+
+    bool approved = await _approveSpentTransaction(otherSignatories);
+
+    if (!approved) {
+      setStatus(LoadingStatus.error,
+          message: Env.approvingSpentTransactionFailed);
+      return;
+    }
+
+    _approveRefundTransaction(otherSignatories);
+
+    // increased the number of times this session has been repeated
+    _repeatedSessionCount += 1;
+    _chargeProgress = 0;
+    _chargingStatus = LoadingStatus.success;
+    notifyListeners();
+
+    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
+
+    appProvider.peerProvider.disconnectP2P();
+  }
+
+  Future<bool> _approveSpentTransaction(List<String> otherSignatories) async {
+    // setStatus(LoadingStatus.loading);
+
+    var spentTimePoint = _spentInfo.timePoint;
 
     var seed = appProvider.accountProvider.account.seed ?? "";
 
-    setStatus(LoadingStatus.loading, message: Env.approvingSpentTransaction);
+    String loadingMsg = Env.approvingSpentTransaction;
+
+    if (_approvalCount > 0 && _pendingTransactionCount > 0) {
+      loadingMsg = "$loadingMsg \n\n $_approvalCount/$_pendingTransactionCount";
+    }
+
+    setStatus(LoadingStatus.loading, message: loadingMsg);
+
+    // await Future.delayed(const Duration(seconds: 3));
 
     bool approveSpent = await appProvider.peerProvider
         .approveMultisigTransaction(
@@ -283,45 +377,43 @@ class CEVChargeProvider with ChangeNotifier {
             callHash: _spentInfo.callHash,
             seed: seed);
 
-    if (!approveSpent) {
-      setStatus(LoadingStatus.error,
-          message: Env.approvingSpentTransactionFailed);
+    if (approveSpent) {
+      db.deleteTransaction(_spentInfo.txHash);
+    }
+
+    return approveSpent;
+  }
+
+  _approveRefundTransaction(List<String> otherSignatories) async {
+    var refundTimePoint = _refundInfo.timePoint;
+    var seed = appProvider.accountProvider.account.seed ?? "";
+
+    bool approveRefund = await appProvider.peerProvider
+        .approveMultisigTransaction(
+            threshold: 2,
+            otherSignatories: otherSignatories,
+            timepointHeight: refundTimePoint.height.toInt(),
+            timepointIndex: refundTimePoint.index.toInt(),
+            callHash: _refundInfo.callHash,
+            seed: seed);
+
+    if (!approveRefund) {
+      // setStatus(LoadingStatus.error,
+      //     message: Env.approvingRefundTransactionFailed);
       return;
     }
 
-    // increased the number of times this session has been repeated
-    _repeatedSessionCount += 1;
-    notifyListeners();
+    db.deleteTransaction(_refundInfo.txHash);
+  }
 
-    setStatus(LoadingStatus.loading, message: Env.approvingRefundTransaction);
-    // bool approveRefund = await appProvider.peerProvider
-    //     .approveMultisigTransaction(
-    //         threshold: 2,
-    //         otherSignatories: otherSignatories,
-    //         timepointHeight: refundTimePoint.height.toInt(),
-    //         timepointIndex: refundTimePoint.index.toInt(),
-    //         callHash: _refundInfo.callHash,
-    //         seed: seed);
+  Future<List<CEVTransactionDbModel>> _getPendingTransactionsFromDB(
+      TransactonType type) async {
+    final List<CEVTransactionDbModel> transactionDbModels =
+        await db.getTransactions(type);
+    return transactionDbModels;
+  }
 
-    // if (!approveRefund) {
-    //   setStatus(LoadingStatus.error,
-    //       message: Env.approvingRefundTransactionFailed);
-    //   return;
-    // }
-
-    appProvider.peerProvider.approveMultisigTransaction(
-        threshold: 2,
-        otherSignatories: otherSignatories,
-        timepointHeight: refundTimePoint.height.toInt(),
-        timepointIndex: refundTimePoint.index.toInt(),
-        callHash: _refundInfo.callHash,
-        seed: seed);
-
-    _chargingStatus = LoadingStatus.success;
-    appProvider.peerProvider.chargeProgress = 0;
-
-    setStatus(LoadingStatus.idle, message: Env.transactionCompleted);
-
-    appProvider.peerProvider.disconnectP2P();
+  Future<bool> hasPendingTransaction() async {
+    return db.hasSpentTransaction();
   }
 }

@@ -126,7 +126,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       CEVProgressCard(
-                        progress: peerProvider.chargeProgress,
+                        progress: chargeProvider.chargeProgress,
                         size: 172,
                         margin: const EdgeInsets.all(32),
                         child: _buildPump(context),
@@ -290,7 +290,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
-            chargeProvider.progress >= 1 ? Env.fullyCharged : Env.charged,
+            chargeProvider.chargeProgress >= 1 ? Env.fullyCharged : Env.charged,
             style: CEVTheme.titleLabelStyle,
             overflow: TextOverflow.ellipsis,
           )
