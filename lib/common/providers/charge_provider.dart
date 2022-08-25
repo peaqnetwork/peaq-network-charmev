@@ -103,12 +103,14 @@ class CEVChargeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Get all pending transactions from local db
+  /// Process all pending transactions in local db
   Future<void> processPendingTransactionsFromDB() async {
     try {
       _isFetchAllFromDBRunning = true;
       notifyListeners();
 
+      // Spent transactions (Station pending payment) are top priority
+      // so we process them first
       List<CEVTransactionDbModel> pendingSpentTransactions =
           await _getPendingTransactionsFromDB(TransactonType.spent);
 
@@ -143,6 +145,7 @@ class CEVChargeProvider with ChangeNotifier {
       _chargeProgress = tx.progress;
 
       if (tx.transactionType == TransactonType.spent) {
+        // use to count the number of processed approval
         _approvalCount += 1;
         _spentInfo = txval;
         await _approveSpentTransaction(otherSignatories);
@@ -180,7 +183,7 @@ class CEVChargeProvider with ChangeNotifier {
   }
 
   generateTransactions({bool notify = false}) {
-    List<Detail> _newtx = [];
+    List<Detail> newtx = [];
 
     var tokenDecimals = appProvider.accountProvider.account.tokenDecimals;
     var tokenSymbol = appProvider.accountProvider.account.tokenSymbol;
@@ -196,14 +199,14 @@ class CEVChargeProvider with ChangeNotifier {
 
       var spentTokenString = spentToken.toStringAsFixed(4);
       var total = (refundToken + spentToken).toStringAsFixed(4);
-      _newtx.addAll([
+      newtx.addAll([
         Detail("Pay Station", "$spentTokenString $tokenSymbol"),
         Detail("Refund", "$refundTokenString $tokenSymbol"),
         Detail("Total", "$total $tokenSymbol"),
       ]);
     }
 
-    _transactions = _newtx;
+    _transactions = newtx;
     if (notify) {
       notifyListeners();
     }
