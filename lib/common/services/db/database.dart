@@ -43,7 +43,7 @@ class CEVDBService {
     return odb;
   }
 
-  /// create conpetition table first version
+  /// create transactions table first version
   _createTableTransactionsV1(Batch batch) {
     batch.execute("DROP TABLE IF EXISTS $transactionTable");
     batch.execute('''CREATE TABLE $transactionTable ( 
