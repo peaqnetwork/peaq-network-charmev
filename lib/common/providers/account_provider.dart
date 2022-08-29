@@ -67,6 +67,12 @@ class CEVAccountProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  reset() {
+    _status = LoadingStatus.idle;
+    _statusMessage = "";
+    notifyListeners();
+  }
+
   addNode(String node) async {
     var exist = _nodes.contains(node);
     if (!exist) {
@@ -118,6 +124,9 @@ class CEVAccountProvider with ChangeNotifier {
   /// Generate wallet address
   /// Save the account details in shared preference for further retrival
   generateAccount(String secretPhrase) async {
+    _status = LoadingStatus.loading;
+    _statusMessage = Env.generatingAccount;
+    notifyListeners();
     CEVAccount account =
         await appProvider.peerProvider.generateAccount(secretPhrase);
     // print("account: ${accountToJson(account)}");
@@ -132,8 +141,7 @@ class CEVAccountProvider with ChangeNotifier {
     await Future.wait([
       initBeforeOnboardingPage(),
     ]);
-
-    notifyListeners();
+    reset();
 
     return;
   }

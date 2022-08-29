@@ -60,6 +60,7 @@ class Env {
   static const String didVerificationFailed =
       "Provider DID Document verification failed";
   static const String connectingToPeer = "Connecting to Provider Peer...";
+  static const generatingAccount = "Generating account...";
   static const String verifyingDidDocument =
       "Verifying Provider DID Document...";
   static const String invalidP2PUrl = "Invalid P2P URL found";

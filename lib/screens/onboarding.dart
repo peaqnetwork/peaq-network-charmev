@@ -1,5 +1,8 @@
+import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/widgets/dropdown.dart';
+import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/route.dart';
+import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/screens/home.dart';
 import 'package:charmev/theme.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +70,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           foregroundDecoration: const BoxDecoration(color: Colors.transparent)),
     );
 
-    return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
+    return provider.Consumer<CEVAccountProvider>(
+        builder: (context, accountProvider, _) {
       return Stack(children: <Widget>[
         // page 2 is routed from account edit screen
         // Changes was made to suite the edir account page
@@ -89,6 +93,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             body: GestureDetector(
               onTap: () => {},
               child: _buildScreen(context),
+            )),
+        Visibility(
+            visible: (accountProvider.status != LoadingStatus.idle &&
+                accountProvider.status != LoadingStatus.success),
+            child: CEVLoadingView(
+              status: accountProvider.status,
+              loadingContent: CEVStatusCard(
+                  text: accountProvider.statusMessage,
+                  status: LoadingStatus.loading),
+              errorContent: CEVStatusCard(
+                  text: accountProvider.statusMessage,
+                  status: LoadingStatus.error,
+                  onTap: () async {
+                    accountProvider.reset();
+                    Navigator.pop(context);
+                  }),
+              successContent: const SizedBox(),
             )),
       ]);
     });
