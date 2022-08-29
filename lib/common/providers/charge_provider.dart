@@ -22,9 +22,8 @@ import 'package:peaq_network_ev_charging_message_format/p2p_message_format.pb.da
     as msg;
 
 class CEVChargeProvider with ChangeNotifier {
-  CEVChargeProvider({required this.cevSharedPref, required this.db});
+  CEVChargeProvider({required this.db});
 
-  final CEVSharedPref cevSharedPref;
   final CEVTransactionDB db;
 
   late CEVApplicationProvider appProvider;

@@ -26,17 +26,11 @@ class CEVProvidersWrapperState extends State<CEVProvidersWrapper> {
   Widget build(BuildContext context) {
     final serviceProvider = CEVServiceProvider.of(context);
 
-    accountProvider = CEVAccountProvider(
-      cevSharedPref: serviceProvider!.data.cevSharedPref,
-    );
+    accountProvider = CEVAccountProvider();
 
-    chargeProvider = CEVChargeProvider(
-        cevSharedPref: serviceProvider.data.cevSharedPref,
-        db: serviceProvider.data.transactionDB);
+    chargeProvider = CEVChargeProvider(db: serviceProvider!.data.transactionDB);
 
-    peerProvider = CEVPeerProvider(
-        cevSharedPref: serviceProvider.data.cevSharedPref,
-        db: serviceProvider.data.transactionDB);
+    peerProvider = CEVPeerProvider(db: serviceProvider.data.transactionDB);
 
     applicationProvider = CEVApplicationProvider(context,
         cevSharedPrefs: serviceProvider.data.cevSharedPref,

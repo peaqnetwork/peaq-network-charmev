@@ -52,6 +52,8 @@ class CEVApplicationProvider extends ChangeNotifier {
   }
 
   Future<void> _initialize(context) async {
+    await cevSharedPrefs.init();
+
     initLogger();
     _log.fine("initializing");
     // set application model references
@@ -108,6 +110,6 @@ class CEVApplicationProvider extends ChangeNotifier {
   // / Called when initializing and already authenticated or
   // / in the [CEVAuthProvider] after authenticating for the first time.
   void initAuthenticated() {
-    accountProvider.initBeforeOnboardingPage();
+    accountProvider.initBeforeHomePage();
   }
 }

@@ -17,8 +17,8 @@ class Env {
   static const String sk = "sk";
   static const String address = "address";
   static const String did = "did";
-  static const String accountPrefKey = "_account_";
-  static const String nodePrefKey = "_nodes_";
+  static const String accountPrefKey = "account_pref_key";
+  static const String nodePrefKey = "nodes_pref_key";
   static const String appName = "CharmEv";
   static const String eventExplorer = "Event Explorer";
   static const String transactionCompleted = "Transaction Completed";
