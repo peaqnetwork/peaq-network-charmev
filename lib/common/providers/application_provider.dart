@@ -64,11 +64,10 @@ class CEVApplicationProvider extends ChangeNotifier {
       // charmev shared preferences
       // Initialize the shared preference
       cevSharedPrefs.init(),
-      accountProvider.initBeforeOnboardingPage(),
     ]);
     chargeProvider.generateDetails(notify: true);
 
-    if (accountProvider.isLoggedIn) {
+    if (await accountProvider.isLoggedIn) {
       _authenticated = true;
       notifyListeners();
       initAuthenticated();
@@ -84,7 +83,9 @@ class CEVApplicationProvider extends ChangeNotifier {
     _log.fine("on initialized");
     // use to initiate rust log in lib
     peerProvider.initLog().then((v) {
-      chargeProvider.processPendingTransactionsFromDB();
+      if (authenticated) {
+        chargeProvider.processPendingTransactionsFromDB();
+      }
     });
 
     bool hasTransaction = await chargeProvider.hasPendingTransaction();
@@ -106,5 +107,7 @@ class CEVApplicationProvider extends ChangeNotifier {
 
   // / Called when initializing and already authenticated or
   // / in the [CEVAuthProvider] after authenticating for the first time.
-  void initAuthenticated() {}
+  void initAuthenticated() {
+    accountProvider.initBeforeOnboardingPage();
+  }
 }

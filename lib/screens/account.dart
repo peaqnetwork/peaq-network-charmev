@@ -154,8 +154,8 @@ class _AccountScreenState extends State<AccountScreen>
       textColor: Colors.white,
       radius: 10,
       isTextBold: true,
-      onPressed: () {
-        accountProvider.initBeforeLogout();
+      onPressed: () async {
+        await accountProvider.initBeforeLogout();
         CEVNavigator.popAllAndPushNamed("/on-boarding/0");
         // CEVNavigator.pushReplacementRoute(CEVFadeRoute(
         //   builder: (context) => const OnboardingScreen(),

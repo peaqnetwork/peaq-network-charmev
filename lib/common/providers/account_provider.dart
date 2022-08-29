@@ -44,13 +44,18 @@ class CEVAccountProvider with ChangeNotifier {
   String get error => _error;
   String get statusMessage => _statusMessage;
   LoadingStatus get status => _status;
-  bool get isLoggedIn => _isLoggedIn;
   CEVAccount get account => _account!;
   List<Detail> get details => _details;
   List<String> get events => _events;
   List<String> get nodes => _nodes;
   String get selectedNode => _selectedNode;
   bool get showNodeDropdown => _showNodeDropdown;
+
+  Future<bool> get isLoggedIn async {
+    await cevSharedPref.init();
+    var str = cevSharedPref.prefs.getString(Env.accountPrefKey) ?? "";
+    return str.isNotEmpty;
+  }
 
   set showNodeDropdown(bool show) {
     _showNodeDropdown = show;
@@ -115,7 +120,7 @@ class CEVAccountProvider with ChangeNotifier {
   generateAccount(String secretPhrase) async {
     CEVAccount account =
         await appProvider.peerProvider.generateAccount(secretPhrase);
-    print("account: ${accountToJson(account)}");
+    // print("account: ${accountToJson(account)}");
 
     await cevSharedPref.prefs
         .setString(Env.accountPrefKey, accountToJson(account));
@@ -136,10 +141,10 @@ class CEVAccountProvider with ChangeNotifier {
   getAccountBalance() async {
     String balance = await appProvider.peerProvider
         .getAccountBalance(_account!.tokenDecimals.toString(), _account!.seed!);
-    print("balance: $balance");
+    // print("balance: $balance");
 
     _account?.balance = double.parse(balance);
-    print("new account: ${accountToJson(_account!)}");
+    // print("new account: ${accountToJson(_account!)}");
 
     await cevSharedPref.prefs
         .setString(Env.accountPrefKey, accountToJson(account));
@@ -156,17 +161,17 @@ class CEVAccountProvider with ChangeNotifier {
   /// Fetch account saved in the shared pref
   Future<void> getAccount() async {
     await cevSharedPref.init();
-    String? _accountString = cevSharedPref.prefs.getString(Env.accountPrefKey);
+    String? accountString = cevSharedPref.prefs.getString(Env.accountPrefKey);
 
-    if (_accountString != null) {
-      _account = accountFromJson(_accountString);
+    if (accountString != null) {
+      _account = accountFromJson(accountString);
     }
   }
 
   /// Delete account saved in the shared pref
   Future<void> _deleteAccount() async {
     await cevSharedPref.init();
-    cevSharedPref.prefs.remove(Env.accountPrefKey);
+    await cevSharedPref.prefs.setString(Env.accountPrefKey, "");
   }
 
   /// Initializes the authenticated [CEVAccount].
@@ -174,7 +179,6 @@ class CEVAccountProvider with ChangeNotifier {
     await Future.wait([getAccount()]);
 
     if (_account != null) {
-      _isLoggedIn = true;
       generateDetails(notify: true);
       _fetchNode();
     }

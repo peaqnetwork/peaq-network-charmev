@@ -59,15 +59,15 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildMain(BuildContext context) {
     CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
-    CEVAccountProvider accountProvider = CEVAccountProvider.of(context);
-    return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
+    return provider.Consumer<CEVAccountProvider>(
+        builder: (context, accountProvider, _) {
       return SafeArea(
           child: Stack(children: <Widget>[
         // _backgroundImage,
         Scaffold(
             backgroundColor: CEVTheme.bgColor,
             appBar: AppBar(
-              title: _buildAppBarTitle(context, model),
+              title: _buildAppBarTitle(context, accountProvider),
               centerTitle: true,
               automaticallyImplyLeading: false,
               backgroundColor: CEVTheme.appBarBgColor,
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
                     icon: const Icon(Icons.person),
                     onPressed: () {
                       // qrController.pause();
-                      model.getAccountBalance();
+                      accountProvider.getAccountBalance();
                       CEVApp.router.navigateTo(context, CEVRoutes.account,
                           transition: TransitionType.inFromRight);
                     })
@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             Container(
               height: 20,
-              width: 240,
+              width: 250,
               // color: Colors.red,
               child: CEVRaisedButton(
                   text: accountProvider.selectedNode,
