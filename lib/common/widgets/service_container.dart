@@ -1,3 +1,5 @@
+import 'package:charmev/common/services/db/database.dart';
+import 'package:charmev/common/services/db/transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:charmev/common/providers/service_provider.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
@@ -14,6 +16,8 @@ class CEVServiceContainer extends StatefulWidget {
 
 class CEVServiceContainerState extends State<CEVServiceContainer> {
   late CEVSharedPref cevSharedPref;
+  late CEVDBService dbService;
+  late CEVTransactionDB transactionDB;
 
   Key key = UniqueKey();
 
@@ -28,6 +32,9 @@ class CEVServiceContainerState extends State<CEVServiceContainer> {
     super.initState();
 
     cevSharedPref = CEVSharedPref();
+    dbService = CEVDBService.db;
+
+    transactionDB = CEVTransactionDB(dbService.initDB());
   }
 
   @override

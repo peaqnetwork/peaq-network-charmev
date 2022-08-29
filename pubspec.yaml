@@ -40,6 +40,7 @@ dependencies:
   get_it: ^7.2.0
   flutter_svg: ^1.0.0
   scan: ^1.6.0
+  sqflite: ^2.0.3+1
   logging: ^1.0.1 
   validators: ^3.0.0
   shared_preferences: ^2.0.11
@@ -51,6 +52,7 @@ dependencies:
       url: https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git
       path: dart
       ref: 84c8070b71122bc4997877186b1281d2b862093f
+  path_provider: ^2.0.11
   
 
 dev_dependencies:

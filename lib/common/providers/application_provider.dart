@@ -1,5 +1,6 @@
 import 'package:charmev/common/providers/account_provider.dart';
 import 'package:charmev/common/widgets/route.dart';
+import 'package:charmev/screens/charging_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/utils/logger.dart';
@@ -81,13 +82,18 @@ class CEVApplicationProvider extends ChangeNotifier {
   /// to the next screen.
   Future<void> _onInitialized(BuildContext context) async {
     _log.fine("on initialized");
-    peerProvider.initLog();
+    // use to initiate rust log in lib
+    peerProvider.initLog().then((v) {
+      chargeProvider.processPendingTransactionsFromDB();
+    });
+
+    bool hasTransaction = await chargeProvider.hasPendingTransaction();
 
     if (authenticated) {
       _log.fine("navigating to home screen");
-      // use to initiate rust log in lib
       CEVNavigator.pushReplacementRoute(CEVFadeRoute(
-        builder: (context) => const HomeScreen(),
+        builder: (context) =>
+            hasTransaction ? const CharginSessionScreen() : const HomeScreen(),
         duration: const Duration(milliseconds: 600),
       ));
     } else {

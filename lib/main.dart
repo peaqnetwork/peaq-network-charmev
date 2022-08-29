@@ -21,10 +21,10 @@ class CharmevApp extends StatefulWidget {
   const CharmevApp({Key? key}) : super(key: key);
 
   @override
-  _CharmevAppState createState() => _CharmevAppState();
+  CharmevAppState createState() => CharmevAppState();
 }
 
-class _CharmevAppState extends State<CharmevApp> {
+class CharmevAppState extends State<CharmevApp> {
   @override
   void initState() {
     super.initState();

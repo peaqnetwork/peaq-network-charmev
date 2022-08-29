@@ -7,3 +7,8 @@ enum LoadingStatus {
   waiting,
   authorize,
 }
+
+enum TransactonType {
+  spent,
+  refund,
+}

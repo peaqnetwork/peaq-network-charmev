@@ -1,6 +1,7 @@
 import 'package:charmev/common/models/enum.dart';
 import 'package:charmev/common/providers/charge_provider.dart';
 import 'package:charmev/common/providers/peer_provider.dart';
+import 'package:charmev/common/widgets/countdown.dart';
 import 'package:charmev/common/widgets/loading_view.dart';
 import 'package:charmev/common/widgets/status_card.dart';
 import 'package:charmev/keys.dart';
@@ -40,16 +41,20 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
 
   @override
   Widget build(BuildContext context) {
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
-          return true;
+          if (chargeProvider.status == LoadingStatus.idle &&
+              chargeProvider.chargingStatus == LoadingStatus.authorize) {
+            chargeProvider.approveTransactions();
+          }
+          return false;
         },
-        child: Material(color: Colors.white, child: _buildMain(context)));
+        child: Material(
+            color: Colors.white, child: _buildMain(context, chargeProvider)));
   }
 
-  Widget _buildMain(BuildContext context) {
-    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
-
+  Widget _buildMain(BuildContext context, CEVChargeProvider chargeProvider) {
     return Stack(children: <Widget>[
       Scaffold(
           backgroundColor: CEVTheme.bgColor,
@@ -121,7 +126,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       CEVProgressCard(
-                        progress: peerProvider.chargeProgress,
+                        progress: chargeProvider.chargeProgress,
                         size: 172,
                         margin: const EdgeInsets.all(32),
                         child: _buildPump(context),
@@ -285,7 +290,7 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
-            chargeProvider.progress >= 1 ? Env.fullyCharged : Env.charged,
+            chargeProvider.chargeProgress >= 1 ? Env.fullyCharged : Env.charged,
             style: CEVTheme.titleLabelStyle,
             overflow: TextOverflow.ellipsis,
           )
@@ -328,6 +333,22 @@ class _CharginSessionScreenState extends State<CharginSessionScreen>
       ],
     );
 
+    const maxCount = 5;
+
+    final countDown = chargeProvider.status == LoadingStatus.idle &&
+            chargeProvider.chargingStatus == LoadingStatus.authorize
+        ? CEVCountdown(
+            displayChild: (count) => Text(
+              "authorize in ${maxCount - count.toInt()} sec",
+              style: CEVTheme.titleLabelStyle
+                  .copyWith(fontSize: 16, color: CEVTheme.accentColor),
+            ),
+            maxCount: maxCount.toDouble(),
+            onTimeout: () => chargeProvider.approveTransactions(),
+          )
+        : const SizedBox();
+
+    children.add(countDown);
     children.add(submitButton);
     children.add(const SizedBox(
       height: 8,

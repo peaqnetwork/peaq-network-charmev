@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:charmev/common/models/account.dart';
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/rust_data.dart';
+import 'package:charmev/common/models/transaction.dart';
+import 'package:charmev/common/services/db/transactions.dart';
 import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/screens/charging_session.dart';
@@ -40,9 +42,11 @@ Timer runPeriodically(void Function() callback) =>
 class CEVPeerProvider with ChangeNotifier {
   CEVPeerProvider({
     required this.cevSharedPref,
+    required this.db,
   });
 
   final CEVSharedPref cevSharedPref;
+  final CEVTransactionDB db;
 
   late CEVApplicationProvider appProvider;
 
@@ -54,7 +58,6 @@ class CEVPeerProvider with ChangeNotifier {
   String _error = '';
   String _statusMessage = '';
   String _peerId = '';
-  double _chargeProgress = 0;
   bool _isLoggedIn = false;
   bool _showNodeDropdown = false;
   List<Detail> _details = [];
@@ -74,7 +77,6 @@ class CEVPeerProvider with ChangeNotifier {
   bool get isPeerConnected => _isPeerConnected;
   bool get isPeerSubscribed => _isPeerSubscribed;
   String get multisigAddress => _multisigAddress;
-  double get chargeProgress => _chargeProgress;
 
   Future<void> initLog() async {
     api.initLogger();
@@ -101,14 +103,10 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<void> getEvent() async {
-    // print("getEvent hitts");
-
     var data = await api.getEvent();
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
-
-    // print("getEvent EVENT decodedRes $decodedRes");
 
     // decode rust data data
     var rData = CEVRustResponse.fromJson(decodedRes);
@@ -121,8 +119,6 @@ class CEVPeerProvider with ChangeNotifier {
 
       var ev = msg.Event();
       ev.mergeFromBuffer(docOutputAsUint8List);
-      print("getEvent EVENT_ID ${ev.eventId.toString()}");
-      print("getEvent EVENT ev ${ev.toProto3Json()}");
 
       switch (ev.eventId) {
         case msg.EventType.PEER_CONNECTED:
@@ -138,9 +134,8 @@ class CEVPeerProvider with ChangeNotifier {
             } else {
               disconnectP2P();
               appProvider.chargeProvider.setStatus(LoadingStatus.error,
-                  message: Env.providerRejectService +
-                      ": " +
-                      ev.serviceRequestedAckData.resp.message);
+                  message:
+                      "${Env.providerRejectService}: ${ev.serviceRequestedAckData.resp.message}");
             }
 
             break;
@@ -178,7 +173,8 @@ class CEVPeerProvider with ChangeNotifier {
           }
         case msg.EventType.CHARGING_STATUS:
           {
-            _chargeProgress = ev.chargingStatusData.progress / 100;
+            appProvider.chargeProvider.chargeProgress =
+                ev.chargingStatusData.progress / 100;
             notifyListeners();
             break;
           }
@@ -197,8 +193,6 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   verifyPeerDidDocument() async {
-    // print("verifyPeerDidDocument hitts");
-
     var sig = _providerDidDoc.signature.writeToBuffer();
     var providerPK = _providerDidDoc.id.split(":")[2];
 
@@ -234,13 +228,37 @@ class CEVPeerProvider with ChangeNotifier {
       appProvider.chargeProvider.spentInfo = data.spentInfo;
       appProvider.chargeProvider.generateTransactions(notify: true);
       appProvider.chargeProvider.chargingStatus = LoadingStatus.authorize;
+
+      final double progress = appProvider.chargeProvider.chargeProgress;
+      final String otherSignatory =
+          appProvider.chargeProvider.station!.address!;
+
+      // save transaction on the local db until they are approved
+      CEVTransactionDbModel refundTranx = CEVTransactionDbModel(
+        id: data.refundInfo.txHash,
+        data: data.refundInfo.writeToJson(),
+        progress: progress,
+        signatory: otherSignatory,
+        transactionType: TransactonType.refund,
+        date: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      CEVTransactionDbModel spentTranx = CEVTransactionDbModel(
+        id: data.spentInfo.txHash,
+        data: data.spentInfo.writeToJson(),
+        progress: progress,
+        signatory: otherSignatory,
+        transactionType: TransactonType.spent,
+        date: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      db.newTransaction(spentTranx);
+      db.newTransaction(refundTranx);
     }
   }
 
   _verifyPeerIdentity(
       String providerPK, String plainData, doc.Signature signature) async {
-    // print("verifyPeerIdentity hitts");
-
     var sig = signature.writeToBuffer();
 
     var data = await api.verifyPeerIdentity(
@@ -248,7 +266,6 @@ class CEVPeerProvider with ChangeNotifier {
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
-    // print("verifyPeerIdentity decodedRes:: $decodedRes");
 
     if (!decodedRes["error"]) {
       _isPeerAuthenticated = true;
@@ -278,7 +295,6 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<void> _sendIdentityChallengeEvent() async {
-    // print("sendIdentityChallengeEvent hitts");
     var data = await api.sendIdentityChallengeEvent();
 
     var utf8Res = utf8.decode(data);
@@ -289,12 +305,10 @@ class CEVPeerProvider with ChangeNotifier {
     String docCharCode = String.fromCharCodes(docRawData);
 
     _identityChallengeData = docCharCode;
-    // print("RANDOM DATA:: $_identityChallengeData");
   }
 
   Future<bool> sendServiceRequestedEvent(
       String provider, String consumer, String tokenDeposited) async {
-    // print("sendServiceRequestedEvent hitts");
     var data = await api.sendServiceRequestedEvent(
         provider: provider, consumer: consumer, tokenDeposited: tokenDeposited);
 
@@ -309,8 +323,6 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<bool> sendStopChargeEvent() async {
-    // print("sendStopChargeEvent hitts");
-
     var data = await api.sendStopChargeEvent();
 
     var utf8Res = utf8.decode(data);
@@ -327,8 +339,6 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<bool> creatMultisigAddress(String provider, String consumer) async {
-    // print("creatMultisigAddress hitts");
-
     var data = await api
         .createMultisigAddress(signatories: [provider, consumer], threshold: 2);
 
@@ -352,15 +362,11 @@ class CEVPeerProvider with ChangeNotifier {
 
   Future<CEVRustResponse> transferFund(
       String address, String amount, String seed) async {
-    // print("transferFund hitts");
-
     var data = await api.transferFund(
         wsUrl: Env.peaqTestnet, address: address, amount: amount, seed: seed);
 
     var utf8Res = utf8.decode(data);
     var decodedRes = json.decode(utf8Res);
-
-    // print("transferFund decodedRes:: $decodedRes");
 
     // decode rust data data
     var rData = CEVRustResponse.fromJson(decodedRes);
@@ -375,7 +381,6 @@ class CEVPeerProvider with ChangeNotifier {
     required String callHash,
     required String seed,
   }) async {
-    // print("approveMultisigTransaction hitts");
     var data = await api.approveMultisig(
         wsUrl: Env.peaqTestnet,
         threshold: threshold,
@@ -438,10 +443,7 @@ class CEVPeerProvider with ChangeNotifier {
       var accData = decodedRes["data"];
       List<int> docRawData = List<int>.from(accData);
       var utf8ResData = utf8.decode(docRawData);
-      // print("Account utf8ResData:: $utf8ResData");
       var decodedResData = json.decode(utf8ResData);
-
-      // print("Account data:: $decodedResData");
 
       account = accountFromJson(json.encode(decodedResData));
     }

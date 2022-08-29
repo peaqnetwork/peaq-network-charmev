@@ -50,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    CEVAccountProvider _accountProvider = CEVAccountProvider.of(context);
     return WillPopScope(
         onWillPop: () async {
           return true;
@@ -59,8 +58,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildMain(BuildContext context) {
-    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
-    CEVAccountProvider _accountProvider = CEVAccountProvider.of(context);
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
+    CEVAccountProvider accountProvider = CEVAccountProvider.of(context);
     return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
       return SafeArea(
           child: Stack(children: <Widget>[
@@ -89,31 +88,31 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildScreen(context),
             )),
         Visibility(
-          visible: _accountProvider.showNodeDropdown,
+          visible: accountProvider.showNodeDropdown,
           child: CEVDropDown(
-              items: _accountProvider.nodes,
+              items: accountProvider.nodes,
               borderColor: CEVTheme.accentColor,
               onTap: (String item) {
-                _accountProvider.showNodeDropdown =
-                    !_accountProvider.showNodeDropdown;
-                _accountProvider.selectedNode = item;
+                accountProvider.showNodeDropdown =
+                    !accountProvider.showNodeDropdown;
+                accountProvider.selectedNode = item;
               }),
         ),
         Visibility(
-            visible: (_chargeProvider.status != LoadingStatus.idle &&
-                _chargeProvider.status != LoadingStatus.success),
+            visible: (chargeProvider.status != LoadingStatus.idle &&
+                chargeProvider.status != LoadingStatus.success),
             child: CEVLoadingView(
-              status: _chargeProvider.status,
+              status: chargeProvider.status,
               loadingContent: CEVStatusCard(
                   text:
-                      "${_chargeProvider.providerDid} \n\n ${Env.fetchingData}",
+                      "${chargeProvider.providerDid} \n\n ${Env.fetchingData}",
                   status: LoadingStatus.loading),
               errorContent: CEVStatusCard(
                   text:
-                      "${_chargeProvider.providerDid} ${_chargeProvider.providerDid != '' ? '\n\n' : ''} ${_chargeProvider.statusMessage}",
+                      "${chargeProvider.providerDid} ${chargeProvider.providerDid != '' ? '\n\n' : ''} ${chargeProvider.statusMessage}",
                   status: LoadingStatus.error,
                   onTap: () {
-                    _chargeProvider.reset();
+                    chargeProvider.reset();
                     _dumbChargeProvider!.qrController.resume();
                   }),
               successContent: const SizedBox(),
