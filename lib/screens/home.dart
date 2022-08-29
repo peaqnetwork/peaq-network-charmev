@@ -233,6 +233,7 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: const EdgeInsets.all(2),
                   isIconRight: true,
                   textSize: 13,
+                  clipText: true,
                   isTextBold: true,
                   bgColor: Colors.transparent,
                   borderColor: Colors.transparent,
