@@ -122,8 +122,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildScreen(BuildContext context) {
-    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
-    CEVPeerProvider _peerProvider = CEVPeerProvider.of(context);
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
     final qrcodeSize = MediaQuery.of(context).size.width - 32;
     return SizedBox(
         height: double.infinity,
@@ -169,18 +168,18 @@ class _HomeScreenState extends State<HomeScreen>
                                           String err =
                                               "${validation.did(data)}";
                                           if (err.isNotEmpty) {
-                                            _chargeProvider.setStatus(
+                                            chargeProvider.setStatus(
                                                 LoadingStatus.error,
                                                 message: err);
                                             return;
                                           }
                                           _dumbChargeProvider!.qrController
                                               .pause();
-                                          _chargeProvider.providerDid = data;
-                                          _chargeProvider
+                                          chargeProvider.providerDid = data;
+                                          chargeProvider
                                               .generateAndFundMultisigWallet();
 
-                                          await _chargeProvider
+                                          await chargeProvider
                                               .fetchProviderDidDocument(data);
                                           if (!mounted) return;
                                           CEVApp.router.navigateTo(
@@ -218,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen>
                 textAlign: TextAlign.start,
               ),
             ),
-            Container(
+            SizedBox(
               height: 20,
               width: 250,
               // color: Colors.red,

@@ -226,7 +226,7 @@ class CEVChargeProvider with ChangeNotifier {
       setStatus(LoadingStatus.error, message: Env.invalidProviderDid);
     }
 
-    setStatus(LoadingStatus.error, message: Env.fetchingData);
+    setStatus(LoadingStatus.loading, message: Env.fetchingData);
 
     var address = did.split(":")[2];
 
