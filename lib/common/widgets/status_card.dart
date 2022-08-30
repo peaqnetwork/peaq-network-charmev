@@ -24,7 +24,7 @@ class CEVStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("CEVStatusCard progress:: $progress");
+    // print("CEVStatusCard progress:: $progress");
     // String flareUrl = MDImageAssets.loader;
     return GestureDetector(
         onTap: status == LoadingStatus.loading ? null : onTap!,

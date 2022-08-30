@@ -12,11 +12,7 @@ import 'dart:async';
 import 'package:charmev/theme.dart';
 
 class CEVAccountProvider with ChangeNotifier {
-  CEVAccountProvider({
-    required this.cevSharedPref,
-  });
-
-  final CEVSharedPref cevSharedPref;
+  CEVAccountProvider();
 
   late CEVApplicationProvider appProvider;
 
@@ -25,32 +21,28 @@ class CEVAccountProvider with ChangeNotifier {
   }
 
   LoadingStatus _status = LoadingStatus.idle;
-  String _error = '';
   String _statusMessage = '';
-  bool _isLoggedIn = false;
   bool _showNodeDropdown = false;
+  bool _logoutInitiated = false;
   CEVAccount? _account;
   List<Detail> _details = [];
-  // set the SS58 registry prefix
-  // currently set to Substrate which is 42
-  // ignore: todo
-  // TODO:: change to PEAQ SS58 registry prefix when it's set
-  final int _ss58 = 42;
-
-  List<String> _events = [];
   List<String> _nodes = [Env.peaqTestnet];
   String _selectedNode = Env.peaqTestnet;
 
-  String get error => _error;
   String get statusMessage => _statusMessage;
   LoadingStatus get status => _status;
-  bool get isLoggedIn => _isLoggedIn;
   CEVAccount get account => _account!;
   List<Detail> get details => _details;
-  List<String> get events => _events;
   List<String> get nodes => _nodes;
   String get selectedNode => _selectedNode;
   bool get showNodeDropdown => _showNodeDropdown;
+
+  Future<bool> get isLoggedIn async {
+    var str =
+        appProvider.cevSharedPrefs.prefs.getString(Env.accountPrefKey) ?? "";
+
+    return str.isNotEmpty;
+  }
 
   set showNodeDropdown(bool show) {
     _showNodeDropdown = show;
@@ -62,29 +54,32 @@ class CEVAccountProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  reset() {
+    _status = LoadingStatus.idle;
+    _statusMessage = "";
+    notifyListeners();
+  }
+
   addNode(String node) async {
     var exist = _nodes.contains(node);
     if (!exist) {
       _nodes.add(node);
-      await cevSharedPref.init();
-      cevSharedPref.prefs.setStringList(Env.nodePrefKey, _nodes);
+      appProvider.cevSharedPrefs.prefs.setStringList(Env.nodePrefKey, _nodes);
     }
     notifyListeners();
   }
 
   _deleteNodes() async {
-    await cevSharedPref.init();
-    cevSharedPref.prefs.remove(Env.nodePrefKey);
+    appProvider.cevSharedPrefs.prefs.remove(Env.nodePrefKey);
   }
 
   _fetchNode() async {
-    await cevSharedPref.init();
-    List<String>? _savedNodes =
-        cevSharedPref.prefs.getStringList(Env.nodePrefKey);
+    List<String>? savedNodes =
+        appProvider.cevSharedPrefs.prefs.getStringList(Env.nodePrefKey);
 
-    if (_savedNodes != null) {
-      if (_savedNodes.isNotEmpty) {
-        _nodes = _savedNodes;
+    if (savedNodes != null) {
+      if (savedNodes.isNotEmpty) {
+        _nodes = savedNodes;
         notifyListeners();
       }
     }
@@ -93,17 +88,17 @@ class CEVAccountProvider with ChangeNotifier {
 
   // generate consumer account details
   generateDetails({bool notify = false}) {
-    List<Detail> _newDetails = [];
+    List<Detail> newDetails = [];
 
     if (_account != null) {
-      _newDetails.add(Detail("Identity", _account!.did ?? ""));
+      newDetails.add(Detail("Identity", _account!.did ?? ""));
     }
 
-    _newDetails.add(
+    newDetails.add(
       Detail("Balance", "${_account!.balance} ${_account!.tokenSymbol}",
           color: CEVTheme.accentColor),
     );
-    _details = _newDetails;
+    _details = newDetails;
     if (notify) {
       notifyListeners();
     }
@@ -113,11 +108,14 @@ class CEVAccountProvider with ChangeNotifier {
   /// Generate wallet address
   /// Save the account details in shared preference for further retrival
   generateAccount(String secretPhrase) async {
+    _status = LoadingStatus.loading;
+    _statusMessage = Env.generatingAccount;
+    notifyListeners();
     CEVAccount account =
         await appProvider.peerProvider.generateAccount(secretPhrase);
-    print("account: ${accountToJson(account)}");
+    // print("account: ${accountToJson(account)}");
 
-    await cevSharedPref.prefs
+    await appProvider.cevSharedPrefs.prefs
         .setString(Env.accountPrefKey, accountToJson(account));
 
     _account = account;
@@ -125,10 +123,9 @@ class CEVAccountProvider with ChangeNotifier {
     generateDetails();
 
     await Future.wait([
-      initBeforeOnboardingPage(),
+      initBeforeHomePage(),
     ]);
-
-    notifyListeners();
+    reset();
 
     return;
   }
@@ -136,45 +133,45 @@ class CEVAccountProvider with ChangeNotifier {
   getAccountBalance() async {
     String balance = await appProvider.peerProvider
         .getAccountBalance(_account!.tokenDecimals.toString(), _account!.seed!);
-    print("balance: $balance");
+    // print("balance: $balance");
 
     _account?.balance = double.parse(balance);
-    print("new account: ${accountToJson(_account!)}");
+    // print("new account: ${accountToJson(_account!)}");
 
-    await cevSharedPref.prefs
-        .setString(Env.accountPrefKey, accountToJson(account));
+    if (!_logoutInitiated) {
+      await appProvider.cevSharedPrefs.prefs
+          .setString(Env.accountPrefKey, accountToJson(account));
 
-    _account = account;
+      _account = account;
 
-    generateDetails();
+      generateDetails();
 
-    notifyListeners();
+      notifyListeners();
+    }
 
     return;
   }
 
   /// Fetch account saved in the shared pref
   Future<void> getAccount() async {
-    await cevSharedPref.init();
-    String? _accountString = cevSharedPref.prefs.getString(Env.accountPrefKey);
+    String? accountString =
+        appProvider.cevSharedPrefs.prefs.getString(Env.accountPrefKey);
 
-    if (_accountString != null) {
-      _account = accountFromJson(_accountString);
+    if (accountString != null) {
+      _account = accountFromJson(accountString);
     }
   }
 
   /// Delete account saved in the shared pref
   Future<void> _deleteAccount() async {
-    await cevSharedPref.init();
-    cevSharedPref.prefs.remove(Env.accountPrefKey);
+    appProvider.cevSharedPrefs.prefs.remove(Env.accountPrefKey);
+    _logoutInitiated = true;
   }
 
-  /// Initializes the authenticated [CEVAccount].
-  Future<bool> initBeforeOnboardingPage() async {
+  Future<bool> initBeforeHomePage() async {
     await Future.wait([getAccount()]);
 
     if (_account != null) {
-      _isLoggedIn = true;
       generateDetails(notify: true);
       _fetchNode();
     }

@@ -13,6 +13,7 @@ class CEVRaisedButton extends StatelessWidget {
     this.bgColor,
     this.iconSize,
     this.isIconRight = false,
+    this.clipText = false,
     this.spacing,
     this.padding,
     this.textSize,
@@ -37,6 +38,7 @@ class CEVRaisedButton extends StatelessWidget {
   final MaterialStateProperty<double>? elevation;
   final void Function()? onPressed;
   final double? radius;
+  final bool clipText;
 
   @override
   Widget build(BuildContext context) {
@@ -86,15 +88,20 @@ class CEVRaisedButton extends StatelessWidget {
   Widget buildText() {
     return (text.isNotEmpty)
         ? Flexible(
+            flex: 6,
             child: Text(
-              text,
+              clipText
+                  ? text.characters
+                      .replaceAll(Characters(''), Characters('\u{200B}'))
+                      .toString()
+                  : text,
+              overflow: clipText ? TextOverflow.ellipsis : TextOverflow.visible,
               style: TextStyle(
                   fontSize: textSize ?? 18.0,
                   color: textColor ?? Colors.black,
                   fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
                   letterSpacing: 0),
             ),
-            flex: 6,
           )
         : const SizedBox();
   }
@@ -183,6 +190,7 @@ class CEVFlatButton extends StatelessWidget {
   Widget buildText() {
     return (text.isEmpty)
         ? Flexible(
+            flex: 6,
             child: Text(
               text,
               style: TextStyle(
@@ -191,7 +199,6 @@ class CEVFlatButton extends StatelessWidget {
                   fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
                   letterSpacing: 0),
             ),
-            flex: 6,
           )
         : const SizedBox();
   }

@@ -41,11 +41,9 @@ Timer runPeriodically(void Function() callback) =>
 
 class CEVPeerProvider with ChangeNotifier {
   CEVPeerProvider({
-    required this.cevSharedPref,
     required this.db,
   });
 
-  final CEVSharedPref cevSharedPref;
   final CEVTransactionDB db;
 
   late CEVApplicationProvider appProvider;

@@ -16,7 +16,7 @@ void initLogger({String? prefix}) {
         "${rec.loggerName}$separator"
         "${_colored(rec.message, color)}";
 
-    print(logString);
+    // print(logString);
   });
 }
 

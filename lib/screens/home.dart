@@ -59,15 +59,15 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildMain(BuildContext context) {
     CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
-    CEVAccountProvider accountProvider = CEVAccountProvider.of(context);
-    return provider.Consumer<CEVAccountProvider>(builder: (context, model, _) {
+    return provider.Consumer<CEVAccountProvider>(
+        builder: (context, accountProvider, _) {
       return SafeArea(
           child: Stack(children: <Widget>[
         // _backgroundImage,
         Scaffold(
             backgroundColor: CEVTheme.bgColor,
             appBar: AppBar(
-              title: _buildAppBarTitle(context, model),
+              title: _buildAppBarTitle(context, accountProvider),
               centerTitle: true,
               automaticallyImplyLeading: false,
               backgroundColor: CEVTheme.appBarBgColor,
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
                     icon: const Icon(Icons.person),
                     onPressed: () {
                       // qrController.pause();
-                      model.getAccountBalance();
+                      accountProvider.getAccountBalance();
                       CEVApp.router.navigateTo(context, CEVRoutes.account,
                           transition: TransitionType.inFromRight);
                     })
@@ -122,8 +122,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildScreen(BuildContext context) {
-    CEVChargeProvider _chargeProvider = CEVChargeProvider.of(context);
-    CEVPeerProvider _peerProvider = CEVPeerProvider.of(context);
+    CEVChargeProvider chargeProvider = CEVChargeProvider.of(context);
     final qrcodeSize = MediaQuery.of(context).size.width - 32;
     return SizedBox(
         height: double.infinity,
@@ -169,18 +168,18 @@ class _HomeScreenState extends State<HomeScreen>
                                           String err =
                                               "${validation.did(data)}";
                                           if (err.isNotEmpty) {
-                                            _chargeProvider.setStatus(
+                                            chargeProvider.setStatus(
                                                 LoadingStatus.error,
                                                 message: err);
                                             return;
                                           }
                                           _dumbChargeProvider!.qrController
                                               .pause();
-                                          _chargeProvider.providerDid = data;
-                                          _chargeProvider
+                                          chargeProvider.providerDid = data;
+                                          chargeProvider
                                               .generateAndFundMultisigWallet();
 
-                                          await _chargeProvider
+                                          await chargeProvider
                                               .fetchProviderDidDocument(data);
                                           if (!mounted) return;
                                           CEVApp.router.navigateTo(
@@ -218,9 +217,9 @@ class _HomeScreenState extends State<HomeScreen>
                 textAlign: TextAlign.start,
               ),
             ),
-            Container(
+            SizedBox(
               height: 20,
-              width: 240,
+              width: 250,
               // color: Colors.red,
               child: CEVRaisedButton(
                   text: accountProvider.selectedNode,
@@ -233,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: const EdgeInsets.all(2),
                   isIconRight: true,
                   textSize: 13,
+                  clipText: true,
                   isTextBold: true,
                   bgColor: Colors.transparent,
                   borderColor: Colors.transparent,

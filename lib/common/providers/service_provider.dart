@@ -27,7 +27,7 @@ class CEVServiceProvider extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(CEVServiceProvider old) {
+  bool updateShouldNotify(CEVServiceProvider oldWidget) {
     // service provider shouldn't rebuild
     return false;
   }
