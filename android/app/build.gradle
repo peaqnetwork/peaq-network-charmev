@@ -6,6 +6,12 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+def debugKeystoreProperties = new Properties()
+def debugKeystorePropertiesFile = rootProject.file('debug_key.properties')
+if (debugKeystorePropertiesFile.exists()) {
+    debugKeystoreProperties.load(new FileInputStream(debugKeystorePropertiesFile))
+}
+
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
@@ -50,10 +56,29 @@ android {
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        debug {
+           keyAlias debugKeystoreProperties['keyAlias']
+           keyPassword debugKeystoreProperties['keyPassword']
+           storeFile debugKeystoreProperties['storeFile'] ? file(debugKeystoreProperties['storeFile']) : null
+           storePassword debugKeystoreProperties['storePassword']
+       }
+    }
+
+    
+
     buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled true
+            shrinkResources true
+            multiDexEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled true
-            useProguard true
+            // useProguard true
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug

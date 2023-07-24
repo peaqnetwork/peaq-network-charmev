@@ -3,7 +3,7 @@ description: A decentralized app (DApp) that enable Providers to render a decent
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -30,30 +30,28 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   ffi: ^2.0.1
   cupertino_icons: ^1.0.2
-  fluro: ^2.0.3
+  fluro: ^2.0.4
   provider: ^6.0.1
   get_it: ^7.2.0
   flutter_svg: ^1.0.0
   scan: ^1.6.0
   sqflite: ^2.0.3+1
-  logging: ^1.0.1 
+  logging: ^1.0.1
   validators: ^3.0.0
   shared_preferences: ^2.0.15
   intl: ^0.17.0
-  json_annotation: ^4.4.0 
+  json_annotation: ^4.4.0
   flutter_rust_bridge: ^1.41.1
   peaq_network_ev_charging_message_format:
-    git: 
+    git:
       url: https://github.com/peaqnetwork/peaq-network-ev-charging-message-format.git
       path: dart
       ref: 84c8070b71122bc4997877186b1281d2b862093f
   path_provider: ^2.0.11
-  
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +70,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter configs.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with the application, so that we can use the icons in
   # the material Icons class.
@@ -84,7 +81,7 @@ flutter:
     - assets/images/ev-pump.svg
     - assets/images/avatar.svg
     - assets/images/icon.png
-  
+
 flutter_icons:
   ios: true
   android: true

@@ -29,6 +29,8 @@ codec = { package = 'parity-scale-codec', version = "2.0.0", default-features = 
 keyring = { version = "4.1.0-dev", git = "https://github.com/paritytech/substrate.git", branch = 'master', package = "sp-keyring" }
 sp-runtime = { version = "5.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = 'master'}
 
+ws = { version = "0.9.1", optional = true, features = ["nativetls"] }
+
 libp2p = { version = "0.43.0", features = ["tcp-tokio"] }
 futures = "0.3.1"
 tokio = { version = "1.15", features = ["io-util", "io-std", "macros", "rt", "rt-multi-thread", "fs", "time", "sync"] }
