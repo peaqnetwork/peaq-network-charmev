@@ -3288,6 +3288,7 @@ dependencies = [
  "sp-runtime 5.0.0 (git+https://github.com/paritytech/substrate.git?branch=master)",
  "substrate-api-client 0.6.0 (git+https://github.com/irediaes/substrate-api-client.git?rev=b1bf3fd70a7443518edc4fd13395935fa7272047)",
  "tokio",
+ "ws",
 ]
 
 [[package]]
