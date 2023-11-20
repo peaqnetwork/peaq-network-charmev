@@ -9,9 +9,9 @@ import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/rust_data.dart';
 import 'package:charmev/common/models/transaction.dart';
 import 'package:charmev/common/services/db/transactions.dart';
-import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/widgets/route.dart';
 import 'package:charmev/screens/charging_session.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:charmev/common/models/enum.dart';
 
@@ -31,10 +31,13 @@ final path = Platform.isWindows
     : Platform.isMacOS
         ? 'lib$base.dylib'
         : 'lib$base.so';
-late final dylib =
+
+final print = () {};
+
+final dylib =
     Platform.isIOS ? DynamicLibrary.process() : DynamicLibrary.open(path);
 
-late final api = PeaqCodecApiImpl(dylib);
+final api = PeaqCodecApiImpl(dylib);
 
 Timer runPeriodically(void Function() callback) =>
     Timer.periodic(const Duration(milliseconds: 1000), (timer) => callback());
@@ -428,6 +431,8 @@ class CEVPeerProvider with ChangeNotifier {
   }
 
   Future<CEVAccount> generateAccount(String secretPhrase) async {
+    debugPrint("LIB PATH: $path");
+
     CEVAccount account = CEVAccount();
     var data = await api.generateAccount(
         wsUrl: Env.peaqTestnet, secretPhrase: secretPhrase);

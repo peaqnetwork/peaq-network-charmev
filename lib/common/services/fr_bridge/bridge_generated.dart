@@ -459,7 +459,6 @@ class PeaqCodecApiImpl extends FlutterRustBridgeBase<PeaqCodecApiWire>
   }
 
   // Section: api_fill_to_wire
-
 }
 
 // Section: wire2api

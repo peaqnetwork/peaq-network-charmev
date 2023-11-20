@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:convert';
 
 import 'package:charmev/common/models/detail.dart';
 import 'package:charmev/common/models/enum.dart';
@@ -11,7 +10,6 @@ import 'package:charmev/config/env.dart';
 import 'package:charmev/config/navigator.dart';
 import 'package:charmev/screens/home.dart';
 import 'package:charmev/theme.dart';
-import 'package:charmev/common/utils/pref_storage.dart';
 import 'package:charmev/common/providers/application_provider.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:flutter/widgets.dart';
